@@ -1,36 +1,72 @@
-# --- SYSTEMOWE ---
+# ==========================================
+# SYSTEMOWE I TYMCZASOWE
+# ==========================================
 .DS_Store
 Thumbs.db
 desktop.ini
+*.tmp
+*.bak
+*.swp
 
-# --- IDE (IntelliJ, VS Code, Eclipse) ---
-.idea/
+# ==========================================
+# IDE (IntelliJ, WebStorm, VS Code)
+# ==========================================
+**/.idea/
+**/.vscode/
+**/.settings/
+**/.classpath
+**/.project
+**/.factorypath
 *.iml
 *.iws
-.vscode/
-.settings/
-.classpath
-.project
-.factorypath
-bin/
-out/
+**/bin/
+**/out/
+.history/
 
-# --- BACKEND (Java / Maven) ---
+# ==========================================
+# BACKEND (Java / Maven)
+# ==========================================
 **/target/
 **/*.class
 **/*.jar
 **/*.war
 **/*.ear
 **/*.log
+# Lokalne ustawienia z hasłami
 **/application-local.properties
+**/secrets/
+# Pliki Maven Wrapper
+**/.mvn/wrapper/maven-wrapper.jar
 
-# --- FRONTEND (React / Node / Vite) ---
+# ==========================================
+# FRONTEND (React / Node / Vite)
+# ==========================================
 **/node_modules/
 **/dist/
 **/build/
+**/.vite/
 .env
+.env.*
+!.env.example
 *.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+**/.eslintcache
 
-# --- BAZA DANYCH ---
+# ==========================================
+# BAZA DANYCH
+# ==========================================
 *.sql.gz
 *.backup
+**/oracle-logs/
+# Baza H2 w pliku (jeśli będziesz używać zapisu do pliku, nie do pamięci)
+**/h2_db/
+*.mv.db
+*.trace.db
+
+# ==========================================
+# INNE
+# ==========================================
+**/doc/
+**/temp/
