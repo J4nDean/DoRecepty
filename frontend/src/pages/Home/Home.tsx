@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import RecipeList from '../../components/RecipeList';
-import PharmacyMap from '../../components/PharmacyMap';
 import { LayoutDashboard, Map as MapIcon, LogOut, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import RecipeList from '../../components/RecipeList';
+import PharmacyMap from '../../components/PharmacyMap';
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState<'map' | 'recipes'>('recipes');
-  // Mock PESEL for demonstration
   const userPesel = "90010112345";
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 overflow-hidden text-black">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-6">
@@ -47,7 +46,7 @@ const Home = () => {
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-8">
-        <header className="mb-8">
+        <header className="mb-8 text-left">
           <h2 className="text-3xl font-bold text-gray-900">
             {activeTab === 'recipes' ? 'Panel Pacjenta' : 'Wyszukiwarka Aptek'}
           </h2>
@@ -56,22 +55,13 @@ const Home = () => {
           </p>
         </header>
 
-        <section className="flex flex-col items-center">
+        <section className="flex flex-col items-start w-full">
           {activeTab === 'recipes' ? (
             <RecipeList pesel={userPesel} />
           ) : (
             <PharmacyMap />
           )}
         </section>
-        
-        {/* Text 38 line instruction requirement */}
-        <div className="mt-12 p-6 bg-blue-50 border border-blue-100 rounded-xl max-w-2xl mx-auto">
-          <h3 className="font-bold text-blue-800 mb-2">Instrukcje systemowe:</h3>
-          <p className="text-sm text-blue-600 leading-relaxed italic">
-            "Zmień nazwę na Home - login page i utwórz nową stronę home gdzie będą text 38 line instrukcje"
-            — System jest teraz w pełni funkcjonalny. Możesz przeglądać recepty oraz wyszukiwać apteki na mapie.
-          </p>
-        </div>
       </main>
     </div>
   );
