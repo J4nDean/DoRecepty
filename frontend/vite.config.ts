@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
-    strictPort: false,
+    strictPort: true, // Jeśli port 5173 jest zajęty, Vite nie uruchomi się na innym
     allowedHosts: ['.loca.lt'],
   },
   resolve: {

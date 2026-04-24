@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pill, FileText, CheckCircle, Clock } from 'lucide-react';
+import { API_BASE_URL } from '../config/api';
 
 interface Drug {
   name: string;
@@ -22,11 +23,10 @@ const RecipeList = ({ pesel }: { pesel: string }) => {
     if (!pesel) return;
 
     setLoading(true);
-    axios.get(`http://localhost:8080/api/recipes/${pesel}`)
+    axios.get(`${API_BASE_URL}/recipes/${pesel}`)
       .then(res => setRecipes(res.data))
       .catch(err => {
         console.error("Błąd pobierania recept:", err);
-        // Mock data if backend is not running
         setRecipes([
           {
             accessCode: "1234",
@@ -40,7 +40,7 @@ const RecipeList = ({ pesel }: { pesel: string }) => {
   }, [pesel]);
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-2xl">
+    <div className="bg-white rounded-xl shadow-md p-6 w-full max-w-2xl text-black">
       <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
         <FileText className="text-blue-500" /> Twoje e-recepty
       </h2>

@@ -5,8 +5,7 @@ import {
   APIProvider,
   Map,
   Marker,
-  useMap,
-  MapMouseEvent
+  useMap
 } from '@vis.gl/react-google-maps';
 import '../styles/PharmacyMap.css';
 
@@ -36,15 +35,15 @@ const PharmacyMap = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [mapCenter, setMapCenter] = useState<LatLngLiteral>({ lat: 52.237, lng: 21.017 });
   const [userMarker, setUserMarker] = useState<LatLngLiteral | null>(null);
-  const [zoom] = useState<number>(11);
   const [isGeocoding, setIsGeocoding] = useState<boolean>(false);
 
   const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
 
   const geocodeBatch = useCallback(async (list: Pharmacy[]) => {
-    if (typeof google === 'undefined') return;
-    const geocoder = new google.maps.Geocoder();
+    // Bezpieczne sprawdzenie czy API Google jest załadowane
+    if (typeof window === 'undefined' || !window.google) return;
     
+    const geocoder = new window.google.maps.Geocoder();
     const missing = list.filter(p => !p.latitude).slice(0, 8);
     if (missing.length === 0) return;
 
@@ -54,62 +53,51 @@ const PharmacyMap = () => {
       const fullAddress = `${p.address}, ${p.city}, Poland`;
       return new Promise<void>((resolve) => {
         geocoder.geocode({ address: fullAddress }, (results, status) => {
-          if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
+          if (status === 'OK' && results && results[0]) {
             const lat = results[0].geometry.location.lat();
             const lng = results[0].geometry.location.lng();
             p.latitude = lat;
             p.longitude = lng;
-            axios.post('http://localhost:8080/api/pharmacies/update-location', p).catch(() => {});
-          }
-          resolve();
-        });
-      });
-    });
+            axios.post(`${API_BASE_URL}/pharmacies/update-location`, p).catch(() => {});
+            }
+            resolve();
+            });
+            });
+            });
 
-    await Promise.all(promises);
-    setPharmacies([...list]);
-    setIsGeocoding(false);
-  }, []);
+            await Promise.all(promises);
+            setPharmacies([...list]);
+            setIsGeocoding(false);
+            }, []);
 
-  const handleSearch = useCallback(async () => {
-    if (!addressInput.trim()) return;
+            const handleSearch = useCallback(async () => {
+            if (!addressInput.trim() || !window.google) return;
 
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: addressInput }, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK && results && results[0]) {
-        const location = results[0].geometry.location;
-        const newPos = { lat: location.lat(), lng: location.lng() };
-        setMapCenter(newPos);
-        setUserMarker(newPos);
-      }
-    });
+            const geocoder = new google.maps.Geocoder();
+            geocoder.geocode({ address: addressInput }, (results, status) => {
+            if (status === 'OK' && results && results[0]) {
+            const location = results[0].geometry.location;
+            const newPos = { lat: location.lat(), lng: location.lng() };
+            setMapCenter(newPos);
+            setUserMarker(newPos);
+            }
+            });
 
-    try {
-      const res = await axios.get<Pharmacy[]>(`http://localhost:8080/api/pharmacies/search?city=${addressInput}`);
-      const data = res.data;
-      setPharmacies(data);
-      setTimeout(() => geocodeBatch(data), 800);
-    } catch (error) {
-      console.error("Search error:", error);
-    }
+            try {
+            const res = await axios.get<Pharmacy[]>(`${API_BASE_URL}/pharmacies/search?city=${addressInput}`);
+      setPharmacies(res.data);
+      setTimeout(() => geocodeBatch(res.data), 800);
+    } catch (error) {}
   }, [addressInput, geocodeBatch]);
 
-  const onMapClick = (e: MapMouseEvent) => {
-    if (e.detail.latLng) {
-      const pos = { lat: e.detail.latLng.lat, lng: e.detail.latLng.lng };
-      setUserMarker(pos);
-      setMapCenter(pos);
-    }
-  };
-
   return (
-    <div className="map-container">
+    <div className="map-container text-black">
       <div className="search-header">
         <div className="search-input-wrapper">
           <Search className="search-icon" size={18} />
           <input 
             type="text" 
-            placeholder="Wpisz miasto (np. Poznań)..." 
+            placeholder="Wpisz miasto..." 
             className="search-input"
             value={addressInput}
             onChange={(e) => setAddressInput(e.target.value)}
@@ -125,7 +113,7 @@ const PharmacyMap = () => {
       <div className="content-layout">
         <div className="sidebar">
           <div className="sidebar-header">
-            <h3>
+            <h3 className="text-black font-bold">
               <MapPin size={18} className="text-blue-500" /> 
               Wyniki ({pharmacies.length})
             </h3>
@@ -138,7 +126,7 @@ const PharmacyMap = () => {
                   className="pharmacy-card"
                   onClick={() => p.latitude && setMapCenter({ lat: p.latitude, lng: p.longitude })}
                 >
-                  <p className="pharmacy-name">{p.name}</p>
+                  <p className="pharmacy-name text-black">{p.name}</p>
                   <p className="pharmacy-address">{p.address}, {p.city}</p>
                   
                   {p.latitude ? (
@@ -165,10 +153,16 @@ const PharmacyMap = () => {
             <APIProvider apiKey={API_KEY}>
               <Map
                 defaultCenter={mapCenter}
-                defaultZoom={zoom}
+                defaultZoom={11}
                 gestureHandling="greedy"
                 disableDefaultUI={false}
-                onClick={onMapClick}
+                onClick={(e: any) => {
+                  if (e.detail.latLng) {
+                    const pos = { lat: e.detail.latLng.lat, lng: e.detail.latLng.lng };
+                    setUserMarker(pos);
+                    setMapCenter(pos);
+                  }
+                }}
               >
                 {userMarker && <Marker position={userMarker} />}
                 {pharmacies.map((p, idx) => (
@@ -177,7 +171,6 @@ const PharmacyMap = () => {
                       key={idx}
                       position={{ lat: p.latitude, lng: p.longitude }}
                       title={p.name}
-                      icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png"
                     />
                   )
                 ))}
