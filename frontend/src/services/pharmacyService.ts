@@ -6,13 +6,31 @@ import { API_BASE_URL } from '../config/api';
 
 /* ---- helpers ---- */
 
-function isOpenNow(): boolean {
+function parseOpeningHours(hoursStr: string | null | undefined): { open: number; close: number } | null {
+  if (!hoursStr) return null;
+  // Match first "HH:MM - HH:MM" pattern (supports - and – separators)
+  const match = hoursStr.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+  if (!match) return null;
+  const open = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
+  const close = parseInt(match[3], 10) * 60 + parseInt(match[4], 10);
+  return { open, close };
+}
+
+function isOpenNow(api: ApiPharmacy): boolean {
+  if (api.status && api.status !== 'AKTYWNA') return false;
+
   const now = new Date();
-  const day = now.getDay(); // 0=Sun, 6=Sat
-  const hour = now.getHours();
-  if (day === 0) return hour >= 10 && hour < 16;
-  if (day === 6) return hour >= 9 && hour < 17;
-  return hour >= 8 && hour < 20;
+  const day = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+  let hoursStr: string | null | undefined;
+  if (day === 0) hoursStr = api.openingHoursSunday;
+  else if (day === 6) hoursStr = api.openingHoursSaturday;
+  else hoursStr = api.openingHoursWeekdays;
+
+  const hours = parseOpeningHours(hoursStr);
+  if (!hours) return false;
+
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  return nowMinutes >= hours.open && nowMinutes < hours.close;
 }
 
 function mapApiPharmacy(api: ApiPharmacy): Pharmacy {
@@ -28,7 +46,7 @@ function mapApiPharmacy(api: ApiPharmacy): Pharmacy {
       saturday: api.openingHoursSaturday || '09:00 – 17:00',
       sunday: api.openingHoursSunday || '10:00 – 16:00',
     },
-    isOpen: api.status ? api.status === 'AKTYWNA' : isOpenNow(),
+    isOpen: isOpenNow(api),
     latitude: api.latitude ?? undefined,
     longitude: api.longitude ?? undefined,
   };
