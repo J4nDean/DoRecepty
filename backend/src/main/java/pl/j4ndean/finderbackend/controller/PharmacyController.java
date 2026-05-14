@@ -22,6 +22,15 @@ public class PharmacyController {
         return pharmacyService.searchByCity(city);
     }
 
+    @GetMapping("/nearby")
+    public List<Pharmacy> nearby(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "10") double radiusKm,
+            @RequestParam(defaultValue = "20") int limit) {
+        return pharmacyService.findNearby(lat, lng, radiusKm, limit);
+    }
+
     @PostMapping("/update-location")
     public void updateLocation(@RequestBody Pharmacy pharmacy) {
         pharmacyRepository.findByCityContainingIgnoreCase(pharmacy.getCity()).stream()

@@ -23,7 +23,9 @@ public class PharmacyImportService {
 
     @PostConstruct
     public void init() {
-        pharmacyRepository.deleteAll();
+        if (pharmacyRepository.count() > 0) {
+            return;
+        }
         importFromLocalFile();
     }
 

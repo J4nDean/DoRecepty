@@ -51,6 +51,32 @@ export const fetchNearbyPharmacies = async (city = 'Warszawa'): Promise<Pharmacy
   return searchPharmacies(city);
 };
 
+export const fetchNearbyByLocation = async (
+  lat: number,
+  lng: number,
+  radiusKm = 10,
+  limit = 20,
+): Promise<Pharmacy[]> => {
+  const res = await axios.get<ApiPharmacy[]>(
+    `${API_BASE_URL}/pharmacies/nearby?lat=${lat}&lng=${lng}&radiusKm=${radiusKm}&limit=${limit}`,
+  );
+  return res.data.map(mapApiPharmacy);
+};
+
+export const getUserLocation = (): Promise<{ lat: number; lng: number }> => {
+  return new Promise((resolve, reject) => {
+    if (!('geolocation' in navigator)) {
+      reject(new Error('Przeglądarka nie wspiera geolokalizacji'));
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      err => reject(err),
+      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
+    );
+  });
+};
+
 export const updatePharmacyLocation = async (
   name: string,
   address: string,
