@@ -49,6 +49,7 @@ public class PharmacyImportService {
         ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
         populator.addScript(resource);
         populator.setSeparator(";");
+        populator.setSqlScriptEncoding("UTF-8");
         populator.setIgnoreFailedDrops(true);
         populator.execute(dataSource);
     }
