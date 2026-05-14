@@ -128,7 +128,7 @@ const PharmaciesPage = () => {
           ) : !searched ? (
             <EmptyState
               title="Wyszukaj aptekę"
-              description="Przesuń mapę na interesujący Cię obszar i kliknij „Szukaj w tym obszarze", wpisz miasto lub użyj celownika."
+              description="Przesuń mapę na interesujący Cię obszar i kliknij Szukaj w tym obszarze, wpisz miasto lub użyj celownika."
               icon={<MapPin size={40} />}
             />
           ) : pharmacies.length === 0 ? (
