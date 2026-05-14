@@ -17,7 +17,12 @@ public class Pharmacy {
     private String name;
     private String address;
     private String city;
+    private String postalCode;
+    private String phone;
     private String status;
+    private String openingHoursWeekdays;
+    private String openingHoursSaturday;
+    private String openingHoursSunday;
     private Double latitude;
     private Double longitude;
 }

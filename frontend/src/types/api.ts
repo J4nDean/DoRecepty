@@ -19,7 +19,12 @@ export interface ApiPharmacy {
   name: string;
   address: string;
   city: string;
+  postalCode: string | null;
+  phone: string | null;
   status: string | null;
+  openingHoursWeekdays: string | null;
+  openingHoursSaturday: string | null;
+  openingHoursSunday: string | null;
   latitude: number | null;
   longitude: number | null;
 }

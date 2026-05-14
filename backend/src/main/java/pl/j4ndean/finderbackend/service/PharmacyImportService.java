@@ -1,79 +1,90 @@
 package pl.j4ndean.finderbackend.service;
 
-import com.opencsv.CSVParserBuilder;
-import com.opencsv.CSVReader;
-import com.opencsv.CSVReaderBuilder;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import pl.j4ndean.finderbackend.model.Pharmacy;
 import pl.j4ndean.finderbackend.repository.PharmacyRepository;
 
-import java.io.File;
-import java.io.FileReader;
-import java.nio.charset.StandardCharsets;
+import javax.sql.DataSource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PharmacyImportService {
 
     private final PharmacyRepository pharmacyRepository;
+    private final DataSource dataSource;
+    private final JdbcTemplate jdbcTemplate;
+
+    private static final String SQL_FILE = "apteki_warszawa_zabki.sql";
 
     @PostConstruct
     public void init() {
         if (pharmacyRepository.count() > 0) {
+            log.info("Pharmacy table already populated — skipping import");
             return;
         }
-        importFromLocalFile();
+
+        ClassPathResource resource = new ClassPathResource(SQL_FILE);
+        if (!resource.exists()) {
+            log.warn("SQL file '{}' not found in classpath — skipping import", SQL_FILE);
+            return;
+        }
+
+        log.info("Importing pharmacies from {}...", SQL_FILE);
+        runSqlScript(resource);
+        migrateFromApteki();
+        log.info("Import complete. Total pharmacies: {}", pharmacyRepository.count());
     }
 
-    public void importFromLocalFile() {
-        String fileName = "Rejestr_Aptek_stan_na_dzien_2026-04-24.csv";
-        File file = new File(fileName);
+    private void runSqlScript(ClassPathResource resource) {
+        ResourceDatabasePopulator populator = new ResourceDatabasePopulator();
+        populator.addScript(resource);
+        populator.setSeparator(";");
+        populator.setIgnoreFailedDrops(true);
+        populator.execute(dataSource);
+    }
 
-        if (!file.exists()) {
-            return;
+    private void migrateFromApteki() {
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+                "SELECT nazwa_apteki, stan_apteki, typ_ulicy, nazwa_ulicy, numer_budynku, " +
+                "miejscowosc, kod_pocztowy, telefon, " +
+                "godziny_otwarcia_poniedzialek, godziny_otwarcia_sobota, " +
+                "godziny_otwarcia_niedziela_niehandlowa " +
+                "FROM apteki WHERE stan_apteki = 'AKTYWNA'"
+        );
+
+        List<Pharmacy> pharmacies = new ArrayList<>(rows.size());
+        for (Map<String, Object> row : rows) {
+            String street = str(row.get("typ_ulicy")) + " " + str(row.get("nazwa_ulicy"));
+            String number = str(row.get("numer_budynku"));
+            String address = (street.trim() + " " + number).trim();
+
+            pharmacies.add(Pharmacy.builder()
+                    .name(str(row.get("nazwa_apteki")))
+                    .address(address)
+                    .city(str(row.get("miejscowosc")))
+                    .postalCode(str(row.get("kod_pocztowy")))
+                    .phone(str(row.get("telefon")))
+                    .status(str(row.get("stan_apteki")))
+                    .openingHoursWeekdays(str(row.get("godziny_otwarcia_poniedzialek")))
+                    .openingHoursSaturday(str(row.get("godziny_otwarcia_sobota")))
+                    .openingHoursSunday(str(row.get("godziny_otwarcia_niedziela_niehandlowa")))
+                    .build());
         }
 
-        try {
-            List<Pharmacy> newList = new ArrayList<>();
-            
-            try (CSVReader reader = new CSVReaderBuilder(
-                    new FileReader(file, StandardCharsets.UTF_8))
-                    .withCSVParser(new CSVParserBuilder().withSeparator('|').build())
-                    .withSkipLines(1)
-                    .build()) {
-                
-                String[] line;
-                while ((line = reader.readNext()) != null) {
-                    if (line.length < 27) continue;
+        pharmacyRepository.saveAll(pharmacies);
+    }
 
-                    try {
-                        String name = line[1].replace("\"", "").trim();
-                        if (name.isEmpty()) name = "Apteka";
-                        
-                        String status = line[2].replace("\"", "").trim();
-                        String street = line[23].replace("\"", "").trim();
-                        String number = line[24].replace("\"", "").trim();
-                        String city = line[26].replace("\"", "").trim();
-
-                        if (!city.isEmpty() && "AKTYWNA".equalsIgnoreCase(status)) {
-                            newList.add(Pharmacy.builder()
-                                    .name(name)
-                                    .address((street + " " + number).trim())
-                                    .city(city)
-                                    .status(status)
-                                    .build());
-                        }
-                    } catch (Exception e) {}
-                }
-            }
-
-            if (!newList.isEmpty()) {
-                pharmacyRepository.saveAll(newList);
-            }
-        } catch (Exception e) {}
+    private static String str(Object value) {
+        return value == null ? "" : value.toString().trim();
     }
 }
