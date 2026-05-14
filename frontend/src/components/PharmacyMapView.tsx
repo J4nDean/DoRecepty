@@ -12,6 +12,23 @@ import type { Pharmacy } from '../types/pharmacy';
 
 type LatLng = { lat: number; lng: number };
 
+type GeocoderResult = { geometry: { location: { lat(): number; lng(): number } } };
+
+declare global {
+  interface Window {
+    google: {
+      maps: {
+        Geocoder: new () => {
+          geocode(
+            request: { address: string },
+            callback: (results: GeocoderResult[] | null, status: string) => void,
+          ): void;
+        };
+      };
+    };
+  }
+}
+
 const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 }; // Warszawa
 
 /* Rendered inside <Map> – can safely call useMap() */

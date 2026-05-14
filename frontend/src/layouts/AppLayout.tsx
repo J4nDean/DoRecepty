@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { BottomNav } from '../components/BottomNav';
 import { Header } from '../components/Header';

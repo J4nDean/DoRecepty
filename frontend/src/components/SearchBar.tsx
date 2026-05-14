@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
-import { useState, FormEvent, KeyboardEvent } from 'react';
+import { useState } from 'react';
+import type { FormEvent, KeyboardEvent } from 'react';
 
 interface SearchBarProps {
   placeholder?: string;
