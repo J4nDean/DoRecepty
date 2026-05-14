@@ -1,10 +1,12 @@
-import { Search } from 'lucide-react';
+import { Search, Crosshair } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
 
 interface SearchBarProps {
   placeholder?: string;
   onSearch: (query: string) => void;
+  onLocate?: () => void;
+  isLocating?: boolean;
   className?: string;
   defaultValue?: string;
 }
@@ -12,6 +14,8 @@ interface SearchBarProps {
 export const SearchBar = ({
   placeholder = 'Szukaj...',
   onSearch,
+  onLocate,
+  isLocating = false,
   className = '',
   defaultValue = '',
 }: SearchBarProps) => {
@@ -41,8 +45,24 @@ export const SearchBar = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           aria-label={placeholder}
-          className="w-full pl-10 pr-4 h-11 border border-slate-200 rounded-lg bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+          className={`w-full pl-10 ${onLocate ? 'pr-11' : 'pr-4'} h-11 border border-slate-200 rounded-lg bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all`}
         />
+        {onLocate && (
+          <button
+            type="button"
+            onClick={onLocate}
+            disabled={isLocating}
+            title="Użyj mojej lokalizacji"
+            aria-label="Użyj mojej lokalizacji"
+            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors ${
+              isLocating
+                ? 'text-blue-600 animate-pulse'
+                : 'text-slate-400 hover:text-blue-600 hover:bg-slate-100'
+            }`}
+          >
+            <Crosshair size={18} />
+          </button>
+        )}
       </div>
       <button
         type="submit"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { MapPin, Navigation } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PharmacyCard } from '../../components/PharmacyCard';
 import { SearchBar } from '../../components/SearchBar';
@@ -13,35 +13,43 @@ import {
 } from '../../services/pharmacyService';
 import type { Pharmacy } from '../../types/pharmacy';
 
+type LatLng = { lat: number; lng: number };
+
 const PharmaciesPage = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchCity, setSearchCity] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
 
   const loadNearby = async () => {
+    setIsLocating(true);
     setIsLoading(true);
     setSearched(true);
     setSelectedId(null);
     setLocationError(null);
     try {
       const { lat, lng } = await getUserLocation();
+      setUserLocation({ lat, lng });
       const results = await fetchNearbyByLocation(lat, lng, 10, 20);
       setPharmacies(results);
       setSearchCity(undefined);
     } catch (err) {
-      const msg =
-        err instanceof GeolocationPositionError
-          ? 'Brak zgody na dostęp do lokalizacji'
-          : err instanceof Error
-            ? err.message
-            : 'Nie udało się pobrać lokalizacji';
+      const isGeoErr =
+        typeof err === 'object' && err !== null && 'code' in err && 'PERMISSION_DENIED' in (err as object);
+      const msg = isGeoErr
+        ? 'Brak zgody na dostęp do lokalizacji'
+        : err instanceof Error
+          ? err.message
+          : 'Nie udało się pobrać lokalizacji';
       setLocationError(msg);
       setPharmacies([]);
     } finally {
       setIsLoading(false);
+      setIsLocating(false);
     }
   };
 
@@ -61,25 +69,33 @@ const PharmaciesPage = () => {
     setIsLoading(false);
   };
 
+  const handleLoadInArea = async (center: LatLng) => {
+    setIsLoading(true);
+    setSearched(true);
+    setSelectedId(null);
+    setSearchCity(undefined);
+    setLocationError(null);
+    try {
+      const results = await fetchNearbyByLocation(center.lat, center.lng, 10, 20);
+      setPharmacies(results);
+    } catch {
+      setLocationError('Nie udało się pobrać aptek dla tego obszaru');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const openCount = pharmacies.filter(p => p.isOpen).length;
 
   return (
     <AppLayout title="Najbliższe apteki" subtitle="Znajdź aptekę w swojej okolicy">
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <SearchBar
-          placeholder="Wpisz miasto lub adres..."
-          onSearch={handleSearch}
-          className="max-w-lg flex-1"
-        />
-        <button
-          type="button"
-          onClick={loadNearby}
-          className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-        >
-          <Navigation size={16} />
-          Użyj mojej lokalizacji
-        </button>
-      </div>
+      <SearchBar
+        placeholder="Wpisz miasto lub adres..."
+        onSearch={handleSearch}
+        onLocate={loadNearby}
+        isLocating={isLocating}
+        className="mb-4 max-w-lg"
+      />
 
       {locationError && (
         <p className="mb-4 text-xs text-amber-600">{locationError}</p>
@@ -102,6 +118,8 @@ const PharmaciesPage = () => {
           pharmacies={pharmacies}
           selectedId={selectedId}
           onSelect={id => setSelectedId(prev => (prev === id ? null : id))}
+          onLoadInArea={handleLoadInArea}
+          userLocation={userLocation}
           searchCity={searchCity}
           className="h-64 lg:h-auto lg:flex-1"
         />
@@ -114,7 +132,7 @@ const PharmaciesPage = () => {
           ) : !searched ? (
             <EmptyState
               title="Wyszukaj aptekę"
-              description="Wpisz miasto lub adres, aby znaleźć apteki w pobliżu."
+              description="Wpisz miasto lub kliknij celownik, aby znaleźć apteki w pobliżu."
               icon={<MapPin size={40} />}
             />
           ) : pharmacies.length === 0 ? (

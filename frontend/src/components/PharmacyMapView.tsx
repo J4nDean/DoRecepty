@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   APIProvider,
   Map,
@@ -6,6 +6,7 @@ import {
   useMap,
   useApiIsLoaded,
 } from '@vis.gl/react-google-maps';
+import { Search } from 'lucide-react';
 import MapPlaceholder from './MapPlaceholder';
 import { updatePharmacyLocation } from '../services/pharmacyService';
 import type { Pharmacy } from '../types/pharmacy';
@@ -29,9 +30,8 @@ declare global {
   }
 }
 
-const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 }; // Warszawa
+const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
 
-/* Rendered inside <Map> – can safely call useMap() */
 const MapPanner = ({ center }: { center: LatLng }) => {
   const map = useMap();
   useEffect(() => {
@@ -44,6 +44,8 @@ interface MapContentProps {
   pharmacies: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  onLoadInArea?: (center: LatLng) => void;
+  userLocation?: LatLng | null;
   searchCity?: string;
   className: string;
 }
@@ -52,19 +54,30 @@ const MapContent = ({
   pharmacies,
   selectedId,
   onSelect,
+  onLoadInArea,
+  userLocation,
   searchCity,
   className,
 }: MapContentProps) => {
   const isLoaded = useApiIsLoaded();
-  const [center, setCenter] = useState<LatLng>(DEFAULT_CENTER);
+  const [center, setCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
+  const [mapCenter, setMapCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
+  const [moved, setMoved] = useState(false);
+  const initialCenterRef = useRef<LatLng>(userLocation ?? DEFAULT_CENTER);
 
-  /* Sync when pharmacies list changes (new search) */
   useEffect(() => {
     setDisplayed(pharmacies);
   }, [pharmacies]);
 
-  /* Pan to selected pharmacy marker */
+  useEffect(() => {
+    if (userLocation) {
+      setCenter(userLocation);
+      initialCenterRef.current = userLocation;
+      setMoved(false);
+    }
+  }, [userLocation]);
+
   useEffect(() => {
     const sel = displayed.find(p => p.id === selectedId);
     if (sel?.latitude && sel?.longitude) {
@@ -72,23 +85,24 @@ const MapContent = ({
     }
   }, [selectedId, displayed]);
 
-  /* Centre map on searched city */
   useEffect(() => {
     if (!isLoaded || !searchCity) return;
     new window.google.maps.Geocoder().geocode(
       { address: `${searchCity}, Poland` },
       (results, status) => {
         if (status === 'OK' && results?.[0]) {
-          setCenter({
+          const next = {
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng(),
-          });
+          };
+          setCenter(next);
+          initialCenterRef.current = next;
+          setMoved(false);
         }
       },
     );
   }, [isLoaded, searchCity]);
 
-  /* Geocode pharmacies that are missing coordinates */
   useEffect(() => {
     if (!isLoaded) return;
     const missing = pharmacies.filter(p => !p.latitude || !p.longitude).slice(0, 5);
@@ -111,13 +125,22 @@ const MapContent = ({
     });
   }, [isLoaded, pharmacies]);
 
+  const handleCameraChanged = (ev: { detail: { center: { lat: number; lng: number } } }) => {
+    const c = { lat: ev.detail.center.lat, lng: ev.detail.center.lng };
+    setMapCenter(c);
+    const init = initialCenterRef.current;
+    const distKm = haversineKm(init.lat, init.lng, c.lat, c.lng);
+    setMoved(distKm > 0.3);
+  };
+
   return (
-    <div className={`rounded-xl overflow-hidden ${className}`}>
+    <div className={`relative rounded-xl overflow-hidden ${className}`}>
       <Map
         defaultCenter={center}
         defaultZoom={13}
         gestureHandling="greedy"
         disableDefaultUI={false}
+        onCameraChanged={handleCameraChanged}
       >
         {displayed.map(p =>
           p.latitude && p.longitude ? (
@@ -129,18 +152,59 @@ const MapContent = ({
             />
           ) : null,
         )}
+        {userLocation && (
+          <Marker
+            position={userLocation}
+            title="Twoja lokalizacja"
+            icon={{
+              path: 0,
+              scale: 8,
+              fillColor: '#2563eb',
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+            } as unknown as string}
+          />
+        )}
         <MapPanner center={center} />
       </Map>
+
+      {onLoadInArea && moved && (
+        <button
+          type="button"
+          onClick={() => {
+            onLoadInArea(mapCenter);
+            initialCenterRef.current = mapCenter;
+            setMoved(false);
+          }}
+          className="absolute top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200"
+        >
+          <Search size={14} />
+          Szukaj aptek w tym obszarze
+        </button>
+      )}
     </div>
   );
 };
 
-/* ---- Public component ---- */
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
 
 export interface PharmacyMapViewProps {
   pharmacies?: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
+  onLoadInArea?: (center: LatLng) => void;
+  userLocation?: LatLng | null;
   searchCity?: string;
   className?: string;
 }
@@ -149,6 +213,8 @@ const PharmacyMapView = ({
   pharmacies = [],
   selectedId,
   onSelect,
+  onLoadInArea,
+  userLocation,
   searchCity,
   className = '',
 }: PharmacyMapViewProps) => {
@@ -169,6 +235,8 @@ const PharmacyMapView = ({
         pharmacies={pharmacies}
         selectedId={selectedId}
         onSelect={onSelect}
+        onLoadInArea={onLoadInArea}
+        userLocation={userLocation}
         searchCity={searchCity}
         className={className}
       />
