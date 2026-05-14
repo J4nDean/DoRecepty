@@ -169,7 +169,7 @@ const MapContent = ({
         <MapPanner center={center} />
       </Map>
 
-      {onLoadInArea && moved && (
+      {onLoadInArea && (
         <button
           type="button"
           onClick={() => {
