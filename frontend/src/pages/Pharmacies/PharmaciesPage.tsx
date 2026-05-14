@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PharmacyCard } from '../../components/PharmacyCard';
@@ -52,10 +52,6 @@ const PharmaciesPage = () => {
       setIsLocating(false);
     }
   };
-
-  useEffect(() => {
-    loadNearby();
-  }, []);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) return;
@@ -132,7 +128,7 @@ const PharmaciesPage = () => {
           ) : !searched ? (
             <EmptyState
               title="Wyszukaj aptekę"
-              description="Wpisz miasto lub kliknij celownik, aby znaleźć apteki w pobliżu."
+              description="Przesuń mapę na interesujący Cię obszar i kliknij „Szukaj w tym obszarze", wpisz miasto lub użyj celownika."
               icon={<MapPin size={40} />}
             />
           ) : pharmacies.length === 0 ? (
