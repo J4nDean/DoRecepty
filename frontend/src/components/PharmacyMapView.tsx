@@ -63,7 +63,6 @@ const MapContent = ({
   const [center, setCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [mapCenter, setMapCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
-  const [moved, setMoved] = useState(false);
   const initialCenterRef = useRef<LatLng>(userLocation ?? DEFAULT_CENTER);
 
   useEffect(() => {
@@ -74,7 +73,6 @@ const MapContent = ({
     if (userLocation) {
       setCenter(userLocation);
       initialCenterRef.current = userLocation;
-      setMoved(false);
     }
   }, [userLocation]);
 
@@ -97,7 +95,6 @@ const MapContent = ({
           };
           setCenter(next);
           initialCenterRef.current = next;
-          setMoved(false);
         }
       },
     );
@@ -126,11 +123,7 @@ const MapContent = ({
   }, [isLoaded, pharmacies]);
 
   const handleCameraChanged = (ev: { detail: { center: { lat: number; lng: number } } }) => {
-    const c = { lat: ev.detail.center.lat, lng: ev.detail.center.lng };
-    setMapCenter(c);
-    const init = initialCenterRef.current;
-    const distKm = haversineKm(init.lat, init.lng, c.lat, c.lng);
-    setMoved(distKm > 0.3);
+    setMapCenter({ lat: ev.detail.center.lat, lng: ev.detail.center.lng });
   };
 
   return (
@@ -175,7 +168,6 @@ const MapContent = ({
           onClick={() => {
             onLoadInArea(mapCenter);
             initialCenterRef.current = mapCenter;
-            setMoved(false);
           }}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200"
         >
@@ -186,18 +178,6 @@ const MapContent = ({
     </div>
   );
 };
-
-function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number) {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLng = ((lng2 - lng1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(a));
-}
 
 export interface PharmacyMapViewProps {
   pharmacies?: Pharmacy[];
