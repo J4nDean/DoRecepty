@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PharmacyCard } from '../../components/PharmacyCard';
@@ -52,6 +52,14 @@ const PharmaciesPage = () => {
       setIsLocating(false);
     }
   };
+
+  useEffect(() => {
+    getUserLocation()
+      .then(loc => setUserLocation(loc))
+      .catch(() => {
+        /* silent — user can still use the page without geolocation */
+      });
+  }, []);
 
   const handleSearch = async (query: string) => {
     if (!query.trim()) return;
