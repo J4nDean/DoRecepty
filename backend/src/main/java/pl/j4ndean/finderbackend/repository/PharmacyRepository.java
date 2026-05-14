@@ -18,4 +18,7 @@ public interface PharmacyRepository extends JpaRepository<Pharmacy, Long> {
                                      @Param("maxLat") double maxLat,
                                      @Param("minLng") double minLng,
                                      @Param("maxLng") double maxLng);
+
+    @Query(value = "SELECT * FROM pharmacy WHERE latitude IS NULL OR longitude IS NULL", nativeQuery = true)
+    List<Pharmacy> findUngeocoded(org.springframework.data.domain.Pageable pageable);
 }

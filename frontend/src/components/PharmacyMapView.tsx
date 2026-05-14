@@ -105,7 +105,7 @@ const MapContent = ({
 
   useEffect(() => {
     if (!isLoaded) return;
-    const missing = pharmacies.filter(p => !p.latitude || !p.longitude).slice(0, 5);
+    const missing = pharmacies.filter(p => !p.latitude || !p.longitude).slice(0, 25);
     if (missing.length === 0) return;
 
     const geocoder = new window.google.maps.Geocoder();

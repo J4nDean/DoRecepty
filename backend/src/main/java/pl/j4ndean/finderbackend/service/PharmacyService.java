@@ -28,7 +28,7 @@ public class PharmacyService {
         double latDelta = radiusKm / 111.0;
         double lngDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(lat)));
 
-        return pharmacyRepository.findInBoundingBox(
+        List<Pharmacy> geocoded = pharmacyRepository.findInBoundingBox(
                         lat - latDelta, lat + latDelta,
                         lng - lngDelta, lng + lngDelta)
                 .stream()
@@ -37,6 +37,18 @@ public class PharmacyService {
                         p -> haversineKm(lat, lng, p.getLatitude(), p.getLongitude())))
                 .limit(limit)
                 .toList();
+
+        if (geocoded.size() >= limit) {
+            return geocoded;
+        }
+
+        int needed = limit - geocoded.size();
+        List<Pharmacy> ungeocoded = pharmacyRepository.findUngeocoded(
+                org.springframework.data.domain.PageRequest.of(0, needed));
+
+        List<Pharmacy> result = new java.util.ArrayList<>(geocoded);
+        result.addAll(ungeocoded);
+        return result;
     }
 
     private static double haversineKm(double lat1, double lng1, double lat2, double lng2) {

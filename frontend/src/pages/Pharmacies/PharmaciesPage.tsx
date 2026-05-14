@@ -34,7 +34,7 @@ const PharmaciesPage = () => {
     try {
       const { lat, lng } = await getUserLocation();
       setUserLocation({ lat, lng });
-      const results = await fetchNearbyByLocation(lat, lng, 10, 20);
+      const results = await fetchNearbyByLocation(lat, lng, 20, 200);
       setPharmacies(results);
       setSearchCity(undefined);
     } catch (err) {
@@ -76,7 +76,7 @@ const PharmaciesPage = () => {
     setSearchCity(undefined);
     setLocationError(null);
     try {
-      const results = await fetchNearbyByLocation(center.lat, center.lng, 10, 20);
+      const results = await fetchNearbyByLocation(center.lat, center.lng, 20, 200);
       setPharmacies(results);
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');

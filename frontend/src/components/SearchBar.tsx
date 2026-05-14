@@ -54,10 +54,8 @@ export const SearchBar = ({
             disabled={isLocating}
             title="Użyj mojej lokalizacji"
             aria-label="Użyj mojej lokalizacji"
-            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors ${
-              isLocating
-                ? 'text-blue-600 animate-pulse'
-                : 'text-slate-400 hover:text-blue-600 hover:bg-slate-100'
+            className={`absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors text-slate-500 hover:text-slate-700 hover:bg-slate-100 ${
+              isLocating ? 'animate-pulse' : ''
             }`}
           >
             <Crosshair size={18} />
