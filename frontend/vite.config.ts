@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
     port: 5173,
     strictPort: true, // Jeśli port 5173 jest zajęty, Vite nie uruchomi się na innym
-    allowedHosts: ['.loca.lt'],
+    allowedHosts: ['.loca.lt', '.ngrok-free.app', '.ngrok-free.dev', '.ngrok.io', '.ngrok.app'],
   },
   resolve: {
     alias: {
