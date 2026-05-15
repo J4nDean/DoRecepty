@@ -24,6 +24,10 @@ public class PharmacyService {
         return pharmacyRepository.findAll();
     }
 
+    public List<Pharmacy> findInBounds(double minLat, double maxLat, double minLng, double maxLng) {
+        return pharmacyRepository.findInBoundingBoxWithCityFallback(minLat, maxLat, minLng, maxLng);
+    }
+
     public List<Pharmacy> findNearby(double lat, double lng, double radiusKm, int limit) {
         double latDelta = radiusKm / 111.0;
         double lngDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(lat)));

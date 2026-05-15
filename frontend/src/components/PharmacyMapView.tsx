@@ -76,7 +76,7 @@ interface MapContentProps {
   pharmacies: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  onLoadInArea?: (center: LatLng, city?: string) => void;
+  onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -158,16 +158,21 @@ const MapContent = ({
     });
   }, [isLoaded, pharmacies]);
 
-  // Filter to pharmacies visible within current map bounds
+  // Filter to pharmacies with confirmed location within current viewport.
+  // Ungeocoded pharmacies are hidden until the async geocoder resolves them — once
+  // they get coordinates, they'll re-appear iff they fall within bounds.
   const visibleDisplayed = useMemo(() => {
-    if (!mapBounds) return displayed;
-    return displayed.filter(p =>
-      !p.latitude || !p.longitude || (
+    const geocoded = displayed.filter(
+      (p): p is Pharmacy & { latitude: number; longitude: number } =>
+        typeof p.latitude === 'number' && typeof p.longitude === 'number',
+    );
+    if (!mapBounds) return geocoded;
+    return geocoded.filter(
+      p =>
         p.latitude >= mapBounds.south &&
         p.latitude <= mapBounds.north &&
         p.longitude >= mapBounds.west &&
-        p.longitude <= mapBounds.east
-      ),
+        p.longitude <= mapBounds.east,
     );
   }, [displayed, mapBounds]);
 
@@ -225,8 +230,20 @@ const MapContent = ({
         <button
           type="button"
           onClick={async () => {
-            const city = isLoaded ? await reverseGeocodeCity(mapCenter.lat, mapCenter.lng) : undefined;
-            onLoadInArea(mapCenter, city);
+            if (!mapBounds) return;
+            // Reverse-geocode center + 4 corners to detect all cities in viewport (e.g. Ząbki)
+            const points = isLoaded
+              ? [
+                  { lat: (mapBounds.north + mapBounds.south) / 2, lng: (mapBounds.east + mapBounds.west) / 2 },
+                  { lat: mapBounds.north, lng: mapBounds.west },
+                  { lat: mapBounds.north, lng: mapBounds.east },
+                  { lat: mapBounds.south, lng: mapBounds.west },
+                  { lat: mapBounds.south, lng: mapBounds.east },
+                ]
+              : [];
+            const detected = await Promise.all(points.map(p => reverseGeocodeCity(p.lat, p.lng)));
+            const cities = [...new Set(detected.filter((c): c is string => !!c))];
+            onLoadInArea(mapBounds, cities);
           }}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200"
         >
@@ -242,7 +259,7 @@ export interface PharmacyMapViewProps {
   pharmacies?: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  onLoadInArea?: (center: LatLng, city?: string) => void;
+  onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;

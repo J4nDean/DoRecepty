@@ -86,6 +86,19 @@ export const fetchNearbyByLocation = async (
   return res.data.map(mapApiPharmacy);
 };
 
+export const fetchPharmaciesInBounds = async (bounds: {
+  north: number;
+  south: number;
+  east: number;
+  west: number;
+}): Promise<Pharmacy[]> => {
+  const { north, south, east, west } = bounds;
+  const res = await axios.get<ApiPharmacy[]>(
+    `${API_BASE_URL}/pharmacies/in-bounds?north=${north}&south=${south}&east=${east}&west=${west}`,
+  );
+  return res.data.map(mapApiPharmacy);
+};
+
 export const getUserLocation = (): Promise<{ lat: number; lng: number }> => {
   return new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
