@@ -28,13 +28,17 @@ public class PharmacyService {
         double latDelta = radiusKm / 111.0;
         double lngDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(lat)));
 
-        return pharmacyRepository.findInBoundingBox(
+        return pharmacyRepository.findInBoundingBoxWithCityFallback(
                         lat - latDelta, lat + latDelta,
                         lng - lngDelta, lng + lngDelta)
                 .stream()
-                .filter(p -> haversineKm(lat, lng, p.getLatitude(), p.getLongitude()) <= radiusKm)
-                .sorted(Comparator.comparingDouble(
-                        p -> haversineKm(lat, lng, p.getLatitude(), p.getLongitude())))
+                // geocoded: filter by real haversine distance; ungeocoded: always include
+                .filter(p -> p.getLatitude() == null || p.getLongitude() == null
+                        || haversineKm(lat, lng, p.getLatitude(), p.getLongitude()) <= radiusKm)
+                // sort geocoded first (by distance), ungeocoded at the end
+                .sorted(Comparator.comparingDouble(p ->
+                        p.getLatitude() == null ? Double.MAX_VALUE
+                                : haversineKm(lat, lng, p.getLatitude(), p.getLongitude())))
                 .limit(limit)
                 .toList();
     }

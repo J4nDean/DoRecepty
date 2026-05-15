@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import {
   APIProvider,
   Map,
@@ -12,6 +12,7 @@ import { updatePharmacyLocation } from '../services/pharmacyService';
 import type { Pharmacy } from '../types/pharmacy';
 
 type LatLng = { lat: number; lng: number };
+type MapBounds = { north: number; south: number; east: number; west: number };
 
 type GeocoderResult = { geometry: { location: { lat(): number; lng(): number } } };
 
@@ -45,6 +46,7 @@ interface MapContentProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (center: LatLng) => void;
+  onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
   className: string;
@@ -55,6 +57,7 @@ const MapContent = ({
   selectedId,
   onSelect,
   onLoadInArea,
+  onVisibleChange,
   userLocation,
   searchCity,
   className,
@@ -62,8 +65,10 @@ const MapContent = ({
   const isLoaded = useApiIsLoaded();
   const [center, setCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [mapCenter, setMapCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
-  const initialCenterRef = useRef<LatLng>(userLocation ?? DEFAULT_CENTER);
+  const onVisibleChangeRef = useRef(onVisibleChange);
+  useEffect(() => { onVisibleChangeRef.current = onVisibleChange; });
 
   useEffect(() => {
     setDisplayed(pharmacies);
@@ -72,7 +77,7 @@ const MapContent = ({
   useEffect(() => {
     if (userLocation) {
       setCenter(userLocation);
-      initialCenterRef.current = userLocation;
+      setMapCenter(userLocation);
     }
   }, [userLocation]);
 
@@ -94,7 +99,7 @@ const MapContent = ({
             lng: results[0].geometry.location.lng(),
           };
           setCenter(next);
-          initialCenterRef.current = next;
+          setMapCenter(next);
         }
       },
     );
@@ -122,8 +127,31 @@ const MapContent = ({
     });
   }, [isLoaded, pharmacies]);
 
-  const handleCameraChanged = (ev: { detail: { center: { lat: number; lng: number } } }) => {
+  // Filter to pharmacies visible within current map bounds
+  const visibleDisplayed = useMemo(() => {
+    if (!mapBounds) return displayed;
+    return displayed.filter(p =>
+      !p.latitude || !p.longitude || (
+        p.latitude >= mapBounds.south &&
+        p.latitude <= mapBounds.north &&
+        p.longitude >= mapBounds.west &&
+        p.longitude <= mapBounds.east
+      ),
+    );
+  }, [displayed, mapBounds]);
+
+  useEffect(() => {
+    onVisibleChangeRef.current?.(visibleDisplayed);
+  }, [visibleDisplayed]);
+
+  const handleCameraChanged = (ev: {
+    detail: {
+      center: { lat: number; lng: number };
+      bounds?: MapBounds;
+    };
+  }) => {
     setMapCenter({ lat: ev.detail.center.lat, lng: ev.detail.center.lng });
+    if (ev.detail.bounds) setMapBounds(ev.detail.bounds);
   };
 
   return (
@@ -165,10 +193,7 @@ const MapContent = ({
       {onLoadInArea && (
         <button
           type="button"
-          onClick={() => {
-            onLoadInArea(mapCenter);
-            initialCenterRef.current = mapCenter;
-          }}
+          onClick={() => onLoadInArea(mapCenter)}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200"
         >
           <Search size={14} />
@@ -184,6 +209,7 @@ export interface PharmacyMapViewProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (center: LatLng) => void;
+  onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
   className?: string;
@@ -194,6 +220,7 @@ const PharmacyMapView = ({
   selectedId,
   onSelect,
   onLoadInArea,
+  onVisibleChange,
   userLocation,
   searchCity,
   className = '',
@@ -216,6 +243,7 @@ const PharmacyMapView = ({
         selectedId={selectedId}
         onSelect={onSelect}
         onLoadInArea={onLoadInArea}
+        onVisibleChange={onVisibleChange}
         userLocation={userLocation}
         searchCity={searchCity}
         className={className}

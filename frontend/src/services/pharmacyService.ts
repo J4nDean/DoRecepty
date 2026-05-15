@@ -16,8 +16,13 @@ function parseOpeningHours(hoursStr: string | null | undefined): { open: number;
   return { open, close };
 }
 
+const ALWAYS_OPEN_RE = /całodobowo|całą dobę|całodobow[ae]|24\s*h\b|00:00\s*[-–]\s*24:00/i;
+
 function isOpenNow(api: ApiPharmacy): boolean {
   if (api.status && api.status !== 'AKTYWNA') return false;
+
+  const allHours = [api.openingHoursWeekdays, api.openingHoursSaturday, api.openingHoursSunday];
+  if (allHours.some(h => h && ALWAYS_OPEN_RE.test(h))) return true;
 
   const now = new Date();
   const day = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
