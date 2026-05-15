@@ -66,7 +66,6 @@ const MapContent = ({
 }: MapContentProps) => {
   const isLoaded = useApiIsLoaded();
   const [center, setCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
-  const [mapCenter, setMapCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
   const onVisibleChangeRef = useRef(onVisibleChange);
@@ -79,7 +78,6 @@ const MapContent = ({
   useEffect(() => {
     if (userLocation) {
       setCenter(userLocation);
-      setMapCenter(userLocation);
     }
   }, [userLocation]);
 
@@ -101,7 +99,6 @@ const MapContent = ({
             lng: results[0].geometry.location.lng(),
           };
           setCenter(next);
-          setMapCenter(next);
         }
       },
     );
@@ -152,12 +149,8 @@ const MapContent = ({
   }, [visibleDisplayed]);
 
   const handleCameraChanged = (ev: {
-    detail: {
-      center: { lat: number; lng: number };
-      bounds?: MapBounds;
-    };
+    detail: { bounds?: MapBounds };
   }) => {
-    setMapCenter({ lat: ev.detail.center.lat, lng: ev.detail.center.lng });
     if (ev.detail.bounds) setMapBounds(ev.detail.bounds);
   };
 
