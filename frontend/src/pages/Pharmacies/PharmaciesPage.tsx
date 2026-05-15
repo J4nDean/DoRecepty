@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PharmacyCard } from '../../components/PharmacyCard';
@@ -17,6 +17,7 @@ type LatLng = { lat: number; lng: number };
 
 const PharmaciesPage = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
+  const [visiblePharmacies, setVisiblePharmacies] = useState<Pharmacy[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchCity, setSearchCity] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
@@ -53,12 +54,28 @@ const PharmaciesPage = () => {
     }
   };
 
+  // On mount: try to get user location and auto-load nearby pharmacies
   useEffect(() => {
+    let cancelled = false;
     getUserLocation()
-      .then(loc => setUserLocation(loc))
+      .then(async loc => {
+        if (cancelled) return;
+        setUserLocation(loc);
+        setIsLoading(true);
+        setSearched(true);
+        try {
+          const results = await fetchNearbyByLocation(loc.lat, loc.lng, 20, 200);
+          if (!cancelled) setPharmacies(results);
+        } catch {
+          // silent — map still centers on user location
+        } finally {
+          if (!cancelled) setIsLoading(false);
+        }
+      })
       .catch(() => {
-        /* silent — user can still use the page without geolocation */
+        /* user denied location — map shows at default center, list shows empty state */
       });
+    return () => { cancelled = true; };
   }, []);
 
   const handleSearch = async (query: string) => {
@@ -89,7 +106,16 @@ const PharmaciesPage = () => {
     }
   };
 
-  const openCount = pharmacies.filter(p => p.isOpen).length;
+  const handleVisibleChange = useCallback((visible: Pharmacy[]) => {
+    setVisiblePharmacies(visible);
+  }, []);
+
+  // Use visible pharmacies for list (falls back to all if map not ready yet)
+  const listPharmacies = visiblePharmacies.length > 0 || pharmacies.length === 0
+    ? visiblePharmacies
+    : pharmacies;
+
+  const openCount = listPharmacies.filter(p => p.isOpen).length;
 
   return (
     <AppLayout title="Najbliższe apteki" subtitle="Znajdź aptekę w swojej okolicy">
@@ -105,11 +131,11 @@ const PharmaciesPage = () => {
         <p className="mb-4 text-xs text-amber-600">{locationError}</p>
       )}
 
-      {searched && !isLoading && pharmacies.length > 0 && (
+      {searched && !isLoading && listPharmacies.length > 0 && (
         <p className="text-xs text-slate-400 mb-4">
           {searchCity
-            ? `Znaleziono ${pharmacies.length} aptek w "${searchCity}"`
-            : `Najbliżej Ciebie: ${pharmacies.length} aptek`}{' '}
+            ? `Znaleziono ${listPharmacies.length} aptek w "${searchCity}"`
+            : `Widocznych aptek: ${listPharmacies.length}`}{' '}
           · {openCount} otwartych
         </p>
       )}
@@ -123,6 +149,7 @@ const PharmaciesPage = () => {
           selectedId={selectedId}
           onSelect={id => setSelectedId(prev => (prev === id ? null : id))}
           onLoadInArea={handleLoadInArea}
+          onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
           searchCity={searchCity}
           className="h-64 lg:h-auto lg:flex-1"
@@ -139,14 +166,14 @@ const PharmaciesPage = () => {
               description="Przesuń mapę na interesujący Cię obszar i kliknij Szukaj w tym obszarze, wpisz miasto lub użyj celownika."
               icon={<MapPin size={40} />}
             />
-          ) : pharmacies.length === 0 ? (
+          ) : listPharmacies.length === 0 ? (
             <EmptyState
               title="Nie znaleziono aptek"
               description="Spróbuj wpisać inną lokalizację lub zezwól na geolokalizację."
               icon={<MapPin size={40} />}
             />
           ) : (
-            pharmacies.map(p => (
+            listPharmacies.map(p => (
               <PharmacyCard
                 key={p.id}
                 pharmacy={p}
