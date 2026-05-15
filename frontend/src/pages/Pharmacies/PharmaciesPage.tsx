@@ -54,28 +54,14 @@ const PharmaciesPage = () => {
     }
   };
 
-  // On mount: try to get user location and auto-load nearby pharmacies
+  // On mount: just get user location to center the map — don't auto-load pharmacies.
+  // Pharmacies load only after user clicks "Szukaj aptek w tym obszarze" or searches by city.
   useEffect(() => {
-    let cancelled = false;
     getUserLocation()
-      .then(async loc => {
-        if (cancelled) return;
-        setUserLocation(loc);
-        setIsLoading(true);
-        setSearched(true);
-        try {
-          const results = await fetchNearbyByLocation(loc.lat, loc.lng, 20, 200);
-          if (!cancelled) setPharmacies(results);
-        } catch {
-          // silent — map still centers on user location
-        } finally {
-          if (!cancelled) setIsLoading(false);
-        }
-      })
+      .then(setUserLocation)
       .catch(() => {
-        /* user denied location — map shows at default center, list shows empty state */
+        /* user denied location — map shows at default center */
       });
-    return () => { cancelled = true; };
   }, []);
 
   const handleSearch = async (query: string) => {
@@ -90,15 +76,26 @@ const PharmaciesPage = () => {
     setIsLoading(false);
   };
 
-  const handleLoadInArea = async (center: LatLng) => {
+  const handleLoadInArea = async (center: LatLng, city?: string) => {
     setIsLoading(true);
     setSearched(true);
     setSelectedId(null);
     setSearchCity(undefined);
     setLocationError(null);
     try {
-      const results = await fetchNearbyByLocation(center.lat, center.lng, 20, 200);
-      setPharmacies(results);
+      // Fetch geocoded pharmacies near point AND all pharmacies from the detected city
+      // (so Ząbki / suburb pharmacies appear even though they have no lat/lng in DB yet)
+      const [nearby, byCity] = await Promise.all([
+        fetchNearbyByLocation(center.lat, center.lng, 20, 200),
+        city ? searchPharmacies(city) : Promise.resolve([] as Pharmacy[]),
+      ]);
+      const merged = new Map<string, Pharmacy>();
+      nearby.forEach(p => merged.set(p.id, p));
+      byCity.forEach(p => {
+        const existing = merged.get(p.id);
+        if (!existing || (!existing.latitude && p.latitude)) merged.set(p.id, p);
+      });
+      setPharmacies([...merged.values()]);
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');
     } finally {

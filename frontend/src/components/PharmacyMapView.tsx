@@ -14,7 +14,15 @@ import type { Pharmacy } from '../types/pharmacy';
 type LatLng = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
 
-type GeocoderResult = { geometry: { location: { lat(): number; lng(): number } } };
+type GeocoderAddressComponent = {
+  long_name: string;
+  short_name: string;
+  types: string[];
+};
+type GeocoderResult = {
+  geometry: { location: { lat(): number; lng(): number } };
+  address_components?: GeocoderAddressComponent[];
+};
 
 declare global {
   interface Window {
@@ -22,7 +30,7 @@ declare global {
       maps: {
         Geocoder: new () => {
           geocode(
-            request: { address: string },
+            request: { address: string } | { location: { lat: number; lng: number } },
             callback: (results: GeocoderResult[] | null, status: string) => void,
           ): void;
         };
@@ -30,6 +38,29 @@ declare global {
     };
   }
 }
+
+const reverseGeocodeCity = (lat: number, lng: number): Promise<string | undefined> =>
+  new Promise(resolve => {
+    if (!window.google?.maps?.Geocoder) {
+      resolve(undefined);
+      return;
+    }
+    new window.google.maps.Geocoder().geocode(
+      { location: { lat, lng } },
+      (results, status) => {
+        if (status !== 'OK' || !results) {
+          resolve(undefined);
+          return;
+        }
+        const components = results.flatMap(r => r.address_components ?? []);
+        const city =
+          components.find(c => c.types.includes('locality'))?.long_name ??
+          components.find(c => c.types.includes('administrative_area_level_3'))?.long_name ??
+          components.find(c => c.types.includes('postal_town'))?.long_name;
+        resolve(city);
+      },
+    );
+  });
 
 const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
 
@@ -45,7 +76,7 @@ interface MapContentProps {
   pharmacies: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  onLoadInArea?: (center: LatLng) => void;
+  onLoadInArea?: (center: LatLng, city?: string) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -193,7 +224,10 @@ const MapContent = ({
       {onLoadInArea && (
         <button
           type="button"
-          onClick={() => onLoadInArea(mapCenter)}
+          onClick={async () => {
+            const city = isLoaded ? await reverseGeocodeCity(mapCenter.lat, mapCenter.lng) : undefined;
+            onLoadInArea(mapCenter, city);
+          }}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200"
         >
           <Search size={14} />
@@ -208,7 +242,7 @@ export interface PharmacyMapViewProps {
   pharmacies?: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  onLoadInArea?: (center: LatLng) => void;
+  onLoadInArea?: (center: LatLng, city?: string) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
