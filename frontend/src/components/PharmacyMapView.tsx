@@ -14,14 +14,8 @@ import type { Pharmacy } from '../types/pharmacy';
 type LatLng = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
 
-type GeocoderAddressComponent = {
-  long_name: string;
-  short_name: string;
-  types: string[];
-};
 type GeocoderResult = {
   geometry: { location: { lat(): number; lng(): number } };
-  address_components?: GeocoderAddressComponent[];
 };
 
 declare global {
@@ -39,29 +33,6 @@ declare global {
   }
 }
 
-const reverseGeocodeCity = (lat: number, lng: number): Promise<string | undefined> =>
-  new Promise(resolve => {
-    if (!window.google?.maps?.Geocoder) {
-      resolve(undefined);
-      return;
-    }
-    new window.google.maps.Geocoder().geocode(
-      { location: { lat, lng } },
-      (results, status) => {
-        if (status !== 'OK' || !results) {
-          resolve(undefined);
-          return;
-        }
-        const components = results.flatMap(r => r.address_components ?? []);
-        const city =
-          components.find(c => c.types.includes('locality'))?.long_name ??
-          components.find(c => c.types.includes('administrative_area_level_3'))?.long_name ??
-          components.find(c => c.types.includes('postal_town'))?.long_name;
-        resolve(city);
-      },
-    );
-  });
-
 const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
 
 const MapPanner = ({ center }: { center: LatLng }) => {
@@ -76,7 +47,7 @@ interface MapContentProps {
   pharmacies: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
+  onLoadInArea?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -191,7 +162,7 @@ const MapContent = ({
   };
 
   return (
-    <div className={`relative rounded-xl overflow-hidden ${className}`}>
+    <div className={`relative overflow-hidden ${className}`}>
       <Map
         defaultCenter={center}
         defaultZoom={13}
@@ -229,21 +200,9 @@ const MapContent = ({
       {onLoadInArea && (
         <button
           type="button"
-          onClick={async () => {
+          onClick={() => {
             if (!mapBounds) return;
-            // Reverse-geocode center + 4 corners to detect all cities in viewport (e.g. Ząbki)
-            const points = isLoaded
-              ? [
-                  { lat: (mapBounds.north + mapBounds.south) / 2, lng: (mapBounds.east + mapBounds.west) / 2 },
-                  { lat: mapBounds.north, lng: mapBounds.west },
-                  { lat: mapBounds.north, lng: mapBounds.east },
-                  { lat: mapBounds.south, lng: mapBounds.west },
-                  { lat: mapBounds.south, lng: mapBounds.east },
-                ]
-              : [];
-            const detected = await Promise.all(points.map(p => reverseGeocodeCity(p.lat, p.lng)));
-            const cities = [...new Set(detected.filter((c): c is string => !!c))];
-            onLoadInArea(mapBounds, cities);
+            onLoadInArea(mapBounds);
           }}
           className="absolute top-3 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-4 py-2 rounded-full text-sm font-medium text-slate-700 hover:bg-slate-50 border border-slate-200"
         >
@@ -259,7 +218,7 @@ export interface PharmacyMapViewProps {
   pharmacies?: Pharmacy[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
-  onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
+  onLoadInArea?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;

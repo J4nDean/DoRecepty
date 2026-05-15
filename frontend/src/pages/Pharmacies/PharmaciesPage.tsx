@@ -12,6 +12,7 @@ import {
   fetchNearbyByLocation,
   getUserLocation,
 } from '../../services/pharmacyService';
+import { geocodeAddress } from '../../services/geocoding';
 import type { Pharmacy } from '../../types/pharmacy';
 
 type LatLng = { lat: number; lng: number };
@@ -67,38 +68,55 @@ const PharmaciesPage = () => {
   }, []);
 
   const handleSearch = async (query: string) => {
-    if (!query.trim()) return;
+    const q = query.trim();
+    if (!q) return;
     setIsLoading(true);
     setSearched(true);
     setSelectedId(null);
-    setSearchCity(query.trim());
+    setSearchCity(q);
     setLocationError(null);
-    const results = await searchPharmacies(query.trim());
-    setPharmacies(results);
-    setIsLoading(false);
+    try {
+      // Geocode city → redirect map there + fetch a bbox around the city center so we
+      // pick up pharmacies physically in the area regardless of their administrative city
+      // (e.g. Warszawa pharmacies near the Ząbki border show up when searching "Ząbki").
+      const center = await geocodeAddress(`${q}, Poland`);
+      const tasks: Promise<Pharmacy[]>[] = [searchPharmacies(q)];
+      if (center) {
+        const dLat = 0.05;             // ~5.5 km
+        const dLng = 0.05 / Math.cos((center.lat * Math.PI) / 180);
+        tasks.push(fetchPharmaciesInBounds({
+          north: center.lat + dLat,
+          south: center.lat - dLat,
+          east: center.lng + dLng,
+          west: center.lng - dLng,
+        }));
+      }
+      const groups = await Promise.all(tasks);
+      const merged = new Map<string, Pharmacy>();
+      groups.flat().forEach(p => {
+        const existing = merged.get(p.id);
+        if (!existing || (!existing.latitude && p.latitude)) merged.set(p.id, p);
+      });
+      setPharmacies([...merged.values()]);
+    } catch {
+      const results = await searchPharmacies(q);
+      setPharmacies(results);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleLoadInArea = async (bounds: MapBounds, cities: string[]) => {
+  const handleLoadInArea = async (bounds: MapBounds) => {
     setIsLoading(true);
     setSearched(true);
     setSelectedId(null);
     setSearchCity(undefined);
     setLocationError(null);
     try {
-      // Bounds query → geocoded pharmacies strictly inside viewport
-      // City queries (parallel) → fetch ungeocoded pharmacies for every city detected
-      // in the viewport (Warszawa, Ząbki, ...), so the geocoder can place them on the map
-      const [inBounds, ...byCities] = await Promise.all([
-        fetchPharmaciesInBounds(bounds),
-        ...cities.map(c => searchPharmacies(c)),
-      ]);
-      const merged = new Map<string, Pharmacy>();
-      inBounds.forEach(p => merged.set(p.id, p));
-      byCities.flat().forEach(p => {
-        const existing = merged.get(p.id);
-        if (!existing || (!existing.latitude && p.latitude)) merged.set(p.id, p);
-      });
-      setPharmacies([...merged.values()]);
+      // Pure coordinate search — no city detection. Returns only pharmacies whose
+      // lat/lng lie inside the current viewport, regardless of administrative city.
+      const results = await fetchPharmaciesInBounds(bounds);
+      setPharmacies(results);
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');
     } finally {
@@ -140,10 +158,7 @@ const PharmaciesPage = () => {
         </p>
       )}
 
-      <div
-        className="flex flex-col lg:flex-row gap-4"
-        style={{ height: 'calc(100vh - 240px)', minHeight: 400 }}
-      >
+      <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-240px)] lg:min-h-[400px]">
         <PharmacyMapView
           pharmacies={pharmacies}
           selectedId={selectedId}
@@ -152,10 +167,10 @@ const PharmaciesPage = () => {
           onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
           searchCity={searchCity}
-          className="h-64 lg:h-auto lg:flex-1"
+          className="h-[55vh] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:flex-1 rounded-none lg:rounded-xl"
         />
 
-        <div className="lg:w-80 overflow-y-auto space-y-3 pr-1">
+        <div className="space-y-3 lg:w-80 lg:overflow-y-auto lg:pr-1">
           {isLoading ? (
             <div className="flex justify-center py-12">
               <Spinner size="lg" />

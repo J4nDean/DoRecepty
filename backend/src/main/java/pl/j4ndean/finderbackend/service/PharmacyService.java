@@ -25,7 +25,10 @@ public class PharmacyService {
     }
 
     public List<Pharmacy> findInBounds(double minLat, double maxLat, double minLng, double maxLng) {
-        return pharmacyRepository.findInBoundingBoxWithCityFallback(minLat, maxLat, minLng, maxLng);
+        // Strict bounds — only pharmacies whose coordinates lie inside the viewport.
+        // City affiliation is irrelevant; a Warszawa pharmacy near the Ząbki border will be
+        // returned when the user is panned over Ząbki.
+        return pharmacyRepository.findInBoundingBox(minLat, maxLat, minLng, maxLng);
     }
 
     public List<Pharmacy> findNearby(double lat, double lng, double radiusKm, int limit) {
