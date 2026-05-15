@@ -31,6 +31,15 @@ public class PharmacyController {
         return pharmacyService.findNearby(lat, lng, radiusKm, limit);
     }
 
+    @GetMapping("/in-bounds")
+    public List<Pharmacy> inBounds(
+            @RequestParam double north,
+            @RequestParam double south,
+            @RequestParam double east,
+            @RequestParam double west) {
+        return pharmacyService.findInBounds(south, north, west, east);
+    }
+
     @PostMapping("/update-location")
     public void updateLocation(@RequestBody Pharmacy pharmacy) {
         pharmacyRepository.findByCityContainingIgnoreCase(pharmacy.getCity()).stream()

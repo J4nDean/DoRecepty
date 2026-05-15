@@ -8,12 +8,14 @@ import { Spinner } from '../../components/ui/Spinner';
 import { EmptyState } from '../../components/ui/EmptyState';
 import {
   searchPharmacies,
+  fetchPharmaciesInBounds,
   fetchNearbyByLocation,
   getUserLocation,
 } from '../../services/pharmacyService';
 import type { Pharmacy } from '../../types/pharmacy';
 
 type LatLng = { lat: number; lng: number };
+type MapBounds = { north: number; south: number; east: number; west: number };
 
 const PharmaciesPage = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
@@ -76,22 +78,23 @@ const PharmaciesPage = () => {
     setIsLoading(false);
   };
 
-  const handleLoadInArea = async (center: LatLng, city?: string) => {
+  const handleLoadInArea = async (bounds: MapBounds, cities: string[]) => {
     setIsLoading(true);
     setSearched(true);
     setSelectedId(null);
     setSearchCity(undefined);
     setLocationError(null);
     try {
-      // Fetch geocoded pharmacies near point AND all pharmacies from the detected city
-      // (so Ząbki / suburb pharmacies appear even though they have no lat/lng in DB yet)
-      const [nearby, byCity] = await Promise.all([
-        fetchNearbyByLocation(center.lat, center.lng, 20, 200),
-        city ? searchPharmacies(city) : Promise.resolve([] as Pharmacy[]),
+      // Bounds query → geocoded pharmacies strictly inside viewport
+      // City queries (parallel) → fetch ungeocoded pharmacies for every city detected
+      // in the viewport (Warszawa, Ząbki, ...), so the geocoder can place them on the map
+      const [inBounds, ...byCities] = await Promise.all([
+        fetchPharmaciesInBounds(bounds),
+        ...cities.map(c => searchPharmacies(c)),
       ]);
       const merged = new Map<string, Pharmacy>();
-      nearby.forEach(p => merged.set(p.id, p));
-      byCity.forEach(p => {
+      inBounds.forEach(p => merged.set(p.id, p));
+      byCities.flat().forEach(p => {
         const existing = merged.get(p.id);
         if (!existing || (!existing.latitude && p.latitude)) merged.set(p.id, p);
       });
