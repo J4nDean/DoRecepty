@@ -84,6 +84,8 @@ public class PharmacyImportService {
         }
 
         pharmacyRepository.saveAll(pharmacies);
+        log.info("Migrated {} pharmacies from apteki table", pharmacies.size());
+        jdbcTemplate.execute("DROP TABLE IF EXISTS apteki");
     }
 
     private static String str(Object value) {
