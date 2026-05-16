@@ -1,5 +1,7 @@
 package pl.j4ndean.finderbackend.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +27,8 @@ public class PharmacyImportService {
     private final DataSource dataSource;
     private final JdbcTemplate jdbcTemplate;
 
-    private static final String SQL_FILE = "apteki_warszawa_zabki.sql";
+    private static final String SQL_FILE    = "apteki_warszawa_zabki.sql";
+    private static final String COORDS_FILE = "pharmacy_coords.json";
 
     @PostConstruct
     public void init() {
@@ -56,8 +59,12 @@ public class PharmacyImportService {
     }
 
     private void migrateFromApteki() {
-        // Preserve any coordinates already geocoded in the current table.
-        Map<String, double[]> savedCoords = new HashMap<>();
+        // Start with pre-geocoded coordinates shipped with the build (generated
+        // offline by scripts/geocode-pharmacies.mjs), then layer any newer
+        // coordinates already saved in the DB on top — those came from real
+        // user sessions and should win.
+        Map<String, double[]> savedCoords = loadPreGeocodedCoords();
+        log.info("Loaded {} pre-geocoded coordinates from {}", savedCoords.size(), COORDS_FILE);
         pharmacyRepository.findAll().forEach(p -> {
             if (p.getLatitude() != null && p.getLongitude() != null) {
                 savedCoords.put(p.getName() + "|" + p.getAddress(),
@@ -107,5 +114,25 @@ public class PharmacyImportService {
 
     private static String str(Object value) {
         return value == null ? "" : value.toString().trim();
+    }
+
+    private Map<String, double[]> loadPreGeocodedCoords() {
+        ClassPathResource resource = new ClassPathResource(COORDS_FILE);
+        if (!resource.exists()) return new HashMap<>();
+        try {
+            Map<String, Map<String, Double>> raw = new ObjectMapper().readValue(
+                    resource.getInputStream(),
+                    new TypeReference<>() {});
+            Map<String, double[]> out = new HashMap<>(raw.size());
+            raw.forEach((key, value) -> {
+                Double lat = value.get("lat");
+                Double lng = value.get("lng");
+                if (lat != null && lng != null) out.put(key, new double[]{lat, lng});
+            });
+            return out;
+        } catch (Exception e) {
+            log.warn("Failed to read {}: {}", COORDS_FILE, e.getMessage());
+            return new HashMap<>();
+        }
     }
 }
