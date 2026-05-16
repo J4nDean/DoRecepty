@@ -128,6 +128,8 @@ const PharmaciesPage = () => {
         if (city) {
           setSearchCity(city);
           setPharmacies(await searchPharmacies(city));
+        } else {
+          setLocationError('Nie udało się rozpoznać miasta dla tego obszaru — spróbuj wpisać nazwę ręcznie');
         }
       }
     } catch {
