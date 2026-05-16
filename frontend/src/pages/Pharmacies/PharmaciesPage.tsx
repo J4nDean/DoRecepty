@@ -12,7 +12,7 @@ import {
   fetchNearbyByLocation,
   getUserLocation,
 } from '../../services/pharmacyService';
-import { geocodeAddress } from '../../services/geocoding';
+import { geocodeAddress, reverseGeocode } from '../../services/geocoding';
 import type { Pharmacy } from '../../types/pharmacy';
 
 type LatLng    = { lat: number; lng: number };
@@ -114,10 +114,22 @@ const PharmaciesPage = () => {
     setSearched(true);
     setPharmacies([]);
     setSelectedId(null);
-    setSearchCity(undefined);
     setLocationError(null);
     try {
-      setPharmacies(await fetchPharmaciesInBounds(bounds));
+      const inBounds = await fetchPharmaciesInBounds(bounds);
+      if (inBounds.length > 0) {
+        setSearchCity(undefined);
+        setPharmacies(inBounds);
+      } else {
+        // No geocoded pharmacies yet — fall back to city name search.
+        const centerLat = (bounds.north + bounds.south) / 2;
+        const centerLng = (bounds.east + bounds.west) / 2;
+        const city = await reverseGeocode(centerLat, centerLng);
+        if (city) {
+          setSearchCity(city);
+          setPharmacies(await searchPharmacies(city));
+        }
+      }
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');
     } finally {
