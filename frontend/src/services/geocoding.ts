@@ -1,29 +1,30 @@
-/* Thin wrapper around window.google.maps.Geocoder so non-Map components can
-   geocode without having a Google Map instance. The Geocoder is loaded by
-   PharmacyMapView's APIProvider — calling these helpers before the map mounts
-   resolves to null. */
-
 type LatLng = { lat: number; lng: number };
 
-// Reverse-geocodes a lat/lng to the nearest city/town name. Google's response shape varies:
-// some places return `locality`, others only `administrative_area_level_3` (gmina) or
-// `sublocality`. We scan all results across a prioritised list of component types.
+const CITY_PRIORITY_TYPES = [
+  'locality',
+  'postal_town',
+  'administrative_area_level_3',
+  'sublocality_level_1',
+  'administrative_area_level_2',
+] as const;
+
+const getGeocoder = () =>
+  typeof window !== 'undefined' && window.google?.maps?.Geocoder
+    ? new window.google.maps.Geocoder()
+    : null;
+
 export const reverseGeocode = (lat: number, lng: number): Promise<string | null> =>
   new Promise(resolve => {
-    if (!window.google?.maps?.Geocoder) { resolve(null); return; }
-    new window.google.maps.Geocoder().geocode({ location: { lat, lng } }, (results, status) => {
-      if (status !== 'OK' || !results || results.length === 0) { resolve(null); return; }
-      const priorityTypes = [
-        'locality',
-        'postal_town',
-        'administrative_area_level_3',
-        'sublocality_level_1',
-        'administrative_area_level_2',
-      ];
-      for (const type of priorityTypes) {
+    const geocoder = getGeocoder();
+    if (!geocoder) return resolve(null);
+
+    geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+      if (status !== 'OK' || !results?.length) return resolve(null);
+
+      for (const type of CITY_PRIORITY_TYPES) {
         for (const result of results) {
           const found = result.address_components?.find(c => c.types.includes(type));
-          if (found) { resolve(found.long_name); return; }
+          if (found) return resolve(found.long_name);
         }
       }
       resolve(null);
@@ -32,15 +33,11 @@ export const reverseGeocode = (lat: number, lng: number): Promise<string | null>
 
 export const geocodeAddress = (address: string): Promise<LatLng | null> =>
   new Promise(resolve => {
-    if (!window.google?.maps?.Geocoder) {
-      resolve(null);
-      return;
-    }
-    new window.google.maps.Geocoder().geocode({ address }, (results, status) => {
-      if (status !== 'OK' || !results?.[0]) {
-        resolve(null);
-        return;
-      }
+    const geocoder = getGeocoder();
+    if (!geocoder) return resolve(null);
+
+    geocoder.geocode({ address }, (results, status) => {
+      if (status !== 'OK' || !results?.[0]) return resolve(null);
       const loc = results[0].geometry.location;
       resolve({ lat: loc.lat(), lng: loc.lng() });
     });

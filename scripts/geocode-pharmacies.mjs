@@ -1,27 +1,9 @@
 #!/usr/bin/env node
-/**
- * Geocodes every public/over-the-counter pharmacy in apteki_warszawa_zabki.sql
- * via the Google Maps Geocoding API and writes coordinates to
- * backend/src/main/resources/pharmacy_coords.json.
- *
- * Resumable: re-running skips entries already in the JSON file.
- *
- * Usage:
- *   GOOGLE_MAPS_API_KEY=AIza... node scripts/geocode-pharmacies.mjs
- *
- * Filter mirrors PharmacyImportService.java:
- *   stan_apteki = 'AKTYWNA'
- *   AND rodzaj_apteki IN ('APTEKA OGÓLNODOSTĘPNA', 'PUNKT APTECZNY')
- *
- * Key format ("name|address") matches the lookup in PharmacyImportService.migrateFromApteki.
- */
-
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const REPO_ROOT = join(__dirname, '..');
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SQL_PATH  = join(REPO_ROOT, 'backend/src/main/resources/apteki_warszawa_zabki.sql');
 const OUT_PATH  = join(REPO_ROOT, 'backend/src/main/resources/pharmacy_coords.json');
 
@@ -31,119 +13,117 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-const REQUEST_DELAY_MS = 200;          // ~5 req/sec — well under Google's 50 req/sec quota
-const SAVE_EVERY       = 10;            // persist progress every N successful geocodes
+const REQUEST_DELAY_MS = 200;
+const SAVE_EVERY       = 10;
+const PROGRESS_EVERY   = 25;
 
-// ── SQL parsing ──────────────────────────────────────────────────────────────
-
-const sql = readFileSync(SQL_PATH, 'utf8');
-
-// Column order matches the CREATE TABLE in apteki_warszawa_zabki.sql.
 const COL = {
-  nazwa_apteki:    1,
-  stan_apteki:     2,
-  rodzaj_apteki:   3,
-  typ_ulicy:       22,
-  nazwa_ulicy:     23,
-  numer_budynku:   24,
-  miejscowosc:     26,
+  name:     1,
+  status:   2,
+  kind:     3,
+  streetTyp: 22,
+  street:    23,
+  building:  24,
+  city:      26,
 };
 
-function parseValues(line) {
-  const m = line.match(/^INSERT INTO apteki VALUES \((.*)\);\s*$/);
-  if (!m) return null;
-  const out = [];
-  // Each value is single-quoted; SQL doubles embedded quotes ('') for escaping.
-  const re = /'((?:[^']|'')*)'/g;
-  let match;
-  while ((match = re.exec(m[1])) !== null) {
-    out.push(match[1].replace(/''/g, "'"));
-  }
-  return out;
-}
-
-// Mirrors the address-building logic in PharmacyImportService.migrateFromApteki
-// so the resulting key matches the Java lookup.
-function buildKey(values) {
-  const name   = (values[COL.nazwa_apteki]  || '').trim();
-  const typ    = (values[COL.typ_ulicy]     || '').trim();
-  const nazwa  = (values[COL.nazwa_ulicy]   || '').trim();
-  const numer  = (values[COL.numer_budynku] || '').trim();
-  const street = `${typ} ${nazwa}`.trim();
-  const address = `${street} ${numer}`.trim();
-  return { name, address, key: `${name}|${address}` };
-}
-
 const PUBLIC_TYPES = new Set(['APTEKA OGÓLNODOSTĘPNA', 'PUNKT APTECZNY']);
+const INSERT_RE    = /^INSERT INTO apteki VALUES \((.*)\);\s*$/;
+const VALUE_RE     = /'((?:[^']|'')*)'/g;
 
-const pharmacies = [];
-for (const line of sql.split('\n')) {
-  if (!line.startsWith('INSERT INTO apteki')) continue;
-  const values = parseValues(line);
-  if (!values) continue;
-  if (values[COL.stan_apteki] !== 'AKTYWNA') continue;
-  if (!PUBLIC_TYPES.has(values[COL.rodzaj_apteki])) continue;
-  const { name, address, key } = buildKey(values);
-  const city = (values[COL.miejscowosc] || '').trim();
-  if (!name || !address || !city) continue;
-  pharmacies.push({ key, name, address, city });
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const trim  = v => (v ?? '').trim();
+
+function parseValues(line) {
+  const match = line.match(INSERT_RE);
+  if (!match) return null;
+  const values = [];
+  let m;
+  while ((m = VALUE_RE.exec(match[1])) !== null) {
+    values.push(m[1].replace(/''/g, "'"));
+  }
+  return values;
 }
 
-console.log(`Parsed ${pharmacies.length} public pharmacies from SQL.`);
+function toEntry(values) {
+  const name    = trim(values[COL.name]);
+  const street  = `${trim(values[COL.streetTyp])} ${trim(values[COL.street])}`.trim();
+  const address = `${street} ${trim(values[COL.building])}`.trim();
+  const city    = trim(values[COL.city]);
+  return { key: `${name}|${address}`, name, address, city };
+}
 
-// ── Load existing coords (resume support) ────────────────────────────────────
+function parsePharmacies(sql) {
+  return sql.split('\n')
+    .filter(line => line.startsWith('INSERT INTO apteki'))
+    .map(parseValues)
+    .filter(values =>
+      values
+      && values[COL.status] === 'AKTYWNA'
+      && PUBLIC_TYPES.has(values[COL.kind])
+    )
+    .map(toEntry)
+    .filter(p => p.name && p.address && p.city);
+}
 
-let coords = {};
-if (existsSync(OUT_PATH)) {
+function loadCoords() {
+  if (!existsSync(OUT_PATH)) return {};
   try {
-    coords = JSON.parse(readFileSync(OUT_PATH, 'utf8'));
-    console.log(`Loaded ${Object.keys(coords).length} existing coordinates — skipping those.`);
+    return JSON.parse(readFileSync(OUT_PATH, 'utf8'));
   } catch {
     console.warn('Existing pharmacy_coords.json is malformed — starting fresh.');
-    coords = {};
+    return {};
   }
+}
+
+async function geocode(pharmacy) {
+  const query = `${pharmacy.address}, ${pharmacy.city}, Poland`;
+  const url   = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query)}&key=${API_KEY}`;
+  const res   = await fetch(url);
+  return { query, body: await res.json() };
+}
+
+const pharmacies = parsePharmacies(readFileSync(SQL_PATH, 'utf8'));
+console.log(`Parsed ${pharmacies.length} public pharmacies from SQL.`);
+
+const coords = loadCoords();
+if (Object.keys(coords).length) {
+  console.log(`Loaded ${Object.keys(coords).length} existing coordinates — skipping those.`);
 }
 
 const todo = pharmacies.filter(p => !coords[p.key]);
 console.log(`${todo.length} pharmacies need geocoding.`);
 
-// ── Geocode loop ─────────────────────────────────────────────────────────────
-
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-const save  = () => writeFileSync(OUT_PATH, JSON.stringify(coords, null, 2) + '\n', 'utf8');
+const save = () => writeFileSync(OUT_PATH, JSON.stringify(coords, null, 2) + '\n', 'utf8');
 
 let ok = 0, fail = 0;
 
 for (let i = 0; i < todo.length; i++) {
-  const p = todo[i];
-  const query = `${p.address}, ${p.city}, Poland`;
-  const url = `https://maps.googleapis.com/maps/api/geocode/json`
-    + `?address=${encodeURIComponent(query)}&key=${API_KEY}`;
+  const pharmacy = todo[i];
 
   try {
-    const res  = await fetch(url);
-    const json = await res.json();
-    if (json.status === 'OK' && json.results?.[0]) {
-      const loc = json.results[0].geometry.location;
-      coords[p.key] = { lat: loc.lat, lng: loc.lng };
+    const { query, body } = await geocode(pharmacy);
+    if (body.status === 'OK' && body.results?.[0]) {
+      const { lat, lng } = body.results[0].geometry.location;
+      coords[pharmacy.key] = { lat, lng };
       ok++;
-    } else if (json.status === 'ZERO_RESULTS') {
+    } else if (body.status === 'ZERO_RESULTS') {
       fail++;
-      console.warn(`  zero results: ${p.name} — ${query}`);
+      console.warn(`  zero results: ${pharmacy.name} — ${query}`);
     } else {
-      // OVER_QUERY_LIMIT / REQUEST_DENIED / INVALID_REQUEST — abort cleanly so we keep progress
-      console.error(`  API status ${json.status}: ${json.error_message ?? ''}`);
+      console.error(`  API status ${body.status}: ${body.error_message ?? ''}`);
       save();
       process.exit(1);
     }
-  } catch (e) {
+  } catch (err) {
     fail++;
-    console.warn(`  network error for ${p.name}: ${e.message}`);
+    console.warn(`  network error for ${pharmacy.name}: ${err.message}`);
   }
 
-  if ((i + 1) % SAVE_EVERY === 0) save();
-  if ((i + 1) % 25 === 0) {
-    console.log(`  progress: ${i + 1}/${todo.length}  (ok=${ok}, fail=${fail})`);
+  const done = i + 1;
+  if (done % SAVE_EVERY === 0) save();
+  if (done % PROGRESS_EVERY === 0) {
+    console.log(`  progress: ${done}/${todo.length}  (ok=${ok}, fail=${fail})`);
   }
   await sleep(REQUEST_DELAY_MS);
 }

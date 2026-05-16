@@ -47,7 +47,6 @@ const ArchivedPrescriptionsPage = () => {
 
   return (
     <AppLayout title="Archiwalne e-recepty" subtitle="Historia zrealizowanych recept">
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <SearchBar
           placeholder="Szukaj po numerze, leku lub lekarzu..."

@@ -33,7 +33,6 @@ export const PrescriptionCard = ({ prescription, compact = false }: Prescription
       }`}
       aria-label={`Recepta ${prescription.number}`}
     >
-      {/* Header row */}
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
           <p className="text-[11px] text-slate-400 uppercase tracking-wider mb-0.5">
@@ -48,7 +47,6 @@ export const PrescriptionCard = ({ prescription, compact = false }: Prescription
         </Badge>
       </div>
 
-      {/* Meta row */}
       <div className="flex items-center gap-4 text-xs text-slate-500 mb-3 flex-wrap">
         <span className="flex items-center gap-1.5">
           <Calendar size={13} />
@@ -61,7 +59,6 @@ export const PrescriptionCard = ({ prescription, compact = false }: Prescription
         </span>
       </div>
 
-      {/* Doctor info */}
       {!compact && (
         <p className="flex items-center gap-1.5 text-xs text-slate-400">
           <User size={12} />
@@ -69,7 +66,6 @@ export const PrescriptionCard = ({ prescription, compact = false }: Prescription
         </p>
       )}
 
-      {/* CTA */}
       {canNavigate && (
         <div className="flex items-center gap-1 text-[12px] text-blue-600 font-semibold mt-3 border-t border-slate-50 pt-3">
           Szczegóły i dostępność leków

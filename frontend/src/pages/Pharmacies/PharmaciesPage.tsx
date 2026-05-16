@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { MapPin } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PharmacyCard } from '../../components/PharmacyCard';
@@ -18,15 +18,36 @@ import type { Pharmacy } from '../../types/pharmacy';
 type LatLng    = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
 
-// Merges pharmacy arrays, preferring entries that already have coordinates.
+const CITY_BBOX_DELTA = 0.05;
+const NEARBY_RADIUS_KM = 20;
+const NEARBY_LIMIT     = 200;
+
+const isPermissionDenied = (err: unknown) =>
+  typeof err === 'object' && err !== null && 'code' in err && 'PERMISSION_DENIED' in (err as object);
+
+const locationErrorMessage = (err: unknown): string => {
+  if (isPermissionDenied(err)) return 'Brak zgody na dostęp do lokalizacji';
+  return err instanceof Error ? err.message : 'Nie udało się pobrać lokalizacji';
+};
+
 function mergePharmacies(...groups: Pharmacy[][]): Pharmacy[] {
   const map = new Map<string, Pharmacy>();
-  groups.flat().forEach(p => {
-    const existing = map.get(p.id);
-    if (!existing || (!existing.latitude && p.latitude)) map.set(p.id, p);
-  });
+  for (const pharmacy of groups.flat()) {
+    const existing = map.get(pharmacy.id);
+    if (!existing || (!existing.latitude && pharmacy.latitude)) {
+      map.set(pharmacy.id, pharmacy);
+    }
+  }
   return [...map.values()];
 }
+
+const bboxAround = ({ lat, lng }: LatLng, delta = CITY_BBOX_DELTA): MapBounds => {
+  const dLng = delta / Math.cos((lat * Math.PI) / 180);
+  return {
+    north: lat + delta, south: lat - delta,
+    east:  lng + dLng,  west:  lng - dLng,
+  };
+};
 
 const PharmaciesPage = () => {
   const [pharmacies,        setPharmacies]        = useState<Pharmacy[]>([]);
@@ -39,98 +60,81 @@ const PharmaciesPage = () => {
   const [locationError,     setLocationError]     = useState<string | null>(null);
   const [userLocation,      setUserLocation]      = useState<LatLng | null>(null);
 
-  // Centre the map on mount — don't load any pharmacies yet.
+  const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
+
+  const registerCard = (id: string) => (element: HTMLElement | null) => {
+    if (element) cardRefs.current.set(id, element);
+    else cardRefs.current.delete(id);
+  };
+
   useEffect(() => {
-    getUserLocation()
-      .then(setUserLocation)
-      .catch(() => { /* denied — map shows default centre */ });
+    getUserLocation().then(setUserLocation).catch(() => {});
   }, []);
 
-  // ── Locate nearby (GPS button) ─────────────────────────────────────────────
+  useEffect(() => {
+    if (!selectedId) return;
+    const card = cardRefs.current.get(selectedId);
+    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [selectedId]);
 
-  const loadNearby = async () => {
-    setIsLocating(true);
+  const resetForNewSearch = (city?: string) => {
     setIsLoading(true);
     setSearched(true);
     setPharmacies([]);
     setSelectedId(null);
     setLocationError(null);
+    setSearchCity(city);
+  };
+
+  const loadNearby = async () => {
+    setIsLocating(true);
+    resetForNewSearch(undefined);
     try {
       const { lat, lng } = await getUserLocation();
       setUserLocation({ lat, lng });
-      setPharmacies(await fetchNearbyByLocation(lat, lng, 20, 200));
-      setSearchCity(undefined);
+      setPharmacies(await fetchNearbyByLocation(lat, lng, NEARBY_RADIUS_KM, NEARBY_LIMIT));
     } catch (err) {
-      const msg =
-        typeof err === 'object' && err !== null && 'code' in err && 'PERMISSION_DENIED' in (err as object)
-          ? 'Brak zgody na dostęp do lokalizacji'
-          : err instanceof Error ? err.message : 'Nie udało się pobrać lokalizacji';
-      setLocationError(msg);
+      setLocationError(locationErrorMessage(err));
     } finally {
       setIsLoading(false);
       setIsLocating(false);
     }
   };
 
-  // ── City / address search ──────────────────────────────────────────────────
-
   const handleSearch = async (query: string) => {
-    const q = query.trim();
-    if (!q) return;
-    setIsLoading(true);
-    setSearched(true);
-    setPharmacies([]);
-    setSelectedId(null);
-    setSearchCity(q);
-    setLocationError(null);
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    resetForNewSearch(trimmed);
+
     try {
-      // Geocode city → derive a bbox, then fetch both by name (catches ungeocoded
-      // entries like Ząbki) and by coordinates (catches border pharmacies registered
-      // under a neighbouring city).
-      const center = await geocodeAddress(`${q}, Poland`);
-      const tasks: Promise<Pharmacy[]>[] = [searchPharmacies(q)];
-      if (center) {
-        const dLat = 0.05;
-        const dLng = 0.05 / Math.cos((center.lat * Math.PI) / 180);
-        tasks.push(fetchPharmaciesInBounds({
-          north: center.lat + dLat, south: center.lat - dLat,
-          east:  center.lng + dLng, west:  center.lng - dLng,
-        }));
-      }
+      const center = await geocodeAddress(`${trimmed}, Poland`);
+      const tasks: Promise<Pharmacy[]>[] = [searchPharmacies(trimmed)];
+      if (center) tasks.push(fetchPharmaciesInBounds(bboxAround(center)));
       setPharmacies(mergePharmacies(...await Promise.all(tasks)));
     } catch {
-      setPharmacies(await searchPharmacies(q));
+      setPharmacies(await searchPharmacies(trimmed));
     } finally {
       setIsLoading(false);
     }
   };
 
-  // ── "Search in this area" button ───────────────────────────────────────────
-  // Strictly fetches only geocoded pharmacies whose coordinates lie within the
-  // current viewport bounding box — no city-wide dumps, no fallbacks.
-
   const handleLoadInArea = async (bounds: MapBounds) => {
-    setIsLoading(true);
-    setSearched(true);
-    setPharmacies([]);
-    setSelectedId(null);
-    setLocationError(null);
+    resetForNewSearch(undefined);
     try {
       const inBounds = await fetchPharmaciesInBounds(bounds);
       if (inBounds.length > 0) {
-        setSearchCity(undefined);
         setPharmacies(inBounds);
+        return;
+      }
+
+      const centerLat = (bounds.north + bounds.south) / 2;
+      const centerLng = (bounds.east  + bounds.west)  / 2;
+      const city = await reverseGeocode(centerLat, centerLng);
+      if (city) {
+        setSearchCity(city);
+        setPharmacies(await searchPharmacies(city));
       } else {
-        // No geocoded pharmacies yet — fall back to city name search.
-        const centerLat = (bounds.north + bounds.south) / 2;
-        const centerLng = (bounds.east + bounds.west) / 2;
-        const city = await reverseGeocode(centerLat, centerLng);
-        if (city) {
-          setSearchCity(city);
-          setPharmacies(await searchPharmacies(city));
-        } else {
-          setLocationError('Nie udało się rozpoznać miasta dla tego obszaru — spróbuj wpisać nazwę ręcznie');
-        }
+        setLocationError('Nie udało się rozpoznać miasta dla tego obszaru — spróbuj wpisać nazwę ręcznie');
       }
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');
@@ -139,21 +143,18 @@ const PharmaciesPage = () => {
     }
   };
 
-  // ── Visible pharmacies (forwarded from map component) ─────────────────────
-
   const handleVisibleChange = useCallback((visible: Pharmacy[]) => {
     setVisiblePharmacies(visible);
   }, []);
 
-  // Falls back to the full set only during the brief window before the map
-  // reports its first bounds (prevents a flash of empty list on load).
+  const handleSelect = useCallback((id: string) => {
+    setSelectedId(prev => (prev === id ? null : id));
+  }, []);
+
   const listPharmacies = visiblePharmacies.length > 0 || pharmacies.length === 0
     ? visiblePharmacies
     : pharmacies;
-
   const openCount = listPharmacies.filter(p => p.isOpen).length;
-
-  // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <AppLayout title="Najbliższe apteki" subtitle="Znajdź aptekę w swojej okolicy">
@@ -165,16 +166,14 @@ const PharmaciesPage = () => {
         className="mb-4 max-w-lg"
       />
 
-      {locationError && (
-        <p className="mb-4 text-xs text-amber-600">{locationError}</p>
-      )}
+      {locationError && <p className="mb-4 text-xs text-amber-600">{locationError}</p>}
 
       {searched && !isLoading && listPharmacies.length > 0 && (
         <p className="text-xs text-slate-400 mb-4">
           {searchCity
             ? `Znaleziono ${listPharmacies.length} aptek w "${searchCity}"`
-            : `Widocznych aptek: ${listPharmacies.length}`
-          }{' '}· {openCount} otwartych
+            : `Widocznych aptek: ${listPharmacies.length}`}
+          {' '}· {openCount} otwartych
         </p>
       )}
 
@@ -182,7 +181,7 @@ const PharmaciesPage = () => {
         <PharmacyMapView
           pharmacies={pharmacies}
           selectedId={selectedId}
-          onSelect={id => setSelectedId(prev => prev === id ? null : id)}
+          onSelect={handleSelect}
           onLoadInArea={handleLoadInArea}
           onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
@@ -190,15 +189,7 @@ const PharmaciesPage = () => {
           className="h-[52dvh] min-h-[300px] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
         />
 
-        {/*
-          Mobile: fixed height + internal scroll so the list doesn't push the map
-          off-screen and the user can swipe through results without scrolling the page.
-          Desktop: fills the remaining flex height via lg:overflow-y-auto on a stretched item.
-        */}
-        <div className="
-          h-[38dvh] overflow-y-auto overscroll-contain space-y-3 pb-2
-          lg:h-auto lg:w-80 lg:overflow-y-auto lg:pr-1
-        ">
+        <div className="h-[38dvh] overflow-y-auto overscroll-contain space-y-3 pb-2 lg:h-auto lg:w-80 lg:overflow-y-auto lg:pr-1 scroll-smooth">
           {isLoading ? (
             <div className="flex justify-center py-12"><Spinner size="lg" /></div>
           ) : !searched ? (
@@ -217,9 +208,10 @@ const PharmaciesPage = () => {
             listPharmacies.map(p => (
               <PharmacyCard
                 key={p.id}
+                ref={registerCard(p.id)}
                 pharmacy={p}
                 selected={selectedId === p.id}
-                onClick={() => setSelectedId(prev => prev === p.id ? null : p.id)}
+                onClick={() => handleSelect(p.id)}
               />
             ))
           )}

@@ -4,8 +4,6 @@ import type { ApiRecipe, ApiDrug } from '../types/api';
 import { mockPrescriptions } from '../data/mockPrescriptions';
 import { API_BASE_URL } from '../config/api';
 
-/* ---- helpers ---- */
-
 const STATUS_MAP: Record<string, PrescriptionStatus> = {
   AKTYWNA: 'AKTYWNA',
   ZREALIZOWANA: 'ZREALIZOWANA',
@@ -14,12 +12,14 @@ const STATUS_MAP: Record<string, PrescriptionStatus> = {
   ANULOWANA: 'ANULOWANA',
 };
 
+const DAY_MS         = 1000 * 60 * 60 * 24;
+const ISSUE_GAP_DAYS = 7;
+const VALIDITY_DAYS  = 30;
+
 function parseQuantityStr(raw: string): { quantity: number; unit: string } {
   const match = raw.match(/^(\d+)\s*(.*)$/);
-  if (match) {
-    return { quantity: parseInt(match[1], 10), unit: match[2].trim() || 'szt.' };
-  }
-  return { quantity: 1, unit: raw };
+  if (!match) return { quantity: 1, unit: raw };
+  return { quantity: parseInt(match[1], 10), unit: match[2].trim() || 'szt.' };
 }
 
 function drugRealizationStatus(recipeStatus: string): DrugRealizationStatus {
@@ -40,30 +40,24 @@ function mapDrug(apiDrug: ApiDrug, index: number, recipeStatus: string): Drug {
   };
 }
 
-function mapRecipe(recipe: ApiRecipe, index: number): Prescription {
-  const status: PrescriptionStatus = STATUS_MAP[recipe.status] ?? 'ARCHIWALNA';
+const isoDate = (date: Date) => date.toISOString().split('T')[0];
 
-  // Generate plausible dates since backend doesn't provide them
-  const today = new Date();
-  const issued = new Date(today);
-  issued.setDate(today.getDate() - 7 * (index + 1));
-  const expires = new Date(issued);
-  expires.setDate(issued.getDate() + 30);
+function mapRecipe(recipe: ApiRecipe, index: number): Prescription {
+  const issued  = new Date(Date.now() - ISSUE_GAP_DAYS * (index + 1) * DAY_MS);
+  const expires = new Date(issued.getTime() + VALIDITY_DAYS * DAY_MS);
 
   return {
     id: recipe.accessCode,
     number: recipe.accessCode,
-    issueDate: issued.toISOString().split('T')[0],
-    expiryDate: expires.toISOString().split('T')[0],
-    status,
+    issueDate: isoDate(issued),
+    expiryDate: isoDate(expires),
+    status: STATUS_MAP[recipe.status] ?? 'ARCHIWALNA',
     doctorName: 'Lekarz prowadzący',
     doctorSpecialty: 'Medycyna ogólna',
     patientPesel: recipe.pesel,
     drugs: recipe.drugs.map((d, i) => mapDrug(d, i, recipe.status)),
   };
 }
-
-/* ---- public API ---- */
 
 export const fetchPrescriptions = async (pesel: string): Promise<Prescription[]> => {
   try {

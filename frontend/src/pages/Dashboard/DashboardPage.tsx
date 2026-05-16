@@ -9,7 +9,6 @@ import { useAuth } from '../../context/AuthContext';
 import { fetchPrescriptions } from '../../services/prescriptionService';
 import type { Prescription } from '../../types/prescription';
 
-
 interface StatCardProps {
   to: string;
   icon: React.ReactNode;
@@ -58,7 +57,6 @@ const DashboardPage = () => {
       title={`Dzień dobry, ${user?.firstName ?? ''}!`}
       subtitle="Oto Twoje podsumowanie"
     >
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
         <StatCard
           to="/recepty/aktywne"
@@ -88,7 +86,6 @@ const DashboardPage = () => {
         </Link>
       </div>
 
-      {/* Recent prescriptions */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider">

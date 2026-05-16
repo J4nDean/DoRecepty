@@ -12,8 +12,6 @@ import MapPlaceholder from './MapPlaceholder';
 import { updatePharmacyLocation } from '../services/pharmacyService';
 import type { Pharmacy } from '../types/pharmacy';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type LatLng    = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
 
@@ -38,41 +36,37 @@ declare global {
   }
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
 const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
+const DEFAULT_ZOOM             = 13;
+const GEOCODE_BATCH_LIMIT      = 25;
 
-// Selected-pharmacy pin: medium green body, deep-green border, dark-green centre dot.
-// Colours mirror the default red pin's visual weight — same saturation/lightness ratio,
-// just shifted to the green hue family (no neon, no pastels).
-//   background  #43A047  ≈ Green 600  (matches #DB4437 red luminance)
-//   borderColor #1B5E20  ≈ Green 900  (matches the dark-red border on the default pin)
-//   glyphColor  #1B5E20  ≈ Green 900  (elegant dark-green centre dot)
 const SELECTED_PIN = {
   background:  '#43A047',
   borderColor: '#1B5E20',
   glyphColor:  '#1B5E20',
 } as const;
 
-// ─── MapPanner ────────────────────────────────────────────────────────────────
+const isGeocoded = (p: Pharmacy): p is Pharmacy & { latitude: number; longitude: number } =>
+  typeof p.latitude === 'number' && typeof p.longitude === 'number';
+
+const inBounds = (lat: number, lng: number, b: MapBounds) =>
+  lat >= b.south && lat <= b.north && lng >= b.west && lng <= b.east;
 
 const MapPanner = ({ center }: { center: LatLng }) => {
   const map = useMap();
-  useEffect(() => { if (map) map.panTo(center); }, [map, center]);
+  useEffect(() => { map?.panTo(center); }, [map, center]);
   return null;
 };
 
-// ─── MapContent ───────────────────────────────────────────────────────────────
-
 interface MapContentProps {
-  pharmacies:      Pharmacy[];
-  selectedId?:     string | null;
-  onSelect?:       (id: string) => void;
-  onLoadInArea?:   (bounds: MapBounds) => void;
+  pharmacies:       Pharmacy[];
+  selectedId?:      string | null;
+  onSelect?:        (id: string) => void;
+  onLoadInArea?:    (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
-  userLocation?:   LatLng | null;
-  searchCity?:     string;
-  className:       string;
+  userLocation?:    LatLng | null;
+  searchCity?:      string;
+  className:        string;
 }
 
 const MapContent = ({
@@ -88,43 +82,42 @@ const MapContent = ({
   const isLoaded = useApiIsLoaded();
   const [center,    setCenter]    = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
-
-  // Local copy augmented with coordinates the client-side geocoder resolves.
   const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
 
   const onVisibleChangeRef = useRef(onVisibleChange);
   useEffect(() => { onVisibleChangeRef.current = onVisibleChange; });
 
-  // Replace displayed when parent supplies new pharmacies (new search).
   useEffect(() => { setDisplayed(pharmacies); }, [pharmacies]);
 
-  // Follow user location.
   useEffect(() => { if (userLocation) setCenter(userLocation); }, [userLocation]);
 
-  // Pan to selected pharmacy.
   useEffect(() => {
-    const sel = displayed.find(p => p.id === selectedId);
-    if (sel?.latitude && sel?.longitude) setCenter({ lat: sel.latitude, lng: sel.longitude });
+    const selected = displayed.find(p => p.id === selectedId);
+    if (selected && isGeocoded(selected)) {
+      setCenter({ lat: selected.latitude, lng: selected.longitude });
+    }
   }, [selectedId, displayed]);
 
-  // Pan map when user performs a city search.
   useEffect(() => {
     if (!isLoaded || !searchCity) return;
     new window.google.maps.Geocoder().geocode(
       { address: `${searchCity}, Poland` },
       (results, status) => {
-        if (status === 'OK' && results?.[0])
-          setCenter({ lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() });
+        if (status === 'OK' && results?.[0]) {
+          setCenter({
+            lat: results[0].geometry.location.lat(),
+            lng: results[0].geometry.location.lng(),
+          });
+        }
       },
     );
   }, [isLoaded, searchCity]);
 
-  // Geocode up to 25 pharmacies that lack coordinates in the DB.
-  // Resolved coordinates are saved back so the next bounds query returns them.
   useEffect(() => {
     if (!isLoaded) return;
-    const missing = pharmacies.filter(p => !p.latitude || !p.longitude).slice(0, 25);
+    const missing = pharmacies.filter(p => !isGeocoded(p)).slice(0, GEOCODE_BATCH_LIMIT);
     if (!missing.length) return;
+
     const geocoder = new window.google.maps.Geocoder();
     missing.forEach(pharmacy => {
       geocoder.geocode(
@@ -133,46 +126,39 @@ const MapContent = ({
           if (status !== 'OK' || !results?.[0]) return;
           const lat = results[0].geometry.location.lat();
           const lng = results[0].geometry.location.lng();
-          setDisplayed(prev => prev.map(p => p.id === pharmacy.id ? { ...p, latitude: lat, longitude: lng } : p));
+          setDisplayed(prev => prev.map(p =>
+            p.id === pharmacy.id ? { ...p, latitude: lat, longitude: lng } : p,
+          ));
           updatePharmacyLocation(pharmacy.name, pharmacy.address, pharmacy.city, lat, lng);
         },
       );
     });
   }, [isLoaded, pharmacies]);
 
-  // Only geocoded pharmacies inside the current viewport get rendered and listed.
   const visibleDisplayed = useMemo(() => {
-    const geocoded = displayed.filter(
-      (p): p is Pharmacy & { latitude: number; longitude: number } =>
-        typeof p.latitude === 'number' && typeof p.longitude === 'number',
-    );
-    if (!mapBounds) return geocoded;
-    return geocoded.filter(
-      p => p.latitude  >= mapBounds.south && p.latitude  <= mapBounds.north
-        && p.longitude >= mapBounds.west  && p.longitude <= mapBounds.east,
-    );
+    const geocoded = displayed.filter(isGeocoded);
+    return mapBounds
+      ? geocoded.filter(p => inBounds(p.latitude, p.longitude, mapBounds))
+      : geocoded;
   }, [displayed, mapBounds]);
 
-  useEffect(() => { onVisibleChangeRef.current?.(visibleDisplayed); }, [visibleDisplayed]);
+  useEffect(() => {
+    onVisibleChangeRef.current?.(visibleDisplayed);
+  }, [visibleDisplayed]);
 
   const handleCameraChanged = useCallback((ev: { detail: { bounds?: MapBounds } }) => {
     if (ev.detail.bounds) setMapBounds(ev.detail.bounds);
   }, []);
 
-  // Button fires a strict bounds query — no city-name lookups, no extra API calls.
   const handleSearchArea = useCallback(() => {
     if (mapBounds) onLoadInArea?.(mapBounds);
   }, [mapBounds, onLoadInArea]);
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      {/*
-        mapId="DEMO_MAP_ID" enables AdvancedMarker.
-        Replace with a Cloud-Console-configured Map ID for production.
-      */}
       <Map
         defaultCenter={center}
-        defaultZoom={13}
+        defaultZoom={DEFAULT_ZOOM}
         mapId="DEMO_MAP_ID"
         gestureHandling="greedy"
         onCameraChanged={handleCameraChanged}
@@ -184,10 +170,7 @@ const MapContent = ({
             title={p.name}
             onClick={() => onSelect?.(p.id)}
           >
-            {p.id === selectedId
-              ? <Pin {...SELECTED_PIN} scale={1.2} />
-              : <Pin />
-            }
+            {p.id === selectedId ? <Pin {...SELECTED_PIN} scale={1.2} /> : <Pin />}
           </AdvancedMarker>
         ))}
 
@@ -215,8 +198,6 @@ const MapContent = ({
   );
 };
 
-// ─── Public API ───────────────────────────────────────────────────────────────
-
 export interface PharmacyMapViewProps {
   pharmacies?:      Pharmacy[];
   selectedId?:      string | null;
@@ -239,7 +220,9 @@ const PharmacyMapView = ({
   className = '',
 }: PharmacyMapViewProps) => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
-  if (!apiKey) return <MapPlaceholder className={className} message="Brak klucza VITE_GOOGLE_MAPS_API_KEY" />;
+  if (!apiKey) {
+    return <MapPlaceholder className={className} message="Brak klucza VITE_GOOGLE_MAPS_API_KEY" />;
+  }
 
   return (
     <APIProvider apiKey={apiKey}>

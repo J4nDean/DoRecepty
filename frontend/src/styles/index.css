@@ -36,18 +36,15 @@ body {
   overflow-x: hidden;
 }
 
-/* Focus ring for keyboard navigation */
 :focus-visible {
   outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
-/* Mobile safe area for bottom nav */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 5px;
   height: 5px;

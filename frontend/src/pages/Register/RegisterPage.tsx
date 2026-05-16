@@ -90,7 +90,6 @@ const RegisterPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="flex items-center gap-2 mb-8">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <Stethoscope size={16} className="text-white" />
@@ -107,7 +106,6 @@ const RegisterPage = () => {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-            {/* Name row */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label
@@ -151,7 +149,6 @@ const RegisterPage = () => {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -173,7 +170,6 @@ const RegisterPage = () => {
               )}
             </div>
 
-            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -205,7 +201,6 @@ const RegisterPage = () => {
               )}
             </div>
 
-            {/* Confirm password */}
             <div>
               <label
                 htmlFor="confirmPassword"

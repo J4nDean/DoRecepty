@@ -26,8 +26,7 @@ export const Header = ({ title, subtitle }: HeaderProps) => {
         <div className="hidden md:flex items-center gap-2 pl-1">
           <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
             <span className="text-xs font-bold text-blue-700">
-              {user?.firstName?.[0]}
-              {user?.lastName?.[0]}
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
             </span>
           </div>
         </div>

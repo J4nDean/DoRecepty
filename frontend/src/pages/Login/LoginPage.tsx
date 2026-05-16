@@ -29,7 +29,6 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
-      {/* Left panel */}
       <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-[#1B3A6B] flex-col justify-between p-10 lg:p-14">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
@@ -70,10 +69,8 @@ const LoginPage = () => {
         <p className="text-blue-400 text-xs">© 2025 finder·rx</p>
       </div>
 
-      {/* Right panel — form */}
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
-          {/* Mobile logo */}
           <div className="flex items-center gap-2 mb-10 md:hidden">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <Stethoscope size={16} className="text-white" />

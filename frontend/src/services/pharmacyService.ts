@@ -4,19 +4,30 @@ import type { ApiPharmacy } from '../types/api';
 import { mockPharmacies } from '../data/mockPharmacies';
 import { API_BASE_URL } from '../config/api';
 
-/* ---- helpers ---- */
+type HourRange = { open: number; close: number };
+type Bounds = { north: number; south: number; east: number; west: number };
 
-function parseOpeningHours(hoursStr: string | null | undefined): { open: number; close: number } | null {
+const HOURS_RE       = /(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/;
+const ALWAYS_OPEN_RE = /całodobowo|całą dobę|całodobow[ae]|24\s*h\b|00:00\s*[-–]\s*24:00/i;
+const MINUTES_PER_HOUR = 60;
+
+function parseOpeningHours(hoursStr: string | null | undefined): HourRange | null {
   if (!hoursStr) return null;
-  // Match first "HH:MM - HH:MM" pattern (supports - and – separators)
-  const match = hoursStr.match(/(\d{1,2}):(\d{2})\s*[-–]\s*(\d{1,2}):(\d{2})/);
+  const match = hoursStr.match(HOURS_RE);
   if (!match) return null;
-  const open = parseInt(match[1], 10) * 60 + parseInt(match[2], 10);
-  const close = parseInt(match[3], 10) * 60 + parseInt(match[4], 10);
-  return { open, close };
+  const [, openH, openM, closeH, closeM] = match;
+  return {
+    open:  parseInt(openH, 10)  * MINUTES_PER_HOUR + parseInt(openM, 10),
+    close: parseInt(closeH, 10) * MINUTES_PER_HOUR + parseInt(closeM, 10),
+  };
 }
 
-const ALWAYS_OPEN_RE = /całodobowo|całą dobę|całodobow[ae]|24\s*h\b|00:00\s*[-–]\s*24:00/i;
+function todaysHours(api: ApiPharmacy): string | null | undefined {
+  const day = new Date().getDay();
+  if (day === 0) return api.openingHoursSunday;
+  if (day === 6) return api.openingHoursSaturday;
+  return api.openingHoursWeekdays;
+}
 
 function isOpenNow(api: ApiPharmacy): boolean {
   if (api.status && api.status !== 'AKTYWNA') return false;
@@ -24,55 +35,49 @@ function isOpenNow(api: ApiPharmacy): boolean {
   const allHours = [api.openingHoursWeekdays, api.openingHoursSaturday, api.openingHoursSunday];
   if (allHours.some(h => h && ALWAYS_OPEN_RE.test(h))) return true;
 
-  const now = new Date();
-  const day = now.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-  let hoursStr: string | null | undefined;
-  if (day === 0) hoursStr = api.openingHoursSunday;
-  else if (day === 6) hoursStr = api.openingHoursSaturday;
-  else hoursStr = api.openingHoursWeekdays;
-
-  const hours = parseOpeningHours(hoursStr);
+  const hours = parseOpeningHours(todaysHours(api));
   if (!hours) return false;
 
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
+  const now = new Date();
+  const nowMinutes = now.getHours() * MINUTES_PER_HOUR + now.getMinutes();
   return nowMinutes >= hours.open && nowMinutes < hours.close;
 }
 
 function mapApiPharmacy(api: ApiPharmacy): Pharmacy {
   return {
-    id: String(api.id),
-    name: api.name,
-    address: api.address,
-    city: api.city,
+    id:         String(api.id),
+    name:       api.name,
+    address:    api.address,
+    city:       api.city,
     postalCode: api.postalCode ?? '',
-    phone: api.phone ?? '',
+    phone:      api.phone ?? '',
     openingHours: {
       weekdays: api.openingHoursWeekdays || '08:00 – 20:00',
       saturday: api.openingHoursSaturday || '09:00 – 17:00',
-      sunday: api.openingHoursSunday || '10:00 – 16:00',
+      sunday:   api.openingHoursSunday   || '10:00 – 16:00',
     },
-    isOpen: isOpenNow(api),
-    latitude: api.latitude ?? undefined,
+    isOpen:    isOpenNow(api),
+    latitude:  api.latitude  ?? undefined,
     longitude: api.longitude ?? undefined,
   };
 }
 
-/* ---- public API ---- */
+async function getPharmacies(path: string): Promise<ApiPharmacy[]> {
+  const res = await axios.get<ApiPharmacy[]>(`${API_BASE_URL}${path}`);
+  return res.data;
+}
 
 export const searchPharmacies = async (city: string): Promise<Pharmacy[]> => {
   try {
-    const res = await axios.get<ApiPharmacy[]>(
-      `${API_BASE_URL}/pharmacies/search?city=${encodeURIComponent(city)}`,
-    );
-    return res.data.map(mapApiPharmacy);
+    const data = await getPharmacies(`/pharmacies/search?city=${encodeURIComponent(city)}`);
+    return data.map(mapApiPharmacy);
   } catch {
     return mockPharmacies;
   }
 };
 
-export const fetchNearbyPharmacies = async (city = 'Warszawa'): Promise<Pharmacy[]> => {
-  return searchPharmacies(city);
-};
+export const fetchNearbyPharmacies = (city = 'Warszawa'): Promise<Pharmacy[]> =>
+  searchPharmacies(city);
 
 export const fetchNearbyByLocation = async (
   lat: number,
@@ -80,38 +85,32 @@ export const fetchNearbyByLocation = async (
   radiusKm = 10,
   limit = 20,
 ): Promise<Pharmacy[]> => {
-  const res = await axios.get<ApiPharmacy[]>(
-    `${API_BASE_URL}/pharmacies/nearby?lat=${lat}&lng=${lng}&radiusKm=${radiusKm}&limit=${limit}`,
+  const data = await getPharmacies(
+    `/pharmacies/nearby?lat=${lat}&lng=${lng}&radiusKm=${radiusKm}&limit=${limit}`,
   );
-  return res.data.map(mapApiPharmacy);
+  return data.map(mapApiPharmacy);
 };
 
-export const fetchPharmaciesInBounds = async (bounds: {
-  north: number;
-  south: number;
-  east: number;
-  west: number;
-}): Promise<Pharmacy[]> => {
+export const fetchPharmaciesInBounds = async (bounds: Bounds): Promise<Pharmacy[]> => {
   const { north, south, east, west } = bounds;
-  const res = await axios.get<ApiPharmacy[]>(
-    `${API_BASE_URL}/pharmacies/in-bounds?north=${north}&south=${south}&east=${east}&west=${west}`,
+  const data = await getPharmacies(
+    `/pharmacies/in-bounds?north=${north}&south=${south}&east=${east}&west=${west}`,
   );
-  return res.data.map(mapApiPharmacy);
+  return data.map(mapApiPharmacy);
 };
 
-export const getUserLocation = (): Promise<{ lat: number; lng: number }> => {
-  return new Promise((resolve, reject) => {
+export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
+  new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
       reject(new Error('Przeglądarka nie wspiera geolokalizacji'));
       return;
     }
     navigator.geolocation.getCurrentPosition(
       pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
-      err => reject(err),
+      reject,
       { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
     );
   });
-};
 
 export const updatePharmacyLocation = async (
   name: string,
@@ -122,13 +121,9 @@ export const updatePharmacyLocation = async (
 ): Promise<void> => {
   try {
     await axios.post(`${API_BASE_URL}/pharmacies/update-location`, {
-      name,
-      address,
-      city,
-      latitude,
-      longitude,
+      name, address, city, latitude, longitude,
     });
-  } catch {
-    /* silent — geocoding is best-effort */
+  } catch (_) {
+    void _;
   }
 };

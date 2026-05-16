@@ -22,8 +22,6 @@ import { statusLabel, statusColor } from '../../utils/prescriptionUtils';
 import type { Prescription, DrugRealizationStatus } from '../../types/prescription';
 import type { Pharmacy, DrugAvailabilityStatus } from '../../types/pharmacy';
 
-/* ---- Sub-components ---- */
-
 const realizationConfig: Record<
   DrugRealizationStatus,
   { label: string; cls: string; icon: React.ReactNode }
@@ -120,8 +118,6 @@ const PharmacyAvailabilityCard = ({
   </div>
 );
 
-/* ---- Page ---- */
-
 const PrescriptionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -176,7 +172,6 @@ const PrescriptionDetailPage = () => {
 
   return (
     <AppLayout title="Szczegóły recepty" subtitle={`Nr ${prescription.number}`}>
-      {/* Back */}
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 mb-6 transition-colors"
@@ -186,9 +181,7 @@ const PrescriptionDetailPage = () => {
       </button>
 
       <div className="grid lg:grid-cols-5 gap-6">
-        {/* ---- Left column (3/5) ---- */}
         <div className="lg:col-span-3 space-y-5">
-          {/* Header card */}
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
             <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
               <div>
@@ -234,7 +227,6 @@ const PrescriptionDetailPage = () => {
             </div>
           </div>
 
-          {/* Drug list */}
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
             <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
               <Pill size={16} className="text-blue-500" />
@@ -259,7 +251,6 @@ const PrescriptionDetailPage = () => {
             </div>
           </div>
 
-          {/* Map */}
           <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6">
             <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
               <MapPin size={16} className="text-blue-500" />
@@ -274,7 +265,6 @@ const PrescriptionDetailPage = () => {
           </div>
         </div>
 
-        {/* ---- Right column (2/5) ---- */}
         <div className="lg:col-span-2">
           <h2 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
             <MapPin size={16} className="text-blue-500" />

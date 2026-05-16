@@ -1,5 +1,3 @@
-/* Raw shapes returned by the backend — used only in service layer for mapping */
-
 export interface ApiDrug {
   id: number | null;
   name: string;
