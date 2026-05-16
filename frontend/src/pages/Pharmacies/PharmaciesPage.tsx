@@ -106,17 +106,29 @@ const PharmaciesPage = () => {
     }
   };
 
-  const handleLoadInArea = async (bounds: MapBounds) => {
+  const handleLoadInArea = async (bounds: MapBounds, cities: string[]) => {
     setIsLoading(true);
     setSearched(true);
     setSelectedId(null);
     setSearchCity(undefined);
     setLocationError(null);
     try {
-      // Pure coordinate search — no city detection. Returns only pharmacies whose
-      // lat/lng lie inside the current viewport, regardless of administrative city.
-      const results = await fetchPharmaciesInBounds(bounds);
-      setPharmacies(results);
+      // Bounds query → strict geocoded-in-viewport set.
+      // City queries → bring ungeocoded pharmacies for every city detected in the viewport
+      //   into the state so the client-side geocoder can place them. The visible-list
+      //   filter is strict (only lat/lng inside bounds), so off-area entries never reach
+      //   the user — they sit silently in state until geocoded.
+      const [inBounds, ...byCities] = await Promise.all([
+        fetchPharmaciesInBounds(bounds),
+        ...cities.map(c => searchPharmacies(c)),
+      ]);
+      const merged = new Map<string, Pharmacy>();
+      inBounds.forEach(p => merged.set(p.id, p));
+      byCities.flat().forEach(p => {
+        const existing = merged.get(p.id);
+        if (!existing || (!existing.latitude && p.latitude)) merged.set(p.id, p);
+      });
+      setPharmacies([...merged.values()]);
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');
     } finally {
@@ -167,7 +179,7 @@ const PharmaciesPage = () => {
           onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
           searchCity={searchCity}
-          className="h-[55vh] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:flex-1 rounded-none lg:rounded-xl"
+          className="h-[50vh] min-h-[320px] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
         />
 
         <div className="space-y-3 lg:w-80 lg:overflow-y-auto lg:pr-1">
