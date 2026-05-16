@@ -15,7 +15,7 @@ import {
 import { geocodeAddress } from '../../services/geocoding';
 import type { Pharmacy } from '../../types/pharmacy';
 
-type LatLng   = { lat: number; lng: number };
+type LatLng    = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
 
 // Merges pharmacy arrays, preferring entries that already have coordinates.
@@ -29,30 +29,30 @@ function mergePharmacies(...groups: Pharmacy[][]): Pharmacy[] {
 }
 
 const PharmaciesPage = () => {
-  const [pharmacies,       setPharmacies]       = useState<Pharmacy[]>([]);
+  const [pharmacies,        setPharmacies]        = useState<Pharmacy[]>([]);
   const [visiblePharmacies, setVisiblePharmacies] = useState<Pharmacy[]>([]);
-  const [selectedId,       setSelectedId]       = useState<string | null>(null);
-  const [searchCity,       setSearchCity]       = useState<string | undefined>(undefined);
-  const [isLoading,        setIsLoading]        = useState(false);
-  const [searched,         setSearched]         = useState(false);
-  const [isLocating,       setIsLocating]       = useState(false);
-  const [locationError,    setLocationError]    = useState<string | null>(null);
-  const [userLocation,     setUserLocation]     = useState<LatLng | null>(null);
+  const [selectedId,        setSelectedId]        = useState<string | null>(null);
+  const [searchCity,        setSearchCity]        = useState<string | undefined>(undefined);
+  const [isLoading,         setIsLoading]         = useState(false);
+  const [searched,          setSearched]          = useState(false);
+  const [isLocating,        setIsLocating]        = useState(false);
+  const [locationError,     setLocationError]     = useState<string | null>(null);
+  const [userLocation,      setUserLocation]      = useState<LatLng | null>(null);
 
-  // On mount: centre the map on the user without loading any pharmacies.
+  // Centre the map on mount — don't load any pharmacies yet.
   useEffect(() => {
     getUserLocation()
       .then(setUserLocation)
       .catch(() => { /* denied — map shows default centre */ });
   }, []);
 
-  // ── Locate nearby ──────────────────────────────────────────────────────────
+  // ── Locate nearby (GPS button) ─────────────────────────────────────────────
 
   const loadNearby = async () => {
     setIsLocating(true);
     setIsLoading(true);
     setSearched(true);
-    setPharmacies([]);       // clear old pins immediately
+    setPharmacies([]);
     setSelectedId(null);
     setLocationError(null);
     try {
@@ -72,21 +72,21 @@ const PharmaciesPage = () => {
     }
   };
 
-  // ── City search ────────────────────────────────────────────────────────────
+  // ── City / address search ──────────────────────────────────────────────────
 
   const handleSearch = async (query: string) => {
     const q = query.trim();
     if (!q) return;
     setIsLoading(true);
     setSearched(true);
-    setPharmacies([]);       // clear old pins immediately
+    setPharmacies([]);
     setSelectedId(null);
     setSearchCity(q);
     setLocationError(null);
     try {
-      // Geocode the city to get a bbox, then fetch both by name and by coordinates.
-      // This ensures pharmacies near administrative boundaries (e.g. Warsaw/Ząbki)
-      // are included even when their registered city differs from the search term.
+      // Geocode city → derive a bbox, then fetch both by name (catches ungeocoded
+      // entries like Ząbki) and by coordinates (catches border pharmacies registered
+      // under a neighbouring city).
       const center = await geocodeAddress(`${q}, Poland`);
       const tasks: Promise<Pharmacy[]>[] = [searchPharmacies(q)];
       if (center) {
@@ -106,24 +106,18 @@ const PharmaciesPage = () => {
   };
 
   // ── "Search in this area" button ───────────────────────────────────────────
+  // Strictly fetches only geocoded pharmacies whose coordinates lie within the
+  // current viewport bounding box — no city-wide dumps, no fallbacks.
 
-  const handleLoadInArea = async (bounds: MapBounds, cities: string[]) => {
+  const handleLoadInArea = async (bounds: MapBounds) => {
     setIsLoading(true);
     setSearched(true);
-    setPharmacies([]);       // clear old pins immediately
+    setPharmacies([]);
     setSelectedId(null);
     setSearchCity(undefined);
     setLocationError(null);
     try {
-      // Fetch geocoded pharmacies that are physically inside the viewport, plus
-      // ungeocoded pharmacies from every city detected in the viewport (so the
-      // client-side geocoder can place them; the visible filter ensures only
-      // in-bounds entries reach the list).
-      const [inBounds, ...byCities] = await Promise.all([
-        fetchPharmaciesInBounds(bounds),
-        ...cities.map(c => searchPharmacies(c)),
-      ]);
-      setPharmacies(mergePharmacies(inBounds, ...byCities));
+      setPharmacies(await fetchPharmaciesInBounds(bounds));
     } catch {
       setLocationError('Nie udało się pobrać aptek dla tego obszaru');
     } finally {
@@ -131,14 +125,14 @@ const PharmaciesPage = () => {
     }
   };
 
-  // ── Visible list ───────────────────────────────────────────────────────────
+  // ── Visible pharmacies (forwarded from map component) ─────────────────────
 
   const handleVisibleChange = useCallback((visible: Pharmacy[]) => {
     setVisiblePharmacies(visible);
   }, []);
 
-  // The list shows only pharmacies confirmed to be inside the viewport.
-  // Falls back to the full set while the map is still computing bounds on first load.
+  // Falls back to the full set only during the brief window before the map
+  // reports its first bounds (prevents a flash of empty list on load).
   const listPharmacies = visiblePharmacies.length > 0 || pharmacies.length === 0
     ? visiblePharmacies
     : pharmacies;
@@ -179,10 +173,18 @@ const PharmaciesPage = () => {
           onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
           searchCity={searchCity}
-          className="h-[50vh] min-h-[320px] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
+          className="h-[52dvh] min-h-[300px] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
         />
 
-        <div className="space-y-3 lg:w-80 lg:overflow-y-auto lg:pr-1">
+        {/*
+          Mobile: fixed height + internal scroll so the list doesn't push the map
+          off-screen and the user can swipe through results without scrolling the page.
+          Desktop: fills the remaining flex height via lg:overflow-y-auto on a stretched item.
+        */}
+        <div className="
+          h-[38dvh] overflow-y-auto overscroll-contain space-y-3 pb-2
+          lg:h-auto lg:w-80 lg:overflow-y-auto lg:pr-1
+        ">
           {isLoading ? (
             <div className="flex justify-center py-12"><Spinner size="lg" /></div>
           ) : !searched ? (
