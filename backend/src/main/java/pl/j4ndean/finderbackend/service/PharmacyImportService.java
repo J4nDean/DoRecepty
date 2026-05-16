@@ -60,7 +60,8 @@ public class PharmacyImportService {
                 "miejscowosc, kod_pocztowy, telefon, " +
                 "godziny_otwarcia_poniedzialek, godziny_otwarcia_sobota, " +
                 "godziny_otwarcia_niedziela_niehandlowa " +
-                "FROM apteki WHERE stan_apteki = 'AKTYWNA'"
+                "FROM apteki WHERE stan_apteki = 'AKTYWNA' " +
+                "AND rodzaj_apteki IN ('APTEKA OGÓLNODOSTĘPNA', 'PUNKT APTECZNY')"
         );
 
         List<Pharmacy> pharmacies = new ArrayList<>(rows.size());
