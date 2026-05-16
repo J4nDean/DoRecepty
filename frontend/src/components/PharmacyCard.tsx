@@ -21,8 +21,8 @@ export const PharmacyCard = ({
       onClick ? 'cursor-pointer' : ''
     } ${
       selected
-        ? 'border-blue-400 shadow-md ring-1 ring-blue-100'
-        : 'border-slate-100 shadow-sm hover:border-blue-200 hover:shadow-md'
+        ? 'border-green-500 shadow-md ring-1 ring-green-100'
+        : 'border-slate-100 shadow-sm hover:border-green-300 hover:shadow-md'
     }`}
     aria-label={`${pharmacy.name}, ${pharmacy.isOpen ? 'otwarte' : 'zamknięte'}`}
   >
