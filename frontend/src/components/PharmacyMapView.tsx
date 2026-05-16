@@ -35,6 +35,8 @@ declare global {
   }
 }
 
+// Check sublocality first — it catches districts like Ząbki that Google sometimes
+// classifies as sublocality rather than locality.
 const reverseGeocodeCity = (lat: number, lng: number): Promise<string | undefined> =>
   new Promise(resolve => {
     if (!window.google?.maps?.Geocoder) {
@@ -51,7 +53,9 @@ const reverseGeocodeCity = (lat: number, lng: number): Promise<string | undefine
         const components = results.flatMap(r => r.address_components ?? []);
         resolve(
           components.find(c => c.types.includes('locality'))?.long_name ??
-            components.find(c => c.types.includes('administrative_area_level_3'))?.long_name,
+          components.find(c => c.types.includes('sublocality_level_1'))?.long_name ??
+          components.find(c => c.types.includes('sublocality'))?.long_name ??
+          components.find(c => c.types.includes('administrative_area_level_3'))?.long_name,
         );
       },
     );
@@ -72,6 +76,7 @@ interface MapContentProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -83,6 +88,7 @@ const MapContent = ({
   selectedId,
   onSelect,
   onLoadInArea,
+  onBoundsChange,
   onVisibleChange,
   userLocation,
   searchCity,
@@ -92,17 +98,34 @@ const MapContent = ({
   const [center, setCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
   const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
+
   const onVisibleChangeRef = useRef(onVisibleChange);
   useEffect(() => { onVisibleChangeRef.current = onVisibleChange; });
+
+  const onBoundsChangeRef = useRef(onBoundsChange);
+  useEffect(() => { onBoundsChangeRef.current = onBoundsChange; });
+
+  // Debounced auto-fetch on viewport change (700 ms quiet period).
+  // This fires automatically when the user pans or zooms so pharmacies are
+  // always loaded for the visible area without requiring a manual button click.
+  const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (!mapBounds) return;
+    if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
+    boundsDebounceRef.current = setTimeout(() => {
+      onBoundsChangeRef.current?.(mapBounds);
+    }, 700);
+    return () => {
+      if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
+    };
+  }, [mapBounds]);
 
   useEffect(() => {
     setDisplayed(pharmacies);
   }, [pharmacies]);
 
   useEffect(() => {
-    if (userLocation) {
-      setCenter(userLocation);
-    }
+    if (userLocation) setCenter(userLocation);
   }, [userLocation]);
 
   useEffect(() => {
@@ -118,11 +141,10 @@ const MapContent = ({
       { address: `${searchCity}, Poland` },
       (results, status) => {
         if (status === 'OK' && results?.[0]) {
-          const next = {
+          setCenter({
             lat: results[0].geometry.location.lat(),
             lng: results[0].geometry.location.lng(),
-          };
-          setCenter(next);
+          });
         }
       },
     );
@@ -150,9 +172,7 @@ const MapContent = ({
     });
   }, [isLoaded, pharmacies]);
 
-  // Filter to pharmacies with confirmed location within current viewport.
-  // Ungeocoded pharmacies are hidden until the async geocoder resolves them — once
-  // they get coordinates, they'll re-appear iff they fall within bounds.
+  // Only pharmacies with coordinates confirmed inside the viewport are visible.
   const visibleDisplayed = useMemo(() => {
     const geocoded = displayed.filter(
       (p): p is Pharmacy & { latitude: number; longitude: number } =>
@@ -172,9 +192,7 @@ const MapContent = ({
     onVisibleChangeRef.current?.(visibleDisplayed);
   }, [visibleDisplayed]);
 
-  const handleCameraChanged = (ev: {
-    detail: { bounds?: MapBounds };
-  }) => {
+  const handleCameraChanged = (ev: { detail: { bounds?: MapBounds } }) => {
     if (ev.detail.bounds) setMapBounds(ev.detail.bounds);
   };
 
@@ -187,16 +205,15 @@ const MapContent = ({
         disableDefaultUI={false}
         onCameraChanged={handleCameraChanged}
       >
-        {displayed.map(p =>
-          p.latitude && p.longitude ? (
-            <Marker
-              key={p.id}
-              position={{ lat: p.latitude, lng: p.longitude }}
-              title={p.name}
-              onClick={() => onSelect?.(p.id)}
-            />
-          ) : null,
-        )}
+        {/* Render only in-viewport pins to avoid cluttering the map. */}
+        {visibleDisplayed.map(p => (
+          <Marker
+            key={p.id}
+            position={{ lat: p.latitude, lng: p.longitude }}
+            title={p.name}
+            onClick={() => onSelect?.(p.id)}
+          />
+        ))}
         {userLocation && (
           <Marker
             position={userLocation}
@@ -219,13 +236,15 @@ const MapContent = ({
           type="button"
           onClick={async () => {
             if (!mapBounds) return;
+            // Sample edge-midpoints instead of corners — midpoints hit border areas
+            // more reliably when the viewport straddles two cities (e.g. Warszawa/Ząbki).
             const points = isLoaded
               ? [
                   { lat: (mapBounds.north + mapBounds.south) / 2, lng: (mapBounds.east + mapBounds.west) / 2 },
-                  { lat: mapBounds.north, lng: mapBounds.west },
-                  { lat: mapBounds.north, lng: mapBounds.east },
-                  { lat: mapBounds.south, lng: mapBounds.west },
-                  { lat: mapBounds.south, lng: mapBounds.east },
+                  { lat: mapBounds.north, lng: (mapBounds.east + mapBounds.west) / 2 },
+                  { lat: mapBounds.south, lng: (mapBounds.east + mapBounds.west) / 2 },
+                  { lat: (mapBounds.north + mapBounds.south) / 2, lng: mapBounds.east },
+                  { lat: (mapBounds.north + mapBounds.south) / 2, lng: mapBounds.west },
                 ]
               : [];
             const detected = await Promise.all(points.map(p => reverseGeocodeCity(p.lat, p.lng)));
@@ -248,6 +267,7 @@ export interface PharmacyMapViewProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -259,6 +279,7 @@ const PharmacyMapView = ({
   selectedId,
   onSelect,
   onLoadInArea,
+  onBoundsChange,
   onVisibleChange,
   userLocation,
   searchCity,
@@ -282,6 +303,7 @@ const PharmacyMapView = ({
         selectedId={selectedId}
         onSelect={onSelect}
         onLoadInArea={onLoadInArea}
+        onBoundsChange={onBoundsChange}
         onVisibleChange={onVisibleChange}
         userLocation={userLocation}
         searchCity={searchCity}

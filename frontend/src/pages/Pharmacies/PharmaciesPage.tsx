@@ -136,6 +136,26 @@ const PharmaciesPage = () => {
     }
   };
 
+  // Silent background refresh whenever the user pans or zooms — no loading spinner.
+  // Merges new results with existing state so geocoded pharmacies from a prior
+  // manual search (e.g. ungeocoded Ząbki entries) aren't lost.
+  const handleBoundsChange = useCallback(async (bounds: MapBounds) => {
+    setSearched(true);
+    try {
+      const results = await fetchPharmaciesInBounds(bounds);
+      setPharmacies(prev => {
+        const merged = new Map(prev.map(p => [p.id, p]));
+        results.forEach(p => {
+          const existing = merged.get(p.id);
+          if (!existing || (!existing.latitude && p.latitude)) merged.set(p.id, p);
+        });
+        return [...merged.values()];
+      });
+    } catch {
+      /* silent — auto-load is best-effort */
+    }
+  }, []);
+
   const handleVisibleChange = useCallback((visible: Pharmacy[]) => {
     setVisiblePharmacies(visible);
   }, []);
@@ -176,6 +196,7 @@ const PharmaciesPage = () => {
           selectedId={selectedId}
           onSelect={id => setSelectedId(prev => (prev === id ? null : id))}
           onLoadInArea={handleLoadInArea}
+          onBoundsChange={handleBoundsChange}
           onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
           searchCity={searchCity}

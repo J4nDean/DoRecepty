@@ -25,10 +25,11 @@ public class PharmacyService {
     }
 
     public List<Pharmacy> findInBounds(double minLat, double maxLat, double minLng, double maxLng) {
-        // Strict bounds — only pharmacies whose coordinates lie inside the viewport.
-        // City affiliation is irrelevant; a Warszawa pharmacy near the Ząbki border will be
-        // returned when the user is panned over Ząbki.
-        return pharmacyRepository.findInBoundingBox(minLat, maxLat, minLng, maxLng);
+        // City-fallback: returns geocoded pharmacies inside the viewport PLUS ungeocoded
+        // pharmacies from any city that already has at least one geocoded entry in the
+        // viewport. This lets border cities (e.g. Ząbki) appear once their first pharmacy
+        // is geocoded by the frontend and saved via /update-location.
+        return pharmacyRepository.findInBoundingBoxWithCityFallback(minLat, maxLat, minLng, maxLng);
     }
 
     public List<Pharmacy> findNearby(double lat, double lng, double radiusKm, int limit) {
