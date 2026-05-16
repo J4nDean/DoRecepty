@@ -76,7 +76,6 @@ interface MapContentProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
-  onBoundsChange?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -88,7 +87,6 @@ const MapContent = ({
   selectedId,
   onSelect,
   onLoadInArea,
-  onBoundsChange,
   onVisibleChange,
   userLocation,
   searchCity,
@@ -101,24 +99,6 @@ const MapContent = ({
 
   const onVisibleChangeRef = useRef(onVisibleChange);
   useEffect(() => { onVisibleChangeRef.current = onVisibleChange; });
-
-  const onBoundsChangeRef = useRef(onBoundsChange);
-  useEffect(() => { onBoundsChangeRef.current = onBoundsChange; });
-
-  // Debounced auto-fetch on viewport change (700 ms quiet period).
-  // This fires automatically when the user pans or zooms so pharmacies are
-  // always loaded for the visible area without requiring a manual button click.
-  const boundsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => {
-    if (!mapBounds) return;
-    if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
-    boundsDebounceRef.current = setTimeout(() => {
-      onBoundsChangeRef.current?.(mapBounds);
-    }, 700);
-    return () => {
-      if (boundsDebounceRef.current) clearTimeout(boundsDebounceRef.current);
-    };
-  }, [mapBounds]);
 
   useEffect(() => {
     setDisplayed(pharmacies);
@@ -267,7 +247,6 @@ export interface PharmacyMapViewProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (bounds: MapBounds, cities: string[]) => void;
-  onBoundsChange?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -279,7 +258,6 @@ const PharmacyMapView = ({
   selectedId,
   onSelect,
   onLoadInArea,
-  onBoundsChange,
   onVisibleChange,
   userLocation,
   searchCity,
@@ -303,7 +281,6 @@ const PharmacyMapView = ({
         selectedId={selectedId}
         onSelect={onSelect}
         onLoadInArea={onLoadInArea}
-        onBoundsChange={onBoundsChange}
         onVisibleChange={onVisibleChange}
         userLocation={userLocation}
         searchCity={searchCity}
