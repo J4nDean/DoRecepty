@@ -2231,12 +2231,156 @@
     "lat": 52.22571720000001,
     "lng": 20.9570482
   },
-  "testowa cez|ulica Stanisława Dubois 5": {
-    "lat": 52.2511848,
-    "lng": 20.9946489
-  },
   "Apteka \"Przedwiośnie\"|Płochocińska 199A": {
     "lat": 52.3641014,
     "lng": 21.0272647
+  },
+  "Apteka szpitalna|Barska 16/20": {
+    "lat": 52.2192085,
+    "lng": 20.9790955
+  },
+  "Szpital Opieki Krótkotrwałej|Górczewska 89": {
+    "lat": 52.2377635,
+    "lng": 20.9493462
+  },
+  "Apteka Szpitalna|Inflancka 6": {
+    "lat": 52.2548772,
+    "lng": 20.9917708
+  },
+  "Szpital Kliniczny Dzieciątka Jezus|Williama Heerleina Lindleya 4": {
+    "lat": 52.224358,
+    "lng": 20.9977433
+  },
+  "LUX MED Onkologia Sp. z o.o. Szpital Fieldorfa|gen. Augusta Emila Fieldorfa \"Nila\" 40": {
+    "lat": 52.2336809,
+    "lng": 21.0982133
+  },
+  "|Nowowiejska 27": {
+    "lat": 52.2196099,
+    "lng": 21.0085146
+  },
+  "LUX MED Onkologia Sp. z o.o. Szpital Św. Wincentego|św. Wincentego 103": {
+    "lat": 52.2960937,
+    "lng": 21.0540453
+  },
+  "Endoterapia PFG Szpitalnictwo|Ludwika Waryńskiego 10A": {
+    "lat": 52.2158417,
+    "lng": 21.0164988
+  },
+  "Klinika BUDZIK|al. Aleja Dzieci Polskich 20": {
+    "lat": 52.2071861,
+    "lng": 21.1912064
+  },
+  "Uniwersyteckie Centrum Zdrowia Kobiety i Noworodka Warszawskiego Uniwersytetu Medycznego sp. z o.o. Szpital|Plac Sokratesa Starynkiewicza 1/3": {
+    "lat": 52.2243023,
+    "lng": 20.9951078
+  },
+  "Apteka szpitalna|al. Aleja Dzieci Polskich 20": {
+    "lat": 52.2071861,
+    "lng": 21.1912064
+  },
+  "Centralny Szpital Kliniczny|Jana Nielubowicza 5": {
+    "lat": 52.2077871,
+    "lng": 20.9824191
+  },
+  "APTEKA SZPITALNA|Marcina Kasprzaka 17A": {
+    "lat": 52.2272519,
+    "lng": 20.9703043
+  },
+  "ZESPÓŁ KLINIK NARODOWEGO INSTYTUTU GERIATRII, REUMATOLOGI I REHABILITACJI W WARSZAWIE|Spartańska 1": {
+    "lat": 52.191001,
+    "lng": 20.9941974
+  },
+  "Szpital Praski p.w. Przemienienia Pańskiego|al. Aleja \"Solidarności\" 67": {
+    "lat": 52.25075,
+    "lng": 21.0297475
+  },
+  "ACL VISION OKULIŚCI NZOZ|al. Aleja Niepodległości 20": {
+    "lat": 52.1849115,
+    "lng": 21.0201102
+  },
+  "LUX MED Onkologia Sp. z o.o. Szpital Szamocka|Szamocka 6": {
+    "lat": 52.257869,
+    "lng": 20.9601704
+  },
+  "|Aleja Rzeczypospolitej 1": {
+    "lat": 52.1593478,
+    "lng": 21.0732507
+  },
+  "CENTRUM MEDYCZNE ENEL - MED SZPITAL CENTRUM|Aleja \"Solidarności\" 128": {
+    "lat": 52.2360285,
+    "lng": 20.9747794
+  },
+  "|Edwarda Habicha 24": {
+    "lat": 52.2028808,
+    "lng": 20.8822235
+  },
+  "SZPITAL WIELOPROFILOWY|Zgrupowania AK \"Żmija\" 12": {
+    "lat": 52.269792,
+    "lng": 20.9364849
+  },
+  "HOSPICJUM SIÓSTR FELICJANEK im. bł. Hanny Chrzanowskiej|Nowowiejska 10A": {
+    "lat": 52.220348,
+    "lng": 21.0143321
+  },
+  "KRAJMED CENTRUM NOWOCZESNEJ LARYNGOLOGII-CHIRURGIA JEDNEGO DNIA|Jana Sebastiana Bacha 2": {
+    "lat": 52.1728062,
+    "lng": 21.0327339
+  },
+  "FLEEXIMED SZPITAL|Kazimierza Króla 39": {
+    "lat": 52.1899749,
+    "lng": 21.1817761
+  },
+  "Warsaw Medical Center, Warszawskie Centrum Medyczne|Puławska 488": {
+    "lat": 52.1167621,
+    "lng": 21.0176464
+  },
+  "DOM PRACOWNIKA SŁUŻBY ZDROWIA OPIEKA MEDYCZNA, REHABILITACJA|Elekcyjna 37": {
+    "lat": 52.2377587,
+    "lng": 20.9479541
+  },
+  "BUDZIK DLA DOROSŁYCH|Ludwika Kondratowicza 8": {
+    "lat": 52.291659,
+    "lng": 21.0422292
+  },
+  "SZPITAL MTZ CLINICAL RESEARCH POWERD BY PRATIA|Gładka 22": {
+    "lat": 52.1886738,
+    "lng": 20.9610568
+  },
+  "SENSIN Oddział Chirurgii Plastycznej Jednego Dnia|Budowlana 7": {
+    "lat": 52.2812857,
+    "lng": 21.0271096
+  },
+  "Mazowiecki Szpital Onkologiczny|Aleja \"Solidarności 10": {
+    "lat": 52.2622601,
+    "lng": 21.0506241
+  },
+  "Dom Lekarza Seniora|Wołoska 139": {
+    "lat": 52.2002526,
+    "lng": 20.998835
+  },
+  "ZAKŁAD OPIEKUŃCZO-LECZNICZY IM. SUE RYDER|Józefa Mehoffera 72/74": {
+    "lat": 52.3327529,
+    "lng": 20.9609614
+  },
+  "Reh - Medica Centrum Rehabilitacji|gen. Augusta Emila Fieldorfa \"Nila 18": {
+    "lat": 52.2275356,
+    "lng": 21.0939122
+  },
+  "ARTISAN|Nasturcjowa 6": {
+    "lat": 52.2163737,
+    "lng": 21.1045834
+  },
+  "SAMODZIELNY PUBLICZNY KLINICZNY SZPITAL OKULISTYCZNY W WARSZAWIE|Józefa Sierakowskiego 13": {
+    "lat": 52.251133,
+    "lng": 21.0294501
+  },
+  "|al. Aleja Rzeczypospolitej 5": {
+    "lat": 52.1550874,
+    "lng": 21.0780033
+  },
+  "|al. Aleja Wilanowska 67": {
+    "lat": 52.1739503,
+    "lng": 21.049743
   }
 }

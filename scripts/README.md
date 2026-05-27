@@ -25,3 +25,34 @@ Requires Node 18+ (uses global `fetch`).
 - If `pharmacy_coords.json` gets out of sync (e.g. you wiped it).
 
 After running, commit the updated `pharmacy_coords.json` and push — Railway redeploys and the next import will use the new coords.
+
+---
+
+## `build_pharmacy_data.py`
+
+Generates `backend/src/main/resources/data/pharmacies.sql` — ready-to-load `INSERT` statements for the `pharmacy` table.
+
+Uses `pharmacy_coords.json` for pre-geocoded coordinates; falls back to Nominatim (OpenStreetMap) for any missing entries.
+
+```bash
+pip install requests
+python scripts/build_pharmacy_data.py
+```
+
+Input: `apteki_warszawa_zabki.txt` (registry dump) + `pharmacy_coords.json`.
+Output: `backend/src/main/resources/data/pharmacies.sql` (691 records).
+
+---
+
+## `build_medication_data.py`
+
+Generates `backend/src/main/resources/data/medications.sql` — 100 popular, diverse medications for the `medication` table.
+
+Parses the full RPL XML, selects well-known brands by name pattern, then fills up to 100 entries by ATC diversity.
+
+```bash
+python scripts/build_medication_data.py
+```
+
+Input: `Rejestr_Produktow_Leczniczych_calosciowy_stan_na_dzien_*.xml` (from ezdrowie.gov.pl).
+Output: `backend/src/main/resources/data/medications.sql` (100 records).
