@@ -1,15 +1,24 @@
-export interface ApiDrug {
+export interface ApiMedication {
   id: number | null;
+  gtin: string | null;
   name: string;
-  quantity: string;
+  commonName: string | null;
+  strength: string | null;
+  pharmaceuticalForm: string | null;
+  packageSize: string | null;
+  atcCode: string | null;
+  prescriptionCategory: string | null;
 }
 
-export interface ApiRecipe {
-  id: number | null;
+export interface ApiPrescription {
+  id: string;
   accessCode: string;
-  pesel: string;
+  issueDate: string | null;
+  expirationDate: string | null;
+  doctorNpwz: string | null;
+  clinicRegon: string | null;
   status: string;
-  drugs: ApiDrug[];
+  patient: { id: number; pesel: string } | null;
 }
 
 export interface ApiPharmacy {

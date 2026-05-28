@@ -1,14 +1,14 @@
-export type DrugAvailabilityStatus =
+export type MedicationAvailabilityStatus =
   | 'DOSTĘPNY'
   | 'NIEDOSTĘPNY'
   | 'CZĘŚCIOWO_DOSTĘPNY';
 
-export interface DrugAvailability {
-  drugId: string;
-  drugName: string;
+export interface MedicationAvailability {
+  medicationId: string;
+  medicationName: string;
   isAvailable: boolean;
   quantityInStock?: number;
-  status: DrugAvailabilityStatus;
+  status: MedicationAvailabilityStatus;
 }
 
 export interface OpeningHours {
@@ -29,5 +29,5 @@ export interface Pharmacy {
   isOpen: boolean;
   latitude?: number;
   longitude?: number;
-  availableDrugs?: DrugAvailability[];
+  availableMedications?: MedicationAvailability[];
 }

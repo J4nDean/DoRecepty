@@ -17,10 +17,10 @@ export const mockPharmacies: Pharmacy[] = [
     isOpen: true,
     latitude: 52.2297,
     longitude: 21.0122,
-    availableDrugs: [
-      { drugId: 'd1', drugName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 5, status: 'DOSTĘPNY' },
-      { drugId: 'd2', drugName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 12, status: 'DOSTĘPNY' },
-      { drugId: 'd4', drugName: 'Ramipril 5mg', isAvailable: false, quantityInStock: 0, status: 'NIEDOSTĘPNY' },
+    availableMedications: [
+      { medicationId: 'd1', medicationName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 5, status: 'DOSTĘPNY' },
+      { medicationId: 'd2', medicationName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 12, status: 'DOSTĘPNY' },
+      { medicationId: 'd4', medicationName: 'Ramipril 5mg', isAvailable: false, quantityInStock: 0, status: 'NIEDOSTĘPNY' },
     ],
   },
   {
@@ -39,10 +39,10 @@ export const mockPharmacies: Pharmacy[] = [
     isOpen: true,
     latitude: 52.2316,
     longitude: 21.0224,
-    availableDrugs: [
-      { drugId: 'd1', drugName: 'Amotaks 500mg', isAvailable: false, quantityInStock: 0, status: 'NIEDOSTĘPNY' },
-      { drugId: 'd2', drugName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 3, status: 'CZĘŚCIOWO_DOSTĘPNY' },
-      { drugId: 'd4', drugName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 8, status: 'DOSTĘPNY' },
+    availableMedications: [
+      { medicationId: 'd1', medicationName: 'Amotaks 500mg', isAvailable: false, quantityInStock: 0, status: 'NIEDOSTĘPNY' },
+      { medicationId: 'd2', medicationName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 3, status: 'CZĘŚCIOWO_DOSTĘPNY' },
+      { medicationId: 'd4', medicationName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 8, status: 'DOSTĘPNY' },
     ],
   },
   {
@@ -61,10 +61,10 @@ export const mockPharmacies: Pharmacy[] = [
     isOpen: false,
     latitude: 52.2001,
     longitude: 21.0121,
-    availableDrugs: [
-      { drugId: 'd1', drugName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 2, status: 'DOSTĘPNY' },
-      { drugId: 'd2', drugName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 15, status: 'DOSTĘPNY' },
-      { drugId: 'd4', drugName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 4, status: 'DOSTĘPNY' },
+    availableMedications: [
+      { medicationId: 'd1', medicationName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 2, status: 'DOSTĘPNY' },
+      { medicationId: 'd2', medicationName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 15, status: 'DOSTĘPNY' },
+      { medicationId: 'd4', medicationName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 4, status: 'DOSTĘPNY' },
     ],
   },
   {
@@ -83,10 +83,10 @@ export const mockPharmacies: Pharmacy[] = [
     isOpen: true,
     latitude: 52.2058,
     longitude: 21.001,
-    availableDrugs: [
-      { drugId: 'd1', drugName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 7, status: 'DOSTĘPNY' },
-      { drugId: 'd2', drugName: 'Paracetamol Hasco 500mg', isAvailable: false, quantityInStock: 0, status: 'NIEDOSTĘPNY' },
-      { drugId: 'd4', drugName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 2, status: 'CZĘŚCIOWO_DOSTĘPNY' },
+    availableMedications: [
+      { medicationId: 'd1', medicationName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 7, status: 'DOSTĘPNY' },
+      { medicationId: 'd2', medicationName: 'Paracetamol Hasco 500mg', isAvailable: false, quantityInStock: 0, status: 'NIEDOSTĘPNY' },
+      { medicationId: 'd4', medicationName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 2, status: 'CZĘŚCIOWO_DOSTĘPNY' },
     ],
   },
   {
@@ -105,10 +105,10 @@ export const mockPharmacies: Pharmacy[] = [
     isOpen: true,
     latitude: 52.2263,
     longitude: 21.0048,
-    availableDrugs: [
-      { drugId: 'd1', drugName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 10, status: 'DOSTĘPNY' },
-      { drugId: 'd2', drugName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 8, status: 'DOSTĘPNY' },
-      { drugId: 'd4', drugName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 6, status: 'DOSTĘPNY' },
+    availableMedications: [
+      { medicationId: 'd1', medicationName: 'Amotaks 500mg', isAvailable: true, quantityInStock: 10, status: 'DOSTĘPNY' },
+      { medicationId: 'd2', medicationName: 'Paracetamol Hasco 500mg', isAvailable: true, quantityInStock: 8, status: 'DOSTĘPNY' },
+      { medicationId: 'd4', medicationName: 'Ramipril 5mg', isAvailable: true, quantityInStock: 6, status: 'DOSTĘPNY' },
     ],
   },
 ];

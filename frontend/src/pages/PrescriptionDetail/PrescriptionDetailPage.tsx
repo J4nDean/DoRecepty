@@ -20,7 +20,7 @@ import { fetchNearbyPharmacies } from '../../services/pharmacyService';
 import { formatDate, formatDateShort } from '../../utils/formatDate';
 import { statusLabel, statusColor } from '../../utils/prescriptionUtils';
 import type { Prescription, DrugRealizationStatus } from '../../types/prescription';
-import type { Pharmacy, DrugAvailabilityStatus } from '../../types/pharmacy';
+import type { Pharmacy, MedicationAvailabilityStatus } from '../../types/pharmacy';
 
 const realizationConfig: Record<
   DrugRealizationStatus,
