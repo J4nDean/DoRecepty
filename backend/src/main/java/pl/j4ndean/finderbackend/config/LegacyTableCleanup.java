@@ -7,21 +7,27 @@ import org.springframework.context.event.EventListener;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
- * Usuwa tabele pozostałe po starych encjach (Drug, Recipe).
- * Uruchamia się po pełnym starcie aplikacji — bezpieczne przy każdym restarcie (IF EXISTS).
+ * Usuwa tabele pozostałe po starych encjach.
+ * Zostają wyłącznie: app_user, prescription, medication, pharmacy,
+ * prescription_item, pharmacy_inventory.
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class LegacyTableCleanup {
 
+    private static final List<String> LEGACY_TABLES = List.of(
+            "drug", "recipe", "apteki"
+    );
+
     private final JdbcTemplate jdbc;
 
     @EventListener(ApplicationReadyEvent.class)
     public void dropLegacyTables() {
-        drop("drug");
-        drop("recipe");
+        LEGACY_TABLES.forEach(this::drop);
     }
 
     private void drop(String table) {
