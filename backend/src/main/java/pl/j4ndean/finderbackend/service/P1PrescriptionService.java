@@ -2,6 +2,7 @@ package pl.j4ndean.finderbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pl.j4ndean.finderbackend.dto.PharmacyAvailabilityDto;
 import pl.j4ndean.finderbackend.dto.PharmacyAvailabilityDto.AvailableMedicationDto;
 import pl.j4ndean.finderbackend.dto.PrescriptionDto;
@@ -25,17 +26,20 @@ public class P1PrescriptionService {
     private final PrescriptionItemRepository prescriptionItemRepository;
     private final PharmacyInventoryRepository pharmacyInventoryRepository;
 
+    @Transactional(readOnly = true)
     public Optional<PrescriptionDto> getById(Long id) {
         return prescriptionRepository.findByIdWithPatient(id)
                 .map(p -> PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())));
     }
 
+    @Transactional(readOnly = true)
     public List<PrescriptionDto> getByPesel(String pesel) {
         return prescriptionRepository.findByPatientPesel(pesel).stream()
                 .map(p -> PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())))
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<PharmacyAvailabilityDto> getPharmaciesForPrescription(Long prescriptionId) {
         if (!prescriptionRepository.existsById(prescriptionId)) return List.of();
 
