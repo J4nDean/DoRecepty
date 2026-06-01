@@ -20,14 +20,14 @@ interface StatCardProps {
 const StatCard = ({ to, icon, count, label }: StatCardProps) => (
   <Link
     to={to}
-    className="bg-white rounded-lg border border-neutral-200 p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all"
+    className="bg-white border border-neutral-200 rounded-lg p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all shadow-sm h-24"
   >
-    <div className="w-11 h-11 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white">
+    <div className="w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm">
       {icon}
     </div>
     <div>
-      <p className="text-2xl font-bold text-neutral-900 leading-tight tracking-tight">{count}</p>
-      <p className="text-xs text-neutral-500 mt-0.5">{label}</p>
+      <p className="text-2xl font-black text-neutral-900 leading-tight tracking-tight">{count}</p>
+      <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">{label}</p>
     </div>
   </Link>
 );
@@ -54,39 +54,41 @@ const DashboardPage = () => {
 
   const recent = [...prescriptions]
     .sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime())
-    .slice(0, 3);
+    .slice(0, 5);
+    
   const activeCount = prescriptions.filter(p => activeCodes.includes(p.status)).length;
   const archivedCount = prescriptions.filter(p => archivedCodes.includes(p.status)).length;
 
   return (
     <AppLayout title={`Dzień dobry, ${user?.firstName ?? ''}`} subtitle="Oto Twoje podsumowanie">
       <div className="space-y-12">
+        
         {/* Statystyki */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <StatCard to="/recepty/aktywne" icon={<FileCheck size={19} />} count={isLoading ? '–' : activeCount} label="Aktywne recepty" />
-          <StatCard to="/recepty/archiwalne" icon={<Archive size={19} />} count={isLoading ? '–' : archivedCount} label="Archiwalne recepty" />
+          <StatCard to="/recepty/aktywne" icon={<FileCheck size={20} />} count={isLoading ? '–' : activeCount} label="Aktywne" />
+          <StatCard to="/recepty/archiwalne" icon={<Archive size={20} />} count={isLoading ? '–' : archivedCount} label="Archiwalne" />
           <Link
             to="/apteki"
-            className="hidden lg:flex bg-white rounded-lg border border-neutral-200 p-5 items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all"
+            className="bg-white border border-neutral-200 rounded-lg p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all shadow-sm h-24"
           >
-            <div className="w-11 h-11 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm">
-              <MapPin size={19} />
+            <div className="w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm">
+              <MapPin size={20} />
             </div>
-            <div>
-              <p className="text-sm font-bold text-neutral-900 leading-tight">Znajdź aptekę</p>
-              <p className="text-xs text-neutral-500 mt-0.5">Wyszukaj w pobliżu</p>
+            <div className="min-w-0">
+              <p className="text-sm font-black text-neutral-900 leading-tight truncate">Znajdź aptekę</p>
+              <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider mt-0.5">Wyszukaj w pobliżu</p>
             </div>
           </Link>
         </div>
 
-        {/* Recepty wygasające za niedługo */}
+        {/* WAŻNE TERMINY */}
         {!isLoading && expiringSoon.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-6">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-sm" />
-              <h2 className="text-sm font-bold text-neutral-800 uppercase tracking-widest">Ważne terminy</h2>
+              <h2 className="text-sm font-black text-neutral-800 uppercase tracking-widest">Ważne terminy</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
               {expiringSoon.map(p => {
                 const days = daysUntilExpiry(p.expiryDate!);
                 return (
@@ -100,10 +102,10 @@ const DashboardPage = () => {
                       <AlertTriangle size={19} />
                     </div>
                     <div className="min-w-0 text-left">
-                      <p className="text-sm font-bold text-neutral-900 leading-tight">
+                      <p className="text-sm font-black text-neutral-900 leading-tight">
                         Recepta wygaśnie {days === 0 ? 'dzisiaj' : days === 1 ? 'jutro' : `za ${days} dni`}
                       </p>
-                      <p className="text-xs text-neutral-500 mt-1 truncate">
+                      <p className="text-[10px] text-neutral-400 font-bold uppercase mt-1 truncate">
                         Nr recepty #{p.number}
                       </p>
                     </div>
@@ -114,14 +116,14 @@ const DashboardPage = () => {
           </section>
         )}
 
-        {/* Najnowsze recepty */}
+        {/* NAJNOWSZE DOKUMENTY */}
         <section>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <div className="w-2.5 h-2.5 rounded-full bg-brand-600 shadow-sm" />
-              <h2 className="text-sm font-bold text-neutral-800 uppercase tracking-widest">Najnowsze dokumenty</h2>
+              <h2 className="text-sm font-black text-neutral-800 uppercase tracking-widest">Najnowsze dokumenty</h2>
             </div>
-            <Link to="/recepty/aktywne" className="flex items-center gap-1 text-[11px] font-bold text-brand-600 uppercase tracking-wider hover:underline">
+            <Link to="/recepty/aktywne" className="flex items-center gap-1.5 text-[11px] font-black text-brand-600 uppercase tracking-widest hover:underline">
               Zobacz wszystkie <ChevronRight size={14} />
             </Link>
           </div>
@@ -131,7 +133,7 @@ const DashboardPage = () => {
           ) : recent.length === 0 ? (
             <EmptyState title="Brak recept" description="Nie masz jeszcze żadnych recept w systemie." icon={<FileText size={44} />} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
               {recent.map(p => <PrescriptionCard key={p.id} prescription={p} />)}
             </div>
           )}
