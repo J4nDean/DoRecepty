@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { MapPin } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { MapPin, ArrowDownAZ, ArrowUpDown, Star } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PharmacyCard } from '../../components/PharmacyCard';
 import { SearchBar } from '../../components/SearchBar';
@@ -12,13 +12,14 @@ import {
   fetchNearbyByLocation,
   getUserLocation,
 } from '../../services/pharmacyService';
-import { geocodeAddress, reverseGeocode } from '../../services/geocoding';
+import { reverseGeocode } from '../../services/geocoding';
+import { useFavoritePharmacies } from '../../hooks/useFavoritePharmacies';
+import { haversineKm, type LatLng } from '../../utils/geoUtils';
 import type { Pharmacy } from '../../types/pharmacy';
 
-type LatLng    = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
+type SortMode  = 'default' | 'distance' | 'name';
 
-const CITY_BBOX_DELTA = 0.05;
 const NEARBY_RADIUS_KM = 20;
 const NEARBY_LIMIT     = 200;
 
@@ -30,28 +31,8 @@ const locationErrorMessage = (err: unknown): string => {
   return err instanceof Error ? err.message : 'Nie udało się pobrać lokalizacji';
 };
 
-function mergePharmacies(...groups: Pharmacy[][]): Pharmacy[] {
-  const map = new Map<string, Pharmacy>();
-  for (const pharmacy of groups.flat()) {
-    const existing = map.get(pharmacy.id);
-    if (!existing || (!existing.latitude && pharmacy.latitude)) {
-      map.set(pharmacy.id, pharmacy);
-    }
-  }
-  return [...map.values()];
-}
-
-const bboxAround = ({ lat, lng }: LatLng, delta = CITY_BBOX_DELTA): MapBounds => {
-  const dLng = delta / Math.cos((lat * Math.PI) / 180);
-  return {
-    north: lat + delta, south: lat - delta,
-    east:  lng + dLng,  west:  lng - dLng,
-  };
-};
-
 const PharmaciesPage = () => {
   const [pharmacies,        setPharmacies]        = useState<Pharmacy[]>([]);
-  const [visiblePharmacies, setVisiblePharmacies] = useState<Pharmacy[]>([]);
   const [selectedId,        setSelectedId]        = useState<string | null>(null);
   const [searchCity,        setSearchCity]        = useState<string | undefined>(undefined);
   const [isLoading,         setIsLoading]         = useState(false);
@@ -59,7 +40,11 @@ const PharmaciesPage = () => {
   const [isLocating,        setIsLocating]        = useState(false);
   const [locationError,     setLocationError]     = useState<string | null>(null);
   const [userLocation,      setUserLocation]      = useState<LatLng | null>(null);
+  const [nameFilter,        setNameFilter]        = useState('');
+  const [sortMode,          setSortMode]          = useState<SortMode>('default');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
 
+  const { isFavorite, toggleFavorite, favorites } = useFavoritePharmacies();
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
 
   const registerCard = (id: string) => (element: HTMLElement | null) => {
@@ -93,6 +78,7 @@ const PharmaciesPage = () => {
       const { lat, lng } = await getUserLocation();
       setUserLocation({ lat, lng });
       setPharmacies(await fetchNearbyByLocation(lat, lng, NEARBY_RADIUS_KM, NEARBY_LIMIT));
+      setSortMode('distance');
     } catch (err) {
       setLocationError(locationErrorMessage(err));
     } finally {
@@ -101,17 +87,12 @@ const PharmaciesPage = () => {
     }
   };
 
-  const handleSearch = async (query: string) => {
+  const handleCitySearch = async (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) return;
-    resetForNewSearch(trimmed);
 
+    resetForNewSearch(trimmed);
     try {
-      const center = await geocodeAddress(`${trimmed}, Poland`);
-      const tasks: Promise<Pharmacy[]>[] = [searchPharmacies(trimmed)];
-      if (center) tasks.push(fetchPharmaciesInBounds(bboxAround(center)));
-      setPharmacies(mergePharmacies(...await Promise.all(tasks)));
-    } catch {
       setPharmacies(await searchPharmacies(trimmed));
     } finally {
       setIsLoading(false);
@@ -143,28 +124,82 @@ const PharmaciesPage = () => {
     }
   };
 
-  const handleVisibleChange = useCallback((visible: Pharmacy[]) => {
-    setVisiblePharmacies(visible);
-  }, []);
+  const handleSelect = (id: string) => setSelectedId(prev => (prev === id ? null : id));
 
-  const handleSelect = useCallback((id: string) => {
-    setSelectedId(prev => (prev === id ? null : id));
-  }, []);
+  const withDistance = useMemo(() => {
+    if (!userLocation) return pharmacies;
+    return pharmacies.map(p =>
+      p.latitude != null && p.longitude != null
+        ? { ...p, distance: haversineKm(userLocation, { lat: p.latitude, lng: p.longitude }) }
+        : p,
+    );
+  }, [pharmacies, userLocation]);
 
-  const listPharmacies = visiblePharmacies.length > 0 || pharmacies.length === 0
-    ? visiblePharmacies
-    : pharmacies;
+  const listPharmacies = useMemo(() => {
+    const q = nameFilter.trim().toLowerCase();
+    let list = withDistance;
+
+    if (showFavoritesOnly) list = list.filter(p => isFavorite(p.id));
+    if (q) {
+      list = list.filter(p =>
+        p.name.toLowerCase().includes(q) ||
+        p.city.toLowerCase().includes(q) ||
+        p.address.toLowerCase().includes(q),
+      );
+    }
+
+    if (sortMode === 'distance') {
+      list = [...list].sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+    } else if (sortMode === 'name') {
+      list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'pl'));
+    }
+    return list;
+  }, [withDistance, nameFilter, sortMode, showFavoritesOnly, isFavorite]);
+
   const openCount = listPharmacies.filter(p => p.isOpen).length;
+  const cycleSortMode = () =>
+    setSortMode(prev => (prev === 'default' ? 'distance' : prev === 'distance' ? 'name' : 'default'));
+
+  const sortLabel =
+    sortMode === 'distance' ? 'Od najbliższej'
+    : sortMode === 'name'   ? 'A → Z'
+    :                         'Domyślnie';
 
   return (
     <AppLayout title="Najbliższe apteki" subtitle="Znajdź aptekę w swojej okolicy">
       <SearchBar
-        placeholder="Wpisz miasto lub adres..."
-        onSearch={handleSearch}
+        placeholder="Wpisz nazwę apteki, miasto lub adres..."
+        onSearch={handleCitySearch}
+        onValueChange={setNameFilter}
         onLocate={loadNearby}
         isLocating={isLocating}
-        className="mb-4 max-w-lg"
+        className="mb-3 max-w-lg"
       />
+
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        <button
+          type="button"
+          onClick={cycleSortMode}
+          title="Zmień sortowanie"
+          className="flex items-center gap-1.5 h-9 px-3 border border-slate-200 rounded-lg bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+        >
+          {sortMode === 'name' ? <ArrowDownAZ size={14} /> : <ArrowUpDown size={14} />}
+          {sortLabel}
+        </button>
+        <button
+          type="button"
+          onClick={() => setShowFavoritesOnly(prev => !prev)}
+          aria-pressed={showFavoritesOnly}
+          className={`flex items-center gap-1.5 h-9 px-3 rounded-lg text-xs font-medium transition-colors border ${
+            showFavoritesOnly
+              ? 'bg-amber-50 border-amber-300 text-amber-700'
+              : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+          }`}
+        >
+          <Star size={14} fill={showFavoritesOnly ? 'currentColor' : 'none'} />
+          Ulubione ({favorites.size})
+        </button>
+      </div>
 
       {locationError && <p className="mb-4 text-xs text-amber-600">{locationError}</p>}
 
@@ -174,16 +209,16 @@ const PharmaciesPage = () => {
             ? `Znaleziono ${listPharmacies.length} aptek w "${searchCity}"`
             : `Widocznych aptek: ${listPharmacies.length}`}
           {' '}· {openCount} otwartych
+          {sortMode === 'distance' && !userLocation && ' · udostępnij lokalizację dla sortowania po odległości'}
         </p>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-240px)] lg:min-h-[400px]">
+      <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-300px)] lg:min-h-[400px]">
         <PharmacyMapView
-          pharmacies={pharmacies}
+          pharmacies={listPharmacies}
           selectedId={selectedId}
           onSelect={handleSelect}
           onLoadInArea={handleLoadInArea}
-          onVisibleChange={handleVisibleChange}
           userLocation={userLocation}
           searchCity={searchCity}
           className="h-[52dvh] min-h-[300px] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
@@ -200,8 +235,12 @@ const PharmaciesPage = () => {
             />
           ) : listPharmacies.length === 0 ? (
             <EmptyState
-              title="Nie znaleziono aptek"
-              description="Spróbuj wpisać inną lokalizację lub zezwól na geolokalizację."
+              title={showFavoritesOnly ? 'Brak ulubionych aptek' : 'Nie znaleziono aptek'}
+              description={
+                showFavoritesOnly
+                  ? 'Dodaj apteki do ulubionych klikając gwiazdkę na karcie.'
+                  : 'Spróbuj zmienić kryteria filtrowania lub wyszukać w innym mieście.'
+              }
               icon={<MapPin size={40} />}
             />
           ) : (
@@ -212,6 +251,8 @@ const PharmaciesPage = () => {
                 pharmacy={p}
                 selected={selectedId === p.id}
                 onClick={() => handleSelect(p.id)}
+                isFavorite={isFavorite(p.id)}
+                onToggleFavorite={() => toggleFavorite(p.id)}
               />
             ))
           )}

@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.OffsetDateTime;
 
 @Entity
-@Table(name = "app_user")        // "user" to słowo zarezerwowane w PostgreSQL
+@Table(name = "app_user")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -32,8 +32,9 @@ public class User {
     @Column(columnDefinition = "CHAR(11)")
     private String pesel;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 20)
-    private String role;
+    private Role role;
 
     @Column(columnDefinition = "TIMESTAMPTZ DEFAULT now()")
     private OffsetDateTime createdAt;

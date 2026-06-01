@@ -1,6 +1,4 @@
--- 100 popularnych, różnorodnych leków z Rejestru Produktów Leczniczych.
--- Zgodne ze schematem tabeli MEDICATION (id BIGSERIAL).
--- Wygenerowano przez scripts/build_medication_data.py
+-- Leki z Rejestru Produktów Leczniczych zgodne ze schematem tabeli MEDICATION.
 
 INSERT INTO medication (gtin, name, common_name, strength, pharmaceutical_form, package_size, atc_code, prescription_category) VALUES
   ('05909990296019', 'Apap', 'Paracetamolum', '500 mg', 'Tabletki powlekane', '2 tabl.', 'N02BE01', 'OTC'),
@@ -102,4 +100,6 @@ INSERT INTO medication (gtin, name, common_name, strength, pharmaceutical_form, 
   ('05909990206513', 'Polfilin prolongatum', 'Pentoxifyllinum', '400 mg', 'Tabletki o przedłużonym uwalnianiu', '20 tabl.', 'C04AD03', 'Rp'),
   ('05909990126316', 'Metformax 500', 'Metformini hydrochloridum', '500 mg', 'Tabletki', '30 tabl.', 'A10BA02', 'Rp'),
   ('05909990705450', 'Metformin Bluefish', 'Metformini hydrochloridum', '500 mg', 'Tabletki powlekane', '20 tabl.', 'A10BA02', 'Rp'),
-  ('05909990609109', 'Glucophage XR', 'Metformini hydrochloridum', '500 mg', 'Tabletki o przedłużonym uwalnianiu', '30 tabl.', 'A10BA02', 'Rp');
+  ('05909990609109', 'Glucophage XR', 'Metformini hydrochloridum', '500 mg', 'Tabletki o przedłużonym uwalnianiu', '30 tabl.', 'A10BA02', 'Rp'),
+  ('05909000000017', 'Bezolen', 'Bezolenum', '100 mg', 'Tabletki powlekane', '20 tabl.', 'N02BA20', 'Rp'),
+  ('05909000000024', 'Vasodol', 'Vasodolum', '5 mg', 'Tabletki', '30 tabl.', 'C09BA15', 'Rp');

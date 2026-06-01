@@ -1,11 +1,10 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   FileCheck,
   Archive,
   MapPin,
   LogOut,
-  Stethoscope,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,16 +24,15 @@ const navLinkClass = ({ isActive }: { isActive: boolean }) =>
 
 export const Sidebar = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <aside className="hidden md:flex w-60 shrink-0 flex-col bg-white border-r border-slate-200 h-screen sticky top-0 z-40">
       <div className="px-5 py-5 border-b border-slate-100">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Stethoscope size={16} className="text-white" />
-          </div>
+          <img src="/icon.svg" alt="DoRecepty logo" className="w-8 h-8 rounded-lg" />
           <span className="font-bold text-slate-800 text-[15px] tracking-tight">
-            finder<span className="text-blue-600">·rx</span>
+            Do<span className="text-blue-600">Recepty</span>
           </span>
         </div>
       </div>
@@ -53,7 +51,10 @@ export const Sidebar = () => {
       </nav>
 
       <div className="px-3 pb-4 border-t border-slate-100 pt-3 space-y-1">
-        <div className="px-3 py-2.5 rounded-lg bg-slate-50 mb-1">
+        <button
+          onClick={() => navigate('/profil')}
+          className="w-full px-3 py-2.5 rounded-lg bg-slate-50 hover:bg-blue-50 transition-colors mb-1 text-left"
+        >
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
               <span className="text-[10px] font-bold text-blue-700">
@@ -67,7 +68,7 @@ export const Sidebar = () => {
               <p className="text-[11px] text-slate-400 font-mono">{user?.pesel}</p>
             </div>
           </div>
-        </div>
+        </button>
         <button
           onClick={logout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 hover:text-red-600 transition-colors"

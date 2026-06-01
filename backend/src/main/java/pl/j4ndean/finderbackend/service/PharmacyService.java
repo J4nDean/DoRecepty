@@ -15,12 +15,13 @@ public class PharmacyService {
 
     private static final double EARTH_RADIUS_KM = 6371.0;
     private static final double KM_PER_DEGREE_LAT = 111.0;
-    private static final int CITY_SEARCH_LIMIT = 50;
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final PharmacyRepository pharmacyRepository;
 
-    public List<Pharmacy> searchByCity(String city) {
-        return pharmacyRepository.findByCityContainingIgnoreCase(city, PageRequest.of(0, CITY_SEARCH_LIMIT));
+    public List<Pharmacy> searchByCity(String city, int page, int size) {
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        return pharmacyRepository.findByCityContainingIgnoreCase(city, PageRequest.of(page, safeSize));
     }
 
     public List<Pharmacy> findInBounds(double minLat, double maxLat, double minLng, double maxLng) {
@@ -31,16 +32,31 @@ public class PharmacyService {
         double latDelta = radiusKm / KM_PER_DEGREE_LAT;
         double lngDelta = radiusKm / (KM_PER_DEGREE_LAT * Math.cos(Math.toRadians(lat)));
 
+        record Scored(Pharmacy pharmacy, double distanceKm) {}
+
         return pharmacyRepository.findInBoundingBoxWithCityFallback(
                         lat - latDelta, lat + latDelta,
                         lng - lngDelta, lng + lngDelta)
                 .stream()
-                .filter(p -> !isGeocoded(p) || haversineKm(lat, lng, p.getLatitude(), p.getLongitude()) <= radiusKm)
-                .sorted(Comparator.comparingDouble(p -> isGeocoded(p)
+                .map(p -> new Scored(p, isGeocoded(p)
                         ? haversineKm(lat, lng, p.getLatitude(), p.getLongitude())
                         : Double.MAX_VALUE))
+                .filter(s -> s.distanceKm == Double.MAX_VALUE || s.distanceKm <= radiusKm)
+                .sorted(Comparator.comparingDouble(Scored::distanceKm))
                 .limit(limit)
+                .map(Scored::pharmacy)
                 .toList();
+    }
+
+    public void updateLocation(Pharmacy update) {
+        pharmacyRepository.findByCityContainingIgnoreCase(update.getCity()).stream()
+                .filter(p -> p.getAddress().equalsIgnoreCase(update.getAddress()))
+                .findFirst()
+                .ifPresent(existing -> {
+                    existing.setLatitude(update.getLatitude());
+                    existing.setLongitude(update.getLongitude());
+                    pharmacyRepository.save(existing);
+                });
     }
 
     private static boolean isGeocoded(Pharmacy p) {

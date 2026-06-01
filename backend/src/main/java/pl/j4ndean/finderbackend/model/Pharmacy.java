@@ -34,8 +34,6 @@ public class Pharmacy {
     private Double latitude;
     private Double longitude;
 
-    // Dodatkowe pola z rejestru aptek — używane przez PharmacyImportService,
-    // nie są częścią ERD ale nie przeszkadzają w działaniu.
     private String status;
     private String openingHoursWeekdays;
     private String openingHoursSaturday;

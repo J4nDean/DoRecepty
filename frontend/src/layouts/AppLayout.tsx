@@ -14,7 +14,7 @@ export const AppLayout = ({ children, title, subtitle }: AppLayoutProps) => (
     <Sidebar />
     <div className="flex-1 flex flex-col overflow-hidden min-w-0">
       <Header title={title} subtitle={subtitle} />
-      <main className="flex-1 overflow-y-auto p-5 pb-24 md:p-6 md:pb-6">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-5 pb-24 md:p-6 md:pb-6">
         {children}
       </main>
     </div>

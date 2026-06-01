@@ -5,6 +5,7 @@ import type { FormEvent, KeyboardEvent } from 'react';
 interface SearchBarProps {
   placeholder?: string;
   onSearch: (query: string) => void;
+  onValueChange?: (query: string) => void;
   onLocate?: () => void;
   isLocating?: boolean;
   className?: string;
@@ -14,6 +15,7 @@ interface SearchBarProps {
 export const SearchBar = ({
   placeholder = 'Szukaj...',
   onSearch,
+  onValueChange,
   onLocate,
   isLocating = false,
   className = '',
@@ -21,13 +23,18 @@ export const SearchBar = ({
 }: SearchBarProps) => {
   const [value, setValue] = useState(defaultValue);
 
+  const updateValue = (next: string) => {
+    setValue(next);
+    onValueChange?.(next);
+  };
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     onSearch(value.trim());
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Escape') setValue('');
+    if (e.key === 'Escape') updateValue('');
   };
 
   return (
@@ -41,7 +48,7 @@ export const SearchBar = ({
         <input
           type="search"
           value={value}
-          onChange={e => setValue(e.target.value)}
+          onChange={e => updateValue(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           aria-label={placeholder}

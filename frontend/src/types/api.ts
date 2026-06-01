@@ -1,17 +1,24 @@
 export interface ApiMedication {
   id: number | null;
-  gtin: string | null;
   name: string;
   commonName: string | null;
   strength: string | null;
   pharmaceuticalForm: string | null;
   packageSize: string | null;
-  atcCode: string | null;
-  prescriptionCategory: string | null;
+}
+
+export interface ApiPrescriptionItem {
+  id: number;
+  prescriptionOid: string | null;
+  positionInPackage: number | null;
+  medication: ApiMedication;
+  quantity: number | null;
+  dosageInstructions: string | null;
+  status: string;
 }
 
 export interface ApiPrescription {
-  id: string;
+  id: number;
   accessCode: string;
   issueDate: string | null;
   expirationDate: string | null;
@@ -19,6 +26,7 @@ export interface ApiPrescription {
   clinicRegon: string | null;
   status: string;
   patient: { id: number; pesel: string } | null;
+  items: ApiPrescriptionItem[];
 }
 
 export interface ApiPharmacy {
@@ -34,4 +42,14 @@ export interface ApiPharmacy {
   openingHoursSunday: string | null;
   latitude: number | null;
   longitude: number | null;
+}
+
+export interface ApiAvailableMedication {
+  medicationId: number;
+  medicationName: string;
+  stockQuantity: number;
+}
+
+export interface ApiPharmacyAvailability extends ApiPharmacy {
+  availableMedications: ApiAvailableMedication[];
 }

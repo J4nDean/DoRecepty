@@ -49,8 +49,8 @@ export default defineConfig({
   ],
   server: {
     host: true,
-    port: 5173,
-    strictPort: true,
+    port: process.env.PORT ? Number(process.env.PORT) : 5173,
+    strictPort: false,
     allowedHosts: ['.loca.lt', '.ngrok-free.app', '.ngrok-free.dev', '.ngrok-free.dev', '.ngrok.io', '.ngrok.app'],
   },
   resolve: {

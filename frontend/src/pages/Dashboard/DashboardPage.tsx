@@ -6,6 +6,7 @@ import { PrescriptionCard } from '../../components/PrescriptionCard';
 import { Spinner } from '../../components/ui/Spinner';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useAuth } from '../../context/AuthContext';
+import { useMetadata } from '../../context/MetadataContext';
 import { fetchPrescriptions } from '../../services/prescriptionService';
 import type { Prescription } from '../../types/prescription';
 
@@ -34,6 +35,7 @@ const StatCard = ({ to, icon, iconBg, count, label }: StatCardProps) => (
 
 const DashboardPage = () => {
   const { user } = useAuth();
+  const { metadata, byCategory } = useMetadata();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,20 +46,21 @@ const DashboardPage = () => {
       .finally(() => setIsLoading(false));
   }, [user?.pesel]);
 
-  const recent = prescriptions.slice(0, 3);
-  const activeCount = prescriptions.filter(p =>
-    ['AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA'].includes(p.status),
-  ).length;
-  const archivedCount = prescriptions.filter(p =>
-    ['ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA'].includes(p.status),
-  ).length;
+  const activeCodes   = byCategory(metadata.prescriptionStatuses, 'ACTIVE').map(o => o.code);
+  const archivedCodes = byCategory(metadata.prescriptionStatuses, 'ARCHIVED').map(o => o.code);
+
+  const recent = [...prescriptions]
+    .sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime())
+    .slice(0, 3);
+  const activeCount   = prescriptions.filter(p => activeCodes.includes(p.status)).length;
+  const archivedCount = prescriptions.filter(p => archivedCodes.includes(p.status)).length;
 
   return (
     <AppLayout
       title={`Dzień dobry, ${user?.firstName ?? ''}!`}
       subtitle="Oto Twoje podsumowanie"
     >
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6 sm:mb-8">
         <StatCard
           to="/recepty/aktywne"
           icon={<FileCheck size={19} className="text-blue-600" />}

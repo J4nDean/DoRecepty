@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff, Stethoscope } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 const LoginPage = () => {
@@ -31,11 +31,9 @@ const LoginPage = () => {
     <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
       <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-[#1B3A6B] flex-col justify-between p-10 lg:p-14">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
-            <Stethoscope size={20} className="text-white" />
-          </div>
+          <img src="/icon.svg" alt="DoRecepty logo" className="w-10 h-10 rounded-xl" />
           <span className="text-white font-bold text-xl tracking-tight">
-            finder<span className="text-blue-300">·rx</span>
+            Do<span className="text-blue-300">Recepty</span>
           </span>
         </div>
 
@@ -66,17 +64,15 @@ const LoginPage = () => {
           </div>
         </div>
 
-        <p className="text-blue-400 text-xs">© 2025 finder·rx</p>
+        <p className="text-blue-400 text-xs">© 2025 DoRecepty</p>
       </div>
 
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="flex items-center gap-2 mb-10 md:hidden">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <Stethoscope size={16} className="text-white" />
-            </div>
+            <img src="/icon.svg" alt="DoRecepty logo" className="w-8 h-8 rounded-lg" />
             <span className="font-bold text-slate-800">
-              finder<span className="text-blue-600">·rx</span>
+              Do<span className="text-blue-600">Recepty</span>
             </span>
           </div>
 

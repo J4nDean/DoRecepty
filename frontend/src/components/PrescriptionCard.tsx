@@ -1,10 +1,11 @@
 import { useNavigate } from 'react-router-dom';
-import { Pill, Calendar, ChevronRight, User } from 'lucide-react';
+import { Pill, Calendar, ChevronRight, User, AlertTriangle } from 'lucide-react';
 import type { Prescription } from '../types/prescription';
 import { Badge } from './ui/Badge';
 import type { BadgeVariant } from './ui/Badge';
 import { formatDateShort } from '../utils/formatDate';
-import { statusLabel } from '../utils/prescriptionUtils';
+import { daysUntilExpiry, expiryWarningText, isExpiringSoon } from '../utils/dateUtils';
+import { useMetadata } from '../context/MetadataContext';
 
 const statusToBadge: Record<string, BadgeVariant> = {
   AKTYWNA: 'active',
@@ -21,15 +22,18 @@ interface PrescriptionCardProps {
 
 export const PrescriptionCard = ({ prescription, compact = false }: PrescriptionCardProps) => {
   const navigate = useNavigate();
-  const canNavigate = ['AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA'].includes(prescription.status);
+  const { metadata, labelOf } = useMetadata();
+
+  const expiringSoon = isExpiringSoon(prescription.status, prescription.expiryDate);
+  const days = expiringSoon ? daysUntilExpiry(prescription.expiryDate) : 0;
 
   return (
     <article
-      onClick={() => canNavigate && navigate(`/recepty/${prescription.id}`)}
-      className={`bg-white rounded-xl border border-slate-100 shadow-sm p-5 transition-all ${
-        canNavigate
-          ? 'cursor-pointer hover:border-blue-200 hover:shadow-md'
-          : 'cursor-default'
+      onClick={() => navigate(`/recepty/${prescription.id}`)}
+      className={`bg-white rounded-xl border shadow-sm p-5 transition-all cursor-pointer hover:shadow-md ${
+        expiringSoon
+          ? 'border-amber-400 hover:border-amber-500 ring-1 ring-amber-100'
+          : 'border-slate-100 hover:border-blue-200'
       }`}
       aria-label={`Recepta ${prescription.number}`}
     >
@@ -43,20 +47,28 @@ export const PrescriptionCard = ({ prescription, compact = false }: Prescription
           </p>
         </div>
         <Badge variant={statusToBadge[prescription.status] ?? 'done'}>
-          {statusLabel[prescription.status]}
+          {labelOf(metadata.prescriptionStatuses, prescription.status)}
         </Badge>
       </div>
 
-      <div className="flex items-center gap-4 text-xs text-slate-500 mb-3 flex-wrap">
-        <span className="flex items-center gap-1.5">
-          <Calendar size={13} />
-          {formatDateShort(prescription.issueDate)}
-        </span>
-        <span className="flex items-center gap-1.5">
-          <Pill size={13} />
-          {prescription.drugs.length}{' '}
-          {prescription.drugs.length === 1 ? 'lek' : 'leki'}
-        </span>
+      <div className="flex items-center justify-between gap-3 text-xs text-slate-500 mb-3 flex-wrap">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5">
+            <Calendar size={13} />
+            {formatDateShort(prescription.issueDate)}
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Pill size={13} />
+            {prescription.drugs.length}{' '}
+            {prescription.drugs.length === 1 ? 'lek' : 'leki'}
+          </span>
+        </div>
+        {expiringSoon && (
+          <div className="flex items-center gap-1 text-[11px] font-semibold text-amber-700">
+            <AlertTriangle size={12} />
+            {expiryWarningText(days)}
+          </div>
+        )}
       </div>
 
       {!compact && (
@@ -66,12 +78,10 @@ export const PrescriptionCard = ({ prescription, compact = false }: Prescription
         </p>
       )}
 
-      {canNavigate && (
-        <div className="flex items-center gap-1 text-[12px] text-blue-600 font-semibold mt-3 border-t border-slate-50 pt-3">
-          Szczegóły i dostępność leków
-          <ChevronRight size={13} />
-        </div>
-      )}
+      <div className="flex items-center gap-1 text-[12px] text-blue-600 font-semibold mt-3 border-t border-slate-50 pt-3">
+        Szczegóły i dostępność leków
+        <ChevronRight size={13} />
+      </div>
     </article>
   );
 };

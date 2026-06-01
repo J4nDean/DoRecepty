@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Archive } from 'lucide-react';
 import { AppLayout } from '../../layouts/AppLayout';
 import { PrescriptionCard } from '../../components/PrescriptionCard';
@@ -6,26 +6,31 @@ import { SearchBar } from '../../components/SearchBar';
 import { Spinner } from '../../components/ui/Spinner';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useAuth } from '../../context/AuthContext';
+import { useMetadata } from '../../context/MetadataContext';
 import { fetchPrescriptions } from '../../services/prescriptionService';
 import type { Prescription } from '../../types/prescription';
 
-const ARCHIVE_STATUSES = ['ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA'];
-
 const ArchivedPrescriptionsPage = () => {
   const { user } = useAuth();
+  const { metadata, byCategory } = useMetadata();
+
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
+  const archiveOptions = useMemo(
+    () => byCategory(metadata.prescriptionStatuses, 'ARCHIVED'),
+    [metadata, byCategory],
+  );
+  const archiveCodes = useMemo(() => archiveOptions.map(o => o.code), [archiveOptions]);
+
   useEffect(() => {
-    if (!user?.pesel) return;
+    if (!user?.pesel || archiveCodes.length === 0) return;
     fetchPrescriptions(user.pesel)
-      .then(data =>
-        setPrescriptions(data.filter(p => ARCHIVE_STATUSES.includes(p.status))),
-      )
+      .then(data => setPrescriptions(data.filter(p => archiveCodes.includes(p.status))))
       .finally(() => setIsLoading(false));
-  }, [user?.pesel]);
+  }, [user?.pesel, archiveCodes]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
@@ -60,16 +65,14 @@ const ArchivedPrescriptionsPage = () => {
           className="h-11 px-3 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all min-w-[180px]"
         >
           <option value="">Wszystkie statusy</option>
-          <option value="ZREALIZOWANA">Zrealizowane</option>
-          <option value="ARCHIWALNA">Archiwalne</option>
-          <option value="ANULOWANA">Anulowane</option>
+          {archiveOptions.map(o => (
+            <option key={o.code} value={o.code}>{o.label}</option>
+          ))}
         </select>
       </div>
 
       {isLoading ? (
-        <div className="flex justify-center py-16">
-          <Spinner size="lg" />
-        </div>
+        <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : filtered.length === 0 ? (
         <EmptyState
           title={query || statusFilter ? 'Brak wyników' : 'Brak archiwalnych recept'}
