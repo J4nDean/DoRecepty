@@ -29,7 +29,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-neutral-50">
-      <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-side-primary flex-col justify-between p-10 lg:p-14">
+      <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-gradient-to-br from-brand-600 to-brand-900 flex-col justify-between p-10 lg:p-14">
         <div className="flex items-center gap-3">
           <img src="/icon.svg" alt="DoRecepty" className="w-10 h-10 rounded-lg shadow-sm" />
           <span className="text-white font-semibold text-xl tracking-tight">
