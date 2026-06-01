@@ -1,11 +1,3 @@
--- ═══════════════════════════════════════════════════════════════════════════
---  RECEPTY DEMO (patient_id = 1)
---  Każdy inny użytkownik widzi tylko swoje recepty pobierane przez /prescriptions/me
--- ═══════════════════════════════════════════════════════════════════════════
-DELETE FROM prescription_item WHERE prescription_id IN (
-    SELECT id FROM prescription WHERE patient_id = 1
-);
-DELETE FROM prescription WHERE patient_id = 1;
 
 -- Recepta 1: Nadciśnienie tętnicze
 INSERT INTO prescription (package_key, access_code, issue_date, expiration_date, patient_id, doctor_npwz, clinic_regon, status)
