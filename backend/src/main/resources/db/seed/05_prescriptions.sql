@@ -30,7 +30,8 @@ FROM (VALUES
   ('PKG-KOWALSKI-05', '5510', -10,  20,  '1234567', '123456789', 'PARTIALLY_REALIZED'),
   ('PKG-KOWALSKI-06', '8810', -120, -90, '1234567', '123456789', 'REALIZED'),
   ('PKG-KOWALSKI-07', '7720', -60,  -5,  '7654321', '987654321', 'EXPIRED'),
-  ('PKG-KOWALSKI-08', '8843', -30,  0,   '7654321', '987654321', 'CANCELLED')
+  ('PKG-KOWALSKI-08', '8843', -30,  0,   '7654321', '987654321', 'CANCELLED'),
+  ('PKG-KOWALSKI-09', '9001', -28,  2,   '1234567', '123456789', 'ACTIVE')
 ) AS v(package_key, access_code, issue_off, exp_off, doctor_npwz, clinic_regon, status);
 
 -- =========================================================================
@@ -75,7 +76,9 @@ INSERT INTO prescription_item (prescription_id, prescription_oid, oid_prefix, po
   -- R7 EXPIRED
   ((SELECT id FROM prescription WHERE package_key='PKG-KOWALSKI-07'), 'PL.CSIOZ.KOW.R07.I01', 'PL.CSIOZ.2024', 1, (SELECT id FROM medication WHERE name='Sortis 20'),            1, '1 x 1 tabl. wieczorem',                NULL,             '30%',       'EXPIRED'),
   -- R8 CANCELLED
-  ((SELECT id FROM prescription WHERE package_key='PKG-KOWALSKI-08'), 'PL.CSIOZ.KOW.R08.I01', 'PL.CSIOZ.2024', 1, (SELECT id FROM medication WHERE name='Norvasc'),              1, '1 x 1 tabl. wieczorem',                NULL,             'ryczałt',   'CANCELLED');
+  ((SELECT id FROM prescription WHERE package_key='PKG-KOWALSKI-08'), 'PL.CSIOZ.KOW.R08.I01', 'PL.CSIOZ.2024', 1, (SELECT id FROM medication WHERE name='Norvasc'),              1, '1 x 1 tabl. wieczorem',                NULL,             'ryczałt',   'CANCELLED'),
+  -- R9 ACTIVE, wkrótce wygasa (ważność za 2 dni)
+  ((SELECT id FROM prescription WHERE package_key='PKG-KOWALSKI-09'), 'PL.CSIOZ.KOW.R09.I01', 'PL.CSIOZ.2024', 1, (SELECT id FROM medication WHERE name='Crestor'),              1, '1 x 1 tabl. wieczorem',                NULL,             '30%',       'ACTIVE');
 
 -- =========================================================================
 -- POZYCJE RECEPT — Anna Nowak
