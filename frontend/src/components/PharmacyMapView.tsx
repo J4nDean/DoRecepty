@@ -1,18 +1,10 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import {
-  APIProvider,
-  AdvancedMarker,
-  Map,
-  Pin,
-  useMap,
-  useApiIsLoaded,
-} from '@vis.gl/react-google-maps';
-import { Search } from 'lucide-react';
-import MapPlaceholder from './MapPlaceholder';
-import { updatePharmacyLocation } from '../services/pharmacyService';
-import type { Pharmacy } from '../types/pharmacy';
+import { APIProvider, AdvancedMarker, Map, Pin, useMap, useApiIsLoaded } from '@vis.gl/react-google-maps';
+import { Search, Map as MapIcon } from 'lucide-react';
+import { updatePharmacyLocation } from '../api';
+import type { Pharmacy } from '../types';
 
-type LatLng    = { lat: number; lng: number };
+type LatLng = { lat: number; lng: number };
 type MapBounds = { north: number; south: number; east: number; west: number };
 
 type GeocoderAddressComponent = { long_name: string; types: string[] };
@@ -37,26 +29,29 @@ declare global {
 }
 
 const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
-const DEFAULT_ZOOM             = 13;
-const GEOCODE_BATCH_LIMIT      = 25;
+const DEFAULT_ZOOM = 13;
+const GEOCODE_BATCH_LIMIT = 25;
 
-const SELECTED_PIN = {
-  background:  '#2563EB',
-  borderColor: '#1E3A8A',
-  glyphColor:  '#1E3A8A',
-} as const;
+// Domyślna pinezka — czerwona jak pinezka w logo. Zaznaczona — granatowa (kolor akcentu).
+const DEFAULT_PIN = { background: '#EA4335', borderColor: '#B31412', glyphColor: '#7F0F0A' } as const;
+const SELECTED_PIN = { background: '#1d4ed8', borderColor: '#1e40af', glyphColor: '#1e40af' } as const;
+const FULL_AVAILABILITY_PIN = { background: '#15803D', borderColor: '#14532D', glyphColor: '#14532D' } as const;
+const PARTIAL_AVAILABILITY_PIN = { background: '#EAB308', borderColor: '#854D0E', glyphColor: '#713F12' } as const;
 
-const FULL_AVAILABILITY_PIN = {
-  background:  '#15803D',
-  borderColor: '#14532D',
-  glyphColor:  '#14532D',
-} as const;
-
-const PARTIAL_AVAILABILITY_PIN = {
-  background:  '#EAB308',
-  borderColor: '#854D0E',
-  glyphColor:  '#713F12',
-} as const;
+// Zastępczy widok, gdy nie ma klucza API do Google Maps.
+const MapPlaceholder = ({ className = '', message }: { className?: string; message?: string }) => (
+  <div
+    className={`bg-neutral-100 rounded-xl flex flex-col items-center justify-center text-neutral-400 border border-neutral-200 ${className}`}
+    role="img"
+    aria-label="Mapa aptek"
+  >
+    <div className="w-14 h-14 bg-neutral-200 rounded-full flex items-center justify-center mb-3">
+      <MapIcon size={26} className="text-neutral-400" />
+    </div>
+    <p className="text-sm font-medium text-neutral-500">{message ?? 'Mapa aptek'}</p>
+    <p className="text-xs text-neutral-400 mt-0.5">Integracja z Google Maps</p>
+  </div>
+);
 
 const isGeocoded = (p: Pharmacy): p is Pharmacy & { latitude: number; longitude: number } =>
   typeof p.latitude === 'number' && typeof p.longitude === 'number';
@@ -75,33 +70,26 @@ const MapPanner = ({ center, zoom }: { center: LatLng; zoom?: number }) => {
 };
 
 interface MapContentProps {
-  pharmacies:       Pharmacy[];
-  selectedId?:      string | null;
-  onSelect?:        (id: string) => void;
-  onLoadInArea?:    (bounds: MapBounds) => void;
+  pharmacies: Pharmacy[];
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
+  onLoadInArea?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
-  userLocation?:    LatLng | null;
-  searchCity?:      string;
-  defaultZoom?:     number;
-  className:        string;
+  userLocation?: LatLng | null;
+  searchCity?: string;
+  defaultZoom?: number;
+  className: string;
 }
 
 const MapContent = ({
-  pharmacies,
-  selectedId,
-  onSelect,
-  onLoadInArea,
-  onVisibleChange,
-  userLocation,
-  searchCity,
-  defaultZoom = DEFAULT_ZOOM,
-  className,
+  pharmacies, selectedId, onSelect, onLoadInArea, onVisibleChange,
+  userLocation, searchCity, defaultZoom = DEFAULT_ZOOM, className,
 }: MapContentProps) => {
   const isLoaded = useApiIsLoaded();
-  const [center,     setCenter]    = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
+  const [center, setCenter] = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
   const [zoomTarget, setZoomTarget] = useState<number | undefined>(undefined);
-  const [mapBounds,  setMapBounds] = useState<MapBounds | null>(null);
-  const [displayed,  setDisplayed] = useState<Pharmacy[]>(pharmacies);
+  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
+  const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
 
   const onVisibleChangeRef = useRef(onVisibleChange);
   useEffect(() => { onVisibleChangeRef.current = onVisibleChange; });
@@ -129,10 +117,7 @@ const MapContent = ({
       { address: `${searchCity}, Poland` },
       (results, status) => {
         if (status === 'OK' && results?.[0]) {
-          setCenter({
-            lat: results[0].geometry.location.lat(),
-            lng: results[0].geometry.location.lng(),
-          });
+          setCenter({ lat: results[0].geometry.location.lat(), lng: results[0].geometry.location.lng() });
         }
       },
     );
@@ -151,9 +136,7 @@ const MapContent = ({
           if (status !== 'OK' || !results?.[0]) return;
           const lat = results[0].geometry.location.lat();
           const lng = results[0].geometry.location.lng();
-          setDisplayed(prev => prev.map(p =>
-            p.id === pharmacy.id ? { ...p, latitude: lat, longitude: lng } : p,
-          ));
+          setDisplayed(prev => prev.map(p => (p.id === pharmacy.id ? { ...p, latitude: lat, longitude: lng } : p)));
           updatePharmacyLocation(pharmacy.name, pharmacy.address, pharmacy.city, lat, lng);
         },
       );
@@ -162,14 +145,10 @@ const MapContent = ({
 
   const visibleDisplayed = useMemo(() => {
     const geocoded = displayed.filter(isGeocoded);
-    return mapBounds
-      ? geocoded.filter(p => inBounds(p.latitude, p.longitude, mapBounds))
-      : geocoded;
+    return mapBounds ? geocoded.filter(p => inBounds(p.latitude, p.longitude, mapBounds)) : geocoded;
   }, [displayed, mapBounds]);
 
-  useEffect(() => {
-    onVisibleChangeRef.current?.(visibleDisplayed);
-  }, [visibleDisplayed]);
+  useEffect(() => { onVisibleChangeRef.current?.(visibleDisplayed); }, [visibleDisplayed]);
 
   const handleCameraChanged = useCallback((ev: { detail: { bounds?: MapBounds } }) => {
     if (ev.detail.bounds) setMapBounds(ev.detail.bounds);
@@ -181,38 +160,25 @@ const MapContent = ({
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
-      <Map
-        defaultCenter={center}
-        defaultZoom={defaultZoom}
-        mapId="DEMO_MAP_ID"
-        gestureHandling="greedy"
-        onCameraChanged={handleCameraChanged}
-      >
+      <Map defaultCenter={center} defaultZoom={defaultZoom} mapId="DEMO_MAP_ID" gestureHandling="greedy" onCameraChanged={handleCameraChanged}>
         {visibleDisplayed.map(p => {
           const isSelected = p.id === selectedId;
           const pinByAvailability =
-            p.prescriptionAvailability === 'FULL'    ? FULL_AVAILABILITY_PIN
+            p.prescriptionAvailability === 'FULL' ? FULL_AVAILABILITY_PIN
             : p.prescriptionAvailability === 'PARTIAL' ? PARTIAL_AVAILABILITY_PIN
             : null;
           return (
-            <AdvancedMarker
-              key={p.id}
-              position={{ lat: p.latitude, lng: p.longitude }}
-              title={p.name}
-              onClick={() => onSelect?.(p.id)}
-            >
+            <AdvancedMarker key={p.id} position={{ lat: p.latitude, lng: p.longitude }} title={p.name} onClick={() => onSelect?.(p.id)}>
               {isSelected
                 ? <Pin {...SELECTED_PIN} scale={1.2} />
-                : pinByAvailability
-                  ? <Pin {...pinByAvailability} scale={1.1} />
-                  : <Pin />}
+                : pinByAvailability ? <Pin {...pinByAvailability} scale={1.1} /> : <Pin {...DEFAULT_PIN} />}
             </AdvancedMarker>
           );
         })}
 
         {userLocation && (
           <AdvancedMarker position={userLocation} title="Twoja lokalizacja">
-            <div className="w-4 h-4 rounded-full bg-blue-600 border-[3px] border-white shadow-md" />
+            <div className="w-4 h-4 rounded-full bg-brand-600 border-[3px] border-white shadow-md" />
           </AdvancedMarker>
         )}
 
@@ -223,7 +189,7 @@ const MapContent = ({
         <button
           type="button"
           onClick={handleSearchArea}
-          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-3 py-2 sm:px-4 rounded-full text-xs sm:text-sm font-medium text-slate-700 hover:bg-slate-50 active:bg-slate-100 border border-slate-200 whitespace-nowrap"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 inline-flex items-center gap-2 bg-white shadow-lg px-3 py-2 sm:px-4 rounded-full text-xs sm:text-sm font-medium text-neutral-700 hover:bg-neutral-50 active:bg-neutral-100 border border-neutral-200 whitespace-nowrap"
         >
           <Search size={14} className="shrink-0" />
           <span className="sm:hidden">Szukaj tutaj</span>
@@ -235,27 +201,20 @@ const MapContent = ({
 };
 
 export interface PharmacyMapViewProps {
-  pharmacies?:      Pharmacy[];
-  selectedId?:      string | null;
-  onSelect?:        (id: string) => void;
-  onLoadInArea?:    (bounds: MapBounds) => void;
+  pharmacies?: Pharmacy[];
+  selectedId?: string | null;
+  onSelect?: (id: string) => void;
+  onLoadInArea?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
-  userLocation?:    LatLng | null;
-  searchCity?:      string;
-  defaultZoom?:     number;
-  className?:       string;
+  userLocation?: LatLng | null;
+  searchCity?: string;
+  defaultZoom?: number;
+  className?: string;
 }
 
 const PharmacyMapView = ({
-  pharmacies = [],
-  selectedId,
-  onSelect,
-  onLoadInArea,
-  onVisibleChange,
-  userLocation,
-  searchCity,
-  defaultZoom,
-  className = '',
+  pharmacies = [], selectedId, onSelect, onLoadInArea, onVisibleChange,
+  userLocation, searchCity, defaultZoom, className = '',
 }: PharmacyMapViewProps) => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
   if (!apiKey) {

@@ -582,3 +582,17 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
   ('Apteka', 'Żwirki i Wigury 1/1.280', 'Warszawa', '02-143', '22 718-20-81', 52.2297, 21.0122),
   ('Apteka "Przedwiośnie"', 'Płochocińska 199A/C4-U', 'Warszawa', '03-044', '503 514 451', 52.3641014, 21.0272647),
   ('Zdrowa Rodzina', 'ul. Herbu Oksza 11/u1', 'Warszawa', '02-495', '', 52.2021241, 20.8850597);
+
+-- Domyślne godziny otwarcia dla wszystkich aptek
+UPDATE pharmacy SET
+  opening_hours_weekdays = '08:00 – 20:00',
+  opening_hours_saturday = '09:00 – 14:00',
+  opening_hours_sunday   = NULL
+WHERE opening_hours_weekdays IS NULL;
+
+-- Apteki całodobowe (na podstawie nazwy)
+UPDATE pharmacy SET
+  opening_hours_weekdays = 'całodobowo',
+  opening_hours_saturday = 'całodobowo',
+  opening_hours_sunday   = 'całodobowo'
+WHERE name ILIKE '%24%' OR name ILIKE '%non stop%';
