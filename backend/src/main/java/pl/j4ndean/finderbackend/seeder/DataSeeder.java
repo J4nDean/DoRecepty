@@ -40,9 +40,10 @@ public class DataSeeder implements CommandLineRunner {
     @Value("${seed.personal.lastname:Kowalski}")
     private String personalLastName;
 
-    private final DataSource      dataSource;
-    private final JdbcTemplate    jdbcTemplate;
-    private final PasswordEncoder passwordEncoder;
+    private final DataSource                dataSource;
+    private final JdbcTemplate              jdbcTemplate;
+    private final PasswordEncoder           passwordEncoder;
+    private final PrescriptionSeedService   prescriptionSeedService;
 
     @Override
     public void run(String... args) {
@@ -52,8 +53,20 @@ public class DataSeeder implements CommandLineRunner {
         ensurePersonalUser();
         runSeed("db/seed/01_pharmacies.sql");
         runSeed("db/seed/02_medications.sql");
-        runSeed("db/seed/03_prescriptions.sql");
         runSeed("db/seed/04_pharmacy_inventory.sql");
+        seedPrescriptionsForAllUsers();
+    }
+
+    private void seedPrescriptionsForAllUsers() {
+        List<Long> userIds = jdbcTemplate.queryForList(
+                "SELECT id FROM app_user ORDER BY id", Long.class);
+        for (Long id : userIds) {
+            try {
+                prescriptionSeedService.seedForUser(id);
+            } catch (Exception e) {
+                log.warn("Nie udało się zaseedować recept dla user_id={}: {}", id, e.getMessage());
+            }
+        }
     }
 
     private void fixPrescriptionSequence() {
@@ -86,20 +99,18 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void ensureDemoUser() {
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM app_user WHERE id = 1", Integer.class);
-        if (count != null && count > 0) {
-            log.info("Demo-użytkownik (id=1) już istnieje");
-            return;
-        }
         jdbcTemplate.update(
                 "INSERT INTO app_user (id, first_name, last_name, email, password_hash, pesel, role, created_at) " +
-                "VALUES (1, 'Jan', 'Demo', ?, ?, ?, 'PATIENT', NOW())",
+                "VALUES (1, 'Jan', 'Demo', ?, ?, ?, 'PATIENT', NOW()) " +
+                "ON CONFLICT (id) DO UPDATE SET " +
+                "  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, " +
+                "  email = EXCLUDED.email, password_hash = EXCLUDED.password_hash, " +
+                "  pesel = EXCLUDED.pesel, role = EXCLUDED.role",
                 DEMO_EMAIL,
                 passwordEncoder.encode(DEMO_PASSWORD),
                 DEMO_PESEL);
         syncUserSequence();
-        log.info("Demo-użytkownik utworzony: {}", DEMO_EMAIL);
+        log.info("Demo-użytkownik upserted: {}", DEMO_EMAIL);
     }
 
     private void ensurePersonalUser() {
@@ -107,22 +118,20 @@ public class DataSeeder implements CommandLineRunner {
             log.info("Env vars SEED_PERSONAL_* nie ustawione — konto osobiste nie zostanie utworzone");
             return;
         }
-        Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM app_user WHERE id = 2", Integer.class);
-        if (count != null && count > 0) {
-            log.info("Konto osobiste (id=2) już istnieje");
-            return;
-        }
         jdbcTemplate.update(
                 "INSERT INTO app_user (id, first_name, last_name, email, password_hash, pesel, role, created_at) " +
-                "VALUES (2, ?, ?, ?, ?, ?, 'PATIENT', NOW())",
+                "VALUES (2, ?, ?, ?, ?, ?, 'PATIENT', NOW()) " +
+                "ON CONFLICT (id) DO UPDATE SET " +
+                "  first_name = EXCLUDED.first_name, last_name = EXCLUDED.last_name, " +
+                "  email = EXCLUDED.email, password_hash = EXCLUDED.password_hash, " +
+                "  pesel = EXCLUDED.pesel, role = EXCLUDED.role",
                 personalFirstName,
                 personalLastName,
                 personalEmail,
                 passwordEncoder.encode(personalPassword),
                 personalPesel);
         syncUserSequence();
-        log.info("Konto osobiste utworzone: {}", personalEmail);
+        log.info("Konto osobiste upserted: {}", personalEmail);
     }
 
     private void syncUserSequence() {
