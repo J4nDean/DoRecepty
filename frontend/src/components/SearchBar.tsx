@@ -40,11 +40,7 @@ export const SearchBar = ({
   return (
     <form onSubmit={handleSubmit} className={`flex gap-2 ${className}`} role="search">
       <div className="relative flex-1">
-        <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          size={17}
-          aria-hidden
-        />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" size={17} aria-hidden />
         <input
           type="search"
           value={value}
@@ -52,7 +48,7 @@ export const SearchBar = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full pl-10 ${onLocate ? 'pr-11' : 'pr-4'} h-11 border border-slate-200 rounded-lg bg-white text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all`}
+          className={`w-full pl-10 ${onLocate ? 'pr-11' : 'pr-4'} h-11 border border-neutral-200 rounded-xl bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-600/20 transition-all`}
         />
         {onLocate && (
           <button
@@ -61,7 +57,7 @@ export const SearchBar = ({
             disabled={isLocating}
             title="Użyj mojej lokalizacji"
             aria-label="Użyj mojej lokalizacji"
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors text-slate-500 hover:text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+            className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-md transition-colors text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-50"
           >
             <Crosshair size={18} />
           </button>
@@ -69,7 +65,7 @@ export const SearchBar = ({
       </div>
       <button
         type="submit"
-        className="px-5 h-11 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shrink-0"
+        className="px-5 h-11 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors shrink-0"
       >
         Szukaj
       </button>
