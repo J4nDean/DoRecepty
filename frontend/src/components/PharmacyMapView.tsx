@@ -64,9 +64,13 @@ const isGeocoded = (p: Pharmacy): p is Pharmacy & { latitude: number; longitude:
 const inBounds = (lat: number, lng: number, b: MapBounds) =>
   lat >= b.south && lat <= b.north && lng >= b.west && lng <= b.east;
 
-const MapPanner = ({ center }: { center: LatLng }) => {
+const MapPanner = ({ center, zoom }: { center: LatLng; zoom?: number }) => {
   const map = useMap();
-  useEffect(() => { map?.panTo(center); }, [map, center]);
+  useEffect(() => {
+    if (!map) return;
+    map.panTo(center);
+    if (zoom != null) map.setZoom(zoom);
+  }, [map, center, zoom]);
   return null;
 };
 
@@ -94,21 +98,28 @@ const MapContent = ({
   className,
 }: MapContentProps) => {
   const isLoaded = useApiIsLoaded();
-  const [center,    setCenter]    = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
-  const [mapBounds, setMapBounds] = useState<MapBounds | null>(null);
-  const [displayed, setDisplayed] = useState<Pharmacy[]>(pharmacies);
+  const [center,     setCenter]    = useState<LatLng>(userLocation ?? DEFAULT_CENTER);
+  const [zoomTarget, setZoomTarget] = useState<number | undefined>(undefined);
+  const [mapBounds,  setMapBounds] = useState<MapBounds | null>(null);
+  const [displayed,  setDisplayed] = useState<Pharmacy[]>(pharmacies);
 
   const onVisibleChangeRef = useRef(onVisibleChange);
   useEffect(() => { onVisibleChangeRef.current = onVisibleChange; });
 
   useEffect(() => { setDisplayed(pharmacies); }, [pharmacies]);
 
-  useEffect(() => { if (userLocation) setCenter(userLocation); }, [userLocation]);
+  useEffect(() => {
+    if (userLocation) {
+      setCenter(userLocation);
+      setZoomTarget(15);
+    }
+  }, [userLocation]);
 
   useEffect(() => {
     const selected = displayed.find(p => p.id === selectedId);
     if (selected && isGeocoded(selected)) {
       setCenter({ lat: selected.latitude, lng: selected.longitude });
+      setZoomTarget(16);
     }
   }, [selectedId, displayed]);
 
@@ -205,7 +216,7 @@ const MapContent = ({
           </AdvancedMarker>
         )}
 
-        <MapPanner center={center} />
+        <MapPanner center={center} zoom={zoomTarget} />
       </Map>
 
       {onLoadInArea && (

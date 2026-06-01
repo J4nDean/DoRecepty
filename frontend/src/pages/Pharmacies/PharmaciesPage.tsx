@@ -221,10 +221,10 @@ const PharmaciesPage = () => {
           onLoadInArea={handleLoadInArea}
           userLocation={userLocation}
           searchCity={searchCity}
-          className="h-[52dvh] min-h-[300px] -mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
+          className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
         />
 
-        <div className="h-[38dvh] overflow-y-auto overscroll-contain space-y-3 pb-2 lg:h-auto lg:w-80 lg:overflow-y-auto lg:pr-1 scroll-smooth">
+        <div className="h-[32dvh] min-h-[180px] overflow-y-auto overscroll-contain space-y-3 pb-2 lg:h-auto lg:w-80 lg:overflow-y-auto lg:pr-1 scroll-smooth">
           {isLoading ? (
             <div className="flex justify-center py-12"><Spinner size="lg" /></div>
           ) : !searched ? (
