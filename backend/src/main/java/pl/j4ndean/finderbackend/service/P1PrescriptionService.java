@@ -30,8 +30,8 @@ public class P1PrescriptionService {
                 .map(p -> PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())));
     }
 
-    public List<PrescriptionDto> getByPesel(String pesel) {
-        return prescriptionRepository.findByPatientPesel(pesel).stream()
+    public List<PrescriptionDto> getByUserId(Long userId) {
+        return prescriptionRepository.findByPatientId(userId).stream()
                 .map(p -> PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())))
                 .toList();
     }

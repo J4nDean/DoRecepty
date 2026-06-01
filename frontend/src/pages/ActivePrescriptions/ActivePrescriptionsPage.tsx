@@ -58,11 +58,11 @@ const ActivePrescriptionsPage = () => {
   );
 
   useEffect(() => {
-    if (!user?.pesel || activeCodes.length === 0) return;
-    fetchPrescriptions(user.pesel)
+    if (activeCodes.length === 0) return;
+    fetchPrescriptions()
       .then(data => setPrescriptions(data.filter(p => activeCodes.includes(p.status))))
       .finally(() => setIsLoading(false));
-  }, [user?.pesel, activeCodes]);
+  }, [activeCodes]);
 
   const sorted = useMemo(() => {
     const list = [...prescriptions];
