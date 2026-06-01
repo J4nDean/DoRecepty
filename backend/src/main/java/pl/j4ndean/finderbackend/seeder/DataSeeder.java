@@ -1,31 +1,29 @@
-package pl.j4ndean.finderbackend.service;
+package pl.j4ndean.finderbackend.seeder;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 
 @Slf4j
-@Service
+@Component
+@Order(1)
 @RequiredArgsConstructor
-public class PharmacyImportService {
+public class DataSeeder implements CommandLineRunner {
 
-    // Demo user — stały konto testowe, zawsze id=1
-    private static final String DEMO_PESEL    = "44051401458";
     private static final String DEMO_EMAIL    = "demo@dorecepty.pl";
     private static final String DEMO_PASSWORD = "Demo1234!";
+    private static final String DEMO_PESEL    = "44051401458";
 
-    // Konto osobiste — konfigurowane przez env vars Railway:
-    //   SEED_PERSONAL_EMAIL, SEED_PERSONAL_PASSWORD, SEED_PERSONAL_PESEL
-    //   SEED_PERSONAL_FIRSTNAME (domyślnie: Jan), SEED_PERSONAL_LASTNAME (domyślnie: Kowalski)
     @Value("${seed.personal.email:}")
     private String personalEmail;
 
@@ -45,8 +43,9 @@ public class PharmacyImportService {
     private final JdbcTemplate    jdbcTemplate;
     private final PasswordEncoder passwordEncoder;
 
-    @PostConstruct
-    public void init() {
+    @Override
+    public void run(String... args) {
+        fixPrescriptionSequence();
         truncateAll();
         ensureDemoUser();
         ensurePersonalUser();
@@ -56,20 +55,23 @@ public class PharmacyImportService {
         runSeed("db/seed/04_pharmacy_inventory.sql");
     }
 
-    /**
-     * Czyści wszystkie tabele danych. Nie dotyka app_user — konta przeżywają restart.
-     */
+    private void fixPrescriptionSequence() {
+        try {
+            jdbcTemplate.execute("CREATE SEQUENCE IF NOT EXISTS prescription_id_seq");
+            jdbcTemplate.execute(
+                    "ALTER TABLE prescription ALTER COLUMN id SET DEFAULT nextval('prescription_id_seq')");
+        } catch (Exception e) {
+            log.debug("Prescription sequence already configured: {}", e.getMessage());
+        }
+    }
+
     private void truncateAll() {
         jdbcTemplate.execute(
-            "TRUNCATE prescription_item, pharmacy_inventory, user_favorite_pharmacy, " +
-            "prescription, medication, pharmacy RESTART IDENTITY"
-        );
+                "TRUNCATE prescription_item, pharmacy_inventory, user_favorite_pharmacy, " +
+                "prescription, medication, pharmacy RESTART IDENTITY");
         log.info("Tabele danych wyczyszczone");
     }
 
-    /**
-     * Tworzy demo-użytkownika z id=1, jeśli nie istnieje.
-     */
     private void ensureDemoUser() {
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT COUNT(*) FROM app_user WHERE id = 1", Integer.class);
@@ -82,20 +84,14 @@ public class PharmacyImportService {
                 "VALUES (1, 'Jan', 'Demo', ?, ?, ?, 'PATIENT', NOW())",
                 DEMO_EMAIL,
                 passwordEncoder.encode(DEMO_PASSWORD),
-                DEMO_PESEL
-        );
-        syncSequence();
-        log.info("Demo-użytkownik utworzony: {} (pesel: {})", DEMO_EMAIL, DEMO_PESEL);
+                DEMO_PESEL);
+        syncUserSequence();
+        log.info("Demo-użytkownik utworzony: {}", DEMO_EMAIL);
     }
 
-    /**
-     * Tworzy konto osobiste z id=2 jeśli ustawione env vars:
-     *   SEED_PERSONAL_EMAIL, SEED_PERSONAL_PASSWORD, SEED_PERSONAL_PESEL
-     * Opcjonalnie: SEED_PERSONAL_FIRSTNAME, SEED_PERSONAL_LASTNAME
-     */
     private void ensurePersonalUser() {
         if (personalEmail.isBlank() || personalPassword.isBlank() || personalPesel.isBlank()) {
-            log.info("Env vars SEED_PERSONAL_* nie są ustawione — konto osobiste (id=2) nie zostanie utworzone");
+            log.info("Env vars SEED_PERSONAL_* nie ustawione — konto osobiste nie zostanie utworzone");
             return;
         }
         Integer count = jdbcTemplate.queryForObject(
@@ -111,13 +107,12 @@ public class PharmacyImportService {
                 personalLastName,
                 personalEmail,
                 passwordEncoder.encode(personalPassword),
-                personalPesel
-        );
-        syncSequence();
-        log.info("Konto osobiste utworzone: {} (pesel: {})", personalEmail, personalPesel);
+                personalPesel);
+        syncUserSequence();
+        log.info("Konto osobiste utworzone: {}", personalEmail);
     }
 
-    private void syncSequence() {
+    private void syncUserSequence() {
         jdbcTemplate.execute(
                 "SELECT setval(pg_get_serial_sequence('app_user', 'id'), " +
                 "GREATEST((SELECT MAX(id) FROM app_user), 2))");
