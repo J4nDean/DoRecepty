@@ -44,9 +44,11 @@ function mapPrescription(p: ApiPrescription, pesel: string): Prescription {
   };
 }
 
-export const fetchPrescriptions = async (pesel: string): Promise<Prescription[]> => {
-  const res = await apiClient.get<ApiPrescription[]>(`/prescriptions/${pesel}`, noCache());
-  return res.data.map(p => mapPrescription(p, pesel));
+// Właściciel recept wynika z tokenu JWT (endpoint /me), nie z PESEL-a w URL-u.
+// Argument zostaje opcjonalnie dla zgodności z miejscami wywołań — nie jest używany do zapytania.
+export const fetchPrescriptions = async (_pesel?: string): Promise<Prescription[]> => {
+  const res = await apiClient.get<ApiPrescription[]>(`/prescriptions/me`, noCache());
+  return res.data.map(p => mapPrescription(p, p.patient?.pesel ?? ''));
 };
 
 export const fetchPrescriptionById = async (id: string): Promise<Prescription | undefined> => {

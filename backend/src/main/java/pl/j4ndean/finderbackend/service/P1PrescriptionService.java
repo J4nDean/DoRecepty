@@ -26,17 +26,24 @@ public class P1PrescriptionService {
     private final PrescriptionItemRepository prescriptionItemRepository;
     private final PharmacyInventoryRepository pharmacyInventoryRepository;
 
+    /** Recepty zalogowanego użytkownika (po jego id z tokenu). */
     @Transactional(readOnly = true)
-    public Optional<PrescriptionDto> getById(Long id) {
-        return prescriptionRepository.findByIdWithPatient(id)
-                .map(p -> PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())));
+    public List<PrescriptionDto> getByPatientId(Long userId) {
+        return prescriptionRepository.findByPatientId(userId).stream()
+                .map(this::toDto)
+                .toList();
     }
 
+    /** Szczegóły recepty — tylko jeśli należy do danego użytkownika. */
     @Transactional(readOnly = true)
-    public List<PrescriptionDto> getByPesel(String pesel) {
-        return prescriptionRepository.findByPatientPesel(pesel).stream()
-                .map(p -> PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())))
-                .toList();
+    public Optional<PrescriptionDto> getByIdForUser(Long id, Long userId) {
+        return prescriptionRepository.findByIdWithPatient(id)
+                .filter(p -> p.getPatient() != null && userId.equals(p.getPatient().getId()))
+                .map(this::toDto);
+    }
+
+    private PrescriptionDto toDto(pl.j4ndean.finderbackend.model.Prescription p) {
+        return PrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId()));
     }
 
     @Transactional(readOnly = true)
