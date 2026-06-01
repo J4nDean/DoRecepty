@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
+import java.util.List;
 
 @Slf4j
 @Component
@@ -66,10 +67,22 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private void truncateAll() {
-        jdbcTemplate.execute(
-                "TRUNCATE prescription_item, pharmacy_inventory, user_favorite_pharmacy, " +
-                "prescription, medication, pharmacy RESTART IDENTITY");
-        log.info("Tabele danych wyczyszczone");
+        try {
+            jdbcTemplate.execute(
+                    "TRUNCATE prescription_item, pharmacy_inventory, user_favorite_pharmacy, " +
+                    "prescription, medication, pharmacy RESTART IDENTITY");
+            log.info("Tabele danych wyczyszczone");
+        } catch (Exception e) {
+            log.error("Truncate nie powiódł się, próba fallback: {}", e.getMessage());
+            for (String table : List.of("prescription_item", "pharmacy_inventory",
+                    "user_favorite_pharmacy", "prescription", "medication", "pharmacy")) {
+                try {
+                    jdbcTemplate.execute("TRUNCATE " + table + " RESTART IDENTITY CASCADE");
+                } catch (Exception ex) {
+                    log.warn("Nie można wyczyścić tabeli {}: {}", table, ex.getMessage());
+                }
+            }
+        }
     }
 
     private void ensureDemoUser() {
