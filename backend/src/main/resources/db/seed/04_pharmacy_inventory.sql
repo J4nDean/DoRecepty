@@ -1,12 +1,4 @@
--- Stan magazynowy aptek.
--- Zawiera realistyczne ilości leków na stanie w różnych aptekach.
--- Leki są pogrupowane wg kategorii ATC (bóle, alergie, kardiologia, itp.)
 
-DELETE FROM pharmacy_inventory;
-
--- ============================================================================
--- APTEKA BATOREGO (Ząbki) — pełen asortyment
--- ============================================================================
 
 -- Leki przeciwbólowe i przeciwgorączkowe
 INSERT INTO pharmacy_inventory (pharmacy_id, medication_id, stock_quantity)
