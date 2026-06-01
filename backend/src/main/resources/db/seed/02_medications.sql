@@ -102,4 +102,5 @@ INSERT INTO medication (gtin, name, common_name, strength, pharmaceutical_form, 
   ('05909990705450', 'Metformin Bluefish', 'Metformini hydrochloridum', '500 mg', 'Tabletki powlekane', '20 tabl.', 'A10BA02', 'Rp'),
   ('05909990609109', 'Glucophage XR', 'Metformini hydrochloridum', '500 mg', 'Tabletki o przedłużonym uwalnianiu', '30 tabl.', 'A10BA02', 'Rp'),
   ('05909000000017', 'Bezolen', 'Bezolenum', '100 mg', 'Tabletki powlekane', '20 tabl.', 'N02BA20', 'Rp'),
-  ('05909000000024', 'Vasodol', 'Vasodolum', '5 mg', 'Tabletki', '30 tabl.', 'C09BA15', 'Rp');
+  ('05909000000024', 'Vasodol', 'Vasodolum', '5 mg', 'Tabletki', '30 tabl.', 'C09BA15', 'Rp'),
+  ('05909991234560', 'Metformina Aurovitas', 'Metformini hydrochloridum', '500 mg', 'Tabletki powlekane', '60 tabl.', 'A10BA02', 'Rp');
