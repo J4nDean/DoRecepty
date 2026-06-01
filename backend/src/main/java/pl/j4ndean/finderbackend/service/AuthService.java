@@ -12,7 +12,6 @@ import pl.j4ndean.finderbackend.exception.ConflictException;
 import pl.j4ndean.finderbackend.model.Role;
 import pl.j4ndean.finderbackend.model.User;
 import pl.j4ndean.finderbackend.repository.UserRepository;
-import pl.j4ndean.finderbackend.seeder.PrescriptionSeedService;
 
 @Service
 @RequiredArgsConstructor
@@ -20,10 +19,9 @@ public class AuthService {
 
     private static final String INVALID_CREDENTIALS = "Nieprawidłowy email lub hasło";
 
-    private final UserRepository           userRepository;
-    private final PasswordEncoder          passwordEncoder;
-    private final JwtService               jwtService;
-    private final PrescriptionSeedService  prescriptionSeedService;
+    private final UserRepository  userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService      jwtService;
 
     public AuthResponse register(RegisterRequest req) {
         if (userRepository.existsByEmail(req.email())) {
@@ -41,8 +39,6 @@ public class AuthService {
                 .passwordHash(passwordEncoder.encode(req.password()))
                 .role(Role.PATIENT)
                 .build());
-
-        prescriptionSeedService.seedForUser(saved.getId());
 
         return AuthResponse.from(saved, generateToken(saved));
     }
