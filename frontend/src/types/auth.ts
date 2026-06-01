@@ -15,6 +15,7 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
+  pesel: string;
   password: string;
   confirmPassword: string;
 }

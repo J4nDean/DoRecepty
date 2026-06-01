@@ -41,9 +41,21 @@ const DEFAULT_ZOOM             = 13;
 const GEOCODE_BATCH_LIMIT      = 25;
 
 const SELECTED_PIN = {
-  background:  '#43A047',
-  borderColor: '#1B5E20',
-  glyphColor:  '#1B5E20',
+  background:  '#2563EB',
+  borderColor: '#1E3A8A',
+  glyphColor:  '#1E3A8A',
+} as const;
+
+const FULL_AVAILABILITY_PIN = {
+  background:  '#15803D',
+  borderColor: '#14532D',
+  glyphColor:  '#14532D',
+} as const;
+
+const PARTIAL_AVAILABILITY_PIN = {
+  background:  '#EAB308',
+  borderColor: '#854D0E',
+  glyphColor:  '#713F12',
 } as const;
 
 const isGeocoded = (p: Pharmacy): p is Pharmacy & { latitude: number; longitude: number } =>
@@ -66,6 +78,7 @@ interface MapContentProps {
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?:    LatLng | null;
   searchCity?:      string;
+  defaultZoom?:     number;
   className:        string;
 }
 
@@ -77,6 +90,7 @@ const MapContent = ({
   onVisibleChange,
   userLocation,
   searchCity,
+  defaultZoom = DEFAULT_ZOOM,
   className,
 }: MapContentProps) => {
   const isLoaded = useApiIsLoaded();
@@ -158,21 +172,32 @@ const MapContent = ({
     <div className={`relative overflow-hidden ${className}`}>
       <Map
         defaultCenter={center}
-        defaultZoom={DEFAULT_ZOOM}
+        defaultZoom={defaultZoom}
         mapId="DEMO_MAP_ID"
         gestureHandling="greedy"
         onCameraChanged={handleCameraChanged}
       >
-        {visibleDisplayed.map(p => (
-          <AdvancedMarker
-            key={p.id}
-            position={{ lat: p.latitude, lng: p.longitude }}
-            title={p.name}
-            onClick={() => onSelect?.(p.id)}
-          >
-            {p.id === selectedId ? <Pin {...SELECTED_PIN} scale={1.2} /> : <Pin />}
-          </AdvancedMarker>
-        ))}
+        {visibleDisplayed.map(p => {
+          const isSelected = p.id === selectedId;
+          const pinByAvailability =
+            p.prescriptionAvailability === 'FULL'    ? FULL_AVAILABILITY_PIN
+            : p.prescriptionAvailability === 'PARTIAL' ? PARTIAL_AVAILABILITY_PIN
+            : null;
+          return (
+            <AdvancedMarker
+              key={p.id}
+              position={{ lat: p.latitude, lng: p.longitude }}
+              title={p.name}
+              onClick={() => onSelect?.(p.id)}
+            >
+              {isSelected
+                ? <Pin {...SELECTED_PIN} scale={1.2} />
+                : pinByAvailability
+                  ? <Pin {...pinByAvailability} scale={1.1} />
+                  : <Pin />}
+            </AdvancedMarker>
+          );
+        })}
 
         {userLocation && (
           <AdvancedMarker position={userLocation} title="Twoja lokalizacja">
@@ -206,6 +231,7 @@ export interface PharmacyMapViewProps {
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?:    LatLng | null;
   searchCity?:      string;
+  defaultZoom?:     number;
   className?:       string;
 }
 
@@ -217,6 +243,7 @@ const PharmacyMapView = ({
   onVisibleChange,
   userLocation,
   searchCity,
+  defaultZoom,
   className = '',
 }: PharmacyMapViewProps) => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -234,6 +261,7 @@ const PharmacyMapView = ({
         onVisibleChange={onVisibleChange}
         userLocation={userLocation}
         searchCity={searchCity}
+        defaultZoom={defaultZoom}
         className={className}
       />
     </APIProvider>

@@ -30,4 +30,6 @@ export interface Pharmacy {
   latitude?: number;
   longitude?: number;
   availableMedications?: MedicationAvailability[];
+  hasPrescriptionMedications?: boolean;
+  prescriptionAvailability?: 'FULL' | 'PARTIAL';
 }

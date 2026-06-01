@@ -1,8 +1,6 @@
-import axios from 'axios';
 import type { Pharmacy } from '../types/pharmacy';
 import type { ApiPharmacy } from '../types/api';
-import { mockPharmacies } from '../data/mockPharmacies';
-import { API_BASE_URL } from '../config/api';
+import apiClient from './apiClient';
 
 type HourRange = { open: number; close: number };
 type Bounds = { north: number; south: number; east: number; west: number };
@@ -31,13 +29,10 @@ function todaysHours(api: ApiPharmacy): string | null | undefined {
 
 function isOpenNow(api: ApiPharmacy): boolean {
   if (api.status && api.status !== 'AKTYWNA') return false;
-
   const allHours = [api.openingHoursWeekdays, api.openingHoursSaturday, api.openingHoursSunday];
   if (allHours.some(h => h && ALWAYS_OPEN_RE.test(h))) return true;
-
   const hours = parseOpeningHours(todaysHours(api));
   if (!hours) return false;
-
   const now = new Date();
   const nowMinutes = now.getHours() * MINUTES_PER_HOUR + now.getMinutes();
   return nowMinutes >= hours.open && nowMinutes < hours.close;
@@ -62,22 +57,20 @@ function mapApiPharmacy(api: ApiPharmacy): Pharmacy {
   };
 }
 
-async function getPharmacies(path: string): Promise<ApiPharmacy[]> {
-  const res = await axios.get<ApiPharmacy[]>(`${API_BASE_URL}${path}`);
-  return res.data;
-}
-
-export const searchPharmacies = async (city: string): Promise<Pharmacy[]> => {
+export const searchPharmacies = async (
+  city: string,
+  page = 0,
+  size = 50,
+): Promise<Pharmacy[]> => {
   try {
-    const data = await getPharmacies(`/pharmacies/search?city=${encodeURIComponent(city)}`);
-    return data.map(mapApiPharmacy);
+    const res = await apiClient.get<ApiPharmacy[]>('/pharmacies/search', {
+      params: { city, page, size },
+    });
+    return res.data.map(mapApiPharmacy);
   } catch {
-    return mockPharmacies;
+    return [];
   }
 };
-
-export const fetchNearbyPharmacies = (city = 'Warszawa'): Promise<Pharmacy[]> =>
-  searchPharmacies(city);
 
 export const fetchNearbyByLocation = async (
   lat: number,
@@ -85,18 +78,17 @@ export const fetchNearbyByLocation = async (
   radiusKm = 10,
   limit = 20,
 ): Promise<Pharmacy[]> => {
-  const data = await getPharmacies(
-    `/pharmacies/nearby?lat=${lat}&lng=${lng}&radiusKm=${radiusKm}&limit=${limit}`,
-  );
-  return data.map(mapApiPharmacy);
+  const res = await apiClient.get<ApiPharmacy[]>('/pharmacies/nearby', {
+    params: { lat, lng, radiusKm, limit },
+  });
+  return res.data.map(mapApiPharmacy);
 };
 
 export const fetchPharmaciesInBounds = async (bounds: Bounds): Promise<Pharmacy[]> => {
-  const { north, south, east, west } = bounds;
-  const data = await getPharmacies(
-    `/pharmacies/in-bounds?north=${north}&south=${south}&east=${east}&west=${west}`,
-  );
-  return data.map(mapApiPharmacy);
+  const res = await apiClient.get<ApiPharmacy[]>('/pharmacies/in-bounds', {
+    params: bounds,
+  });
+  return res.data.map(mapApiPharmacy);
 };
 
 export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
@@ -120,9 +112,7 @@ export const updatePharmacyLocation = async (
   longitude: number,
 ): Promise<void> => {
   try {
-    await axios.post(`${API_BASE_URL}/pharmacies/update-location`, {
-      name, address, city, latitude, longitude,
-    });
+    await apiClient.post('/pharmacies/update-location', { name, address, city, latitude, longitude });
   } catch (_) {
     void _;
   }

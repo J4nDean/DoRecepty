@@ -1,14 +1,8 @@
 package pl.j4ndean.finderbackend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pl.j4ndean.finderbackend.model.Pharmacy;
-import pl.j4ndean.finderbackend.repository.PharmacyRepository;
 import pl.j4ndean.finderbackend.service.PharmacyService;
 
 import java.util.List;
@@ -19,11 +13,13 @@ import java.util.List;
 public class PharmacyController {
 
     private final PharmacyService pharmacyService;
-    private final PharmacyRepository pharmacyRepository;
 
     @GetMapping("/search")
-    public List<Pharmacy> searchPharmacies(@RequestParam String city) {
-        return pharmacyService.searchByCity(city);
+    public List<Pharmacy> searchPharmacies(
+            @RequestParam String city,
+            @RequestParam(defaultValue = "0")  int page,
+            @RequestParam(defaultValue = "50") int size) {
+        return pharmacyService.searchByCity(city, page, size);
     }
 
     @GetMapping("/nearby")
@@ -44,13 +40,6 @@ public class PharmacyController {
 
     @PostMapping("/update-location")
     public void updateLocation(@RequestBody Pharmacy pharmacy) {
-        pharmacyRepository.findByCityContainingIgnoreCase(pharmacy.getCity()).stream()
-                .filter(p -> p.getAddress().equalsIgnoreCase(pharmacy.getAddress()))
-                .findFirst()
-                .ifPresent(existing -> {
-                    existing.setLatitude(pharmacy.getLatitude());
-                    existing.setLongitude(pharmacy.getLongitude());
-                    pharmacyRepository.save(existing);
-                });
+        pharmacyService.updateLocation(pharmacy);
     }
 }
