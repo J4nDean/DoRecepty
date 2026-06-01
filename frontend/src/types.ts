@@ -38,6 +38,7 @@ export interface Drug {
   quantity: number;
   unit: string;
   realizationStatus: DrugRealizationStatus;
+  oid?: string;
 }
 
 export interface Prescription {
@@ -48,6 +49,8 @@ export interface Prescription {
   status: PrescriptionStatus;
   doctorName: string;
   doctorSpecialty: string;
+  doctorNpwz?: string;
+  clinicRegon?: string;
   patientPesel: string;
   drugs: Drug[];
   notes?: string;

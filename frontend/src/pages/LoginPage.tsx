@@ -29,9 +29,9 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-neutral-50">
-      <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-gradient-to-br from-brand-500 to-brand-700 flex-col justify-between p-10 lg:p-14">
+      <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-side-primary flex-col justify-between p-10 lg:p-14">
         <div className="flex items-center gap-3">
-          <img src="/icon.svg" alt="DoRecepty" className="w-10 h-10" />
+          <img src="/icon.svg" alt="DoRecepty" className="w-10 h-10 rounded-lg shadow-sm" />
           <span className="text-white font-semibold text-xl tracking-tight">
             <span className="text-white/70">Do</span>Recepty
           </span>
@@ -70,7 +70,7 @@ const LoginPage = () => {
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="w-full max-w-sm">
           <div className="flex items-center gap-2 mb-10 md:hidden">
-            <img src="/icon.svg" alt="DoRecepty" className="w-8 h-8 rounded-lg" />
+            <img src="/icon.svg" alt="DoRecepty" className="w-8 h-8 rounded-lg shadow-sm" />
             <span className="font-semibold text-neutral-900">
               <span className="text-neutral-400">Do</span>Recepty
             </span>
@@ -96,7 +96,7 @@ const LoginPage = () => {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="jan.kowalski@example.com"
                 required
-                className="w-full h-11 px-4 border border-neutral-200 rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-600/20 transition-all"
+                className="w-full h-11 px-4 border border-neutral-200 rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-900/20 transition-all"
               />
             </div>
 
@@ -111,7 +111,7 @@ const LoginPage = () => {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full h-11 px-4 pr-11 border border-neutral-200 rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-600/20 transition-all"
+                  className="w-full h-11 px-4 pr-11 border border-neutral-200 rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-900/20 transition-all"
                 />
                 <button
                   type="button"
@@ -127,7 +127,7 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-2"
+              className="w-full h-11 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-2 shadow-sm"
             >
               {isLoading ? 'Logowanie...' : 'Zaloguj się'}
             </button>

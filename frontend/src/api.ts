@@ -77,6 +77,8 @@ const mapPrescription = (p: ApiPrescription): Prescription => ({
   status: STATUS_MAP[p.status] ?? 'ARCHIWALNA',
   doctorName: 'Lekarz prowadzący',
   doctorSpecialty: 'Medycyna ogólna',
+  doctorNpwz: p.doctorNpwz ?? '',
+  clinicRegon: p.clinicRegon ?? '',
   patientPesel: p.patient?.pesel ?? '',
   drugs: (p.items ?? []).map(item => ({
     id: String(item.id),
@@ -85,6 +87,7 @@ const mapPrescription = (p: ApiPrescription): Prescription => ({
     quantity: item.quantity ?? 1,
     unit: 'op.',
     realizationStatus: ITEM_STATUS_MAP[item.status] ?? 'NIEZREALIZOWANY',
+    oid: item.prescriptionOid ?? '',
   })),
 });
 

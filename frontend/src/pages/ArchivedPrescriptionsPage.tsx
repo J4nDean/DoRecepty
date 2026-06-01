@@ -40,11 +40,6 @@ const ArchivedPrescriptionsPage = () => {
     });
   }, [prescriptions, query, statusFilter]);
 
-  const resultLabel =
-    filtered.length === 1
-      ? '1 recepta'
-      : `${filtered.length} recept${filtered.length >= 2 && filtered.length <= 4 ? 'y' : ''}`;
-
   return (
     <AppLayout title="Archiwalne e-recepty" subtitle="Historia zrealizowanych recept">
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -71,9 +66,14 @@ const ArchivedPrescriptionsPage = () => {
           icon={<Archive size={44} />}
         />
       ) : (
-        <div>
-          <p className="text-xs text-neutral-400 mb-4">Znaleziono: {resultLabel}</p>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="w-2.5 h-2.5 rounded-full bg-neutral-300 shadow-sm" />
+            <h2 className="text-sm font-bold text-neutral-800 uppercase tracking-widest">
+              Wyniki wyszukiwania <span className="text-neutral-400 font-medium ml-1">({filtered.length})</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
             {filtered.map(p => <PrescriptionCard key={p.id} prescription={p} />)}
           </div>
         </div>
