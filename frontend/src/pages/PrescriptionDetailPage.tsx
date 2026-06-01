@@ -18,9 +18,9 @@ import type { Prescription, DrugRealizationStatus, Pharmacy, MedicationAvailabil
 
 // Tylko styling — etykiety przychodzą z backend metadata.
 const realizationStyle: Record<DrugRealizationStatus, { cls: string; icon: React.ReactNode }> = {
-  ZREALIZOWANY: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200', icon: <CheckCircle2 size={11} /> },
-  NIEZREALIZOWANY: { cls: 'bg-neutral-100 text-neutral-600 ring-neutral-200', icon: <Clock size={11} /> },
-  CZĘŚCIOWO: { cls: 'bg-amber-50 text-amber-700 ring-amber-200', icon: <XCircle size={11} /> },
+  ZREALIZOWANY: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200', icon: <CheckCircle2 size={12} /> },
+  NIEZREALIZOWANY: { cls: 'bg-neutral-100 text-neutral-600 ring-neutral-200', icon: <Clock size={12} /> },
+  CZĘŚCIOWO: { cls: 'bg-amber-50 text-amber-700 ring-amber-200', icon: <XCircle size={12} /> },
 };
 
 const availabilityStyle: Record<MedicationAvailabilityStatus, string> = {
@@ -32,7 +32,7 @@ const availabilityStyle: Record<MedicationAvailabilityStatus, string> = {
 const RealizationBadge = ({ status, label }: { status: DrugRealizationStatus; label: string }) => {
   const { cls, icon } = realizationStyle[status];
   return (
-    <span className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ring-1 shrink-0 ${cls}`}>
+    <span className={`flex items-center gap-1.5 text-[13px] font-black px-3 py-1 rounded-full ring-1 shrink-0 ${cls}`}>
       {icon}
       {label}
     </span>
@@ -41,14 +41,14 @@ const RealizationBadge = ({ status, label }: { status: DrugRealizationStatus; la
 
 const ExpiryInfo = ({ status, expiryDate }: { status: string; expiryDate: string }) => {
   if (!isExpiringSoon(status, expiryDate)) {
-    return <p className="text-xs text-neutral-400">Ważna do: {formatDateShort(expiryDate)}</p>;
+    return <p className="text-sm text-neutral-400 font-medium">Ważna do: {formatDateShort(expiryDate)}</p>;
   }
   const days = daysUntilExpiry(expiryDate);
   return (
     <div className="mt-1">
-      <p className="text-xs text-amber-700 font-semibold">Ważna do: {formatDateShort(expiryDate)}</p>
-      <p className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 mt-0.5">
-        <AlertTriangle size={11} />
+      <p className="text-sm text-amber-700 font-bold">Ważna do: {formatDateShort(expiryDate)}</p>
+      <p className="flex items-center gap-1.5 text-[12px] font-black text-amber-700 mt-1 uppercase">
+        <AlertTriangle size={12} />
         {expiryWarningText(days)}
       </p>
     </div>
@@ -66,16 +66,16 @@ const PharmacyAvailabilityCard = ({
 }) => (
   <div
     onClick={onClick}
-    className={`bg-white rounded-xl border shadow-sm p-4 cursor-pointer transition-all ${
-      selected ? 'border-brand-600 shadow-md' : 'border-neutral-200 hover:border-neutral-300 hover:shadow-md'
+    className={`bg-white rounded-xl border shadow-sm p-5 cursor-pointer transition-all ${
+      selected ? 'border-brand-600 shadow-md ring-2 ring-brand-600/10' : 'border-neutral-200 hover:border-neutral-300 hover:shadow-md'
     }`}
   >
-    <div className="flex items-start justify-between gap-2 mb-1.5">
+    <div className="flex items-start justify-between gap-2 mb-2">
       <div className="min-w-0">
-        <p className="font-semibold text-neutral-900 text-sm truncate">{pharmacy.name}</p>
-        <p className="text-xs text-neutral-400 truncate">{pharmacy.address}, {pharmacy.city}</p>
+        <p className="font-bold text-neutral-900 text-base truncate">{pharmacy.name}</p>
+        <p className="text-sm text-neutral-400 truncate">{pharmacy.address}, {pharmacy.city}</p>
       </div>
-      <span className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ring-1 ${
+      <span className={`shrink-0 text-[11px] font-black px-2.5 py-1 rounded-full ring-1 uppercase tracking-tighter ${
         pharmacy.isOpen ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-neutral-100 text-neutral-500 ring-neutral-200'
       }`}>
         {pharmacy.isOpen ? 'Otwarte' : 'Zamknięte'}
@@ -83,18 +83,18 @@ const PharmacyAvailabilityCard = ({
     </div>
 
     {pharmacy.distance != null && (
-      <p className="text-xs text-brand-700 font-medium mb-2.5">{distanceLabel(pharmacy.distance)} od Ciebie</p>
+      <p className="text-sm text-brand-700 font-bold mb-3">{distanceLabel(pharmacy.distance)} od Ciebie</p>
     )}
 
     {prescription.drugs.length > 0 && (
-      <div className="space-y-1.5 border-t border-neutral-100 pt-2.5">
+      <div className="space-y-2 border-t border-neutral-100 pt-3">
         {prescription.drugs.map(drug => {
           const avail = pharmacy.availableMedications?.find(a => a.medicationName === drug.name);
           const status = avail?.status ?? 'NIEDOSTĘPNY';
           return (
             <div key={drug.id} className="flex items-center justify-between gap-2">
-              <span className="text-xs text-neutral-600 truncate">{drug.name}</span>
-              <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded shrink-0 ${availabilityStyle[status]}`}>
+              <span className="text-sm text-neutral-700 font-medium truncate">{drug.name}</span>
+              <span className={`text-[11px] font-black px-2 py-0.5 rounded uppercase tracking-tighter shrink-0 ${availabilityStyle[status]}`}>
                 {availabilityLabel(status)}
               </span>
             </div>
@@ -121,19 +121,27 @@ const withAvailability = (pharmacies: Pharmacy[], drugCount: number): Pharmacy[]
   });
 
 // Poprawiony Barcode - WIĘKSZY i RÓWNY
-const BarcodeMock = () => (
-  <div className="flex h-14 w-full items-stretch justify-center gap-[1px] opacity-40">
-    {[...Array(80)].map((_, i) => (
-      <div
-        key={i}
-        className="bg-black shrink-0"
-        style={{
-          width: i % 10 === 0 ? '5px' : i % 4 === 0 ? '3px' : '1px',
-        }}
-      />
-    ))}
-  </div>
-);
+const BarcodeMock = ({ number }: { number: string }) => {
+  const fullBarcodeNumber = `100101723${number}316993141033672942435380593264361040`.slice(0, 44);
+  return (
+    <div className="flex flex-col items-center w-full">
+      <div className="flex h-16 w-full max-w-[440px] items-stretch justify-center gap-[1.5px] opacity-40">
+        {[...Array(100)].map((_, i) => (
+          <div
+            key={i}
+            className="bg-black shrink-0"
+            style={{
+              width: i % 12 === 0 ? '5px' : i % 4 === 0 ? '3px' : '1.5px',
+            }}
+          />
+        ))}
+      </div>
+      <p className="text-[12px] text-neutral-700 font-mono font-bold tracking-[0.25em] mt-1.5 leading-none">
+        {fullBarcodeNumber}
+      </p>
+    </div>
+  );
+};
 
 const PrescriptionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -198,100 +206,100 @@ const PrescriptionDetailPage = () => {
     <AppLayout title="E-recepta" subtitle={`Dokument nr ${prescription.number}`}>
       <button
         onClick={() => navigate(-1)}
-        className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-brand-700 mb-4 sm:mb-6 transition-colors"
+        className="flex items-center gap-1.5 text-base text-neutral-500 hover:text-brand-700 mb-6 sm:mb-8 transition-colors font-semibold"
       >
-        <ArrowLeft size={16} />
+        <ArrowLeft size={18} />
         Wróć do listy recept
       </button>
 
-      <div className="grid lg:grid-cols-5 gap-4 lg:gap-6">
-        <div className="lg:col-span-3 space-y-3">
-          {/* OFICJALNY NAGŁÓWEK RECEPTY - ZAJMUJE CAŁĄ SZEROKOŚĆ KOLUMNY */}
+      <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
+        <div className="lg:col-span-3 space-y-4">
+          {/* OFICJALNY NAGŁÓWEK RECEPTY */}
           <section className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden w-full">
-            <div className="p-6 border-b border-dashed border-neutral-200 bg-neutral-50/20">
-              <BarcodeMock />
-              <p className="text-center text-[11px] text-neutral-500 font-mono font-bold mt-2 tracking-widest uppercase">
+            <div className="p-8 border-b border-dashed border-neutral-200 bg-neutral-50/20">
+              <BarcodeMock number={prescription.number} />
+              <p className="text-center text-[11px] text-neutral-500 font-mono font-bold mt-2 tracking-[0.4em] uppercase opacity-70">
                 ID-DOCUMENT: {prescription.number}
               </p>
             </div>
 
-            <div className="p-6 sm:p-8 flex flex-col md:flex-row justify-between gap-8">
-              <div className="flex-1 space-y-6">
-                <div className="flex flex-col sm:flex-row items-center gap-6">
+            <div className="p-8 sm:p-10 flex flex-col md:flex-row justify-between gap-10">
+              <div className="flex-1 space-y-8">
+                <div className="flex flex-col sm:flex-row items-center gap-8">
                   <div className="flex flex-col items-center">
-                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-2">Kod dostępu</p>
-                    <div className="relative px-8 py-3 bg-white">
-                      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-600" />
-                      <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-600" />
-                      <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-600" />
-                      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-600" />
-                      <span className="text-4xl font-mono font-bold text-neutral-900 tracking-widest">{prescription.number}</span>
+                    <p className="text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-3">Kod dostępu</p>
+                    <div className="relative px-10 py-4 bg-white shadow-inner rounded">
+                      <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-brand-600" />
+                      <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-brand-600" />
+                      <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-brand-600" />
+                      <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-brand-600" />
+                      <span className="text-5xl font-mono font-black text-neutral-900 tracking-widest">{prescription.number}</span>
                     </div>
                   </div>
-                  <div className="h-16 w-px bg-neutral-100 hidden sm:block" />
+                  <div className="h-20 w-px bg-neutral-100 hidden sm:block mx-4" />
                   <div className="text-center sm:text-left">
-                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-1">Wystawiono</p>
-                    <p className="text-lg font-bold text-neutral-900">{formatDateShort(prescription.issueDate)}</p>
+                    <p className="text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5">Wystawiono</p>
+                    <p className="text-2xl font-black text-neutral-900">{formatDateShort(prescription.issueDate)}</p>
                     <ExpiryInfo status={prescription.status} expiryDate={prescription.expiryDate} />
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6 pt-6 border-t border-neutral-100">
+                <div className="grid sm:grid-cols-2 gap-8 pt-8 border-t border-neutral-100">
                   <div>
-                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-2">Pacjent</p>
-                    <p className="text-sm font-black text-neutral-900 uppercase tracking-tighter">PESEL: {prescription.patientPesel || '—'}</p>
-                    <p className="text-[11px] text-neutral-400 mt-1 font-medium italic">Cyfrowe IKP / DoRecepty</p>
+                    <p className="text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-2.5">Pacjent</p>
+                    <p className="text-base font-black text-neutral-900 uppercase tracking-tighter">PESEL: {prescription.patientPesel || '—'}</p>
+                    <p className="text-xs text-neutral-400 mt-1 font-bold italic">Cyfrowe IKP / DoRecepty</p>
                   </div>
                   <div>
-                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-2">Wystawca</p>
-                    <p className="text-sm font-bold text-neutral-900">{prescription.doctorName}</p>
-                    <p className="text-[11px] text-neutral-500">NPWZ: {prescription.doctorNpwz || '—'}</p>
-                    <p className="text-[11px] text-neutral-400">REGON: {prescription.clinicRegon || '—'}</p>
+                    <p className="text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-2.5">Wystawca</p>
+                    <p className="text-base font-black text-neutral-900">{prescription.doctorName}</p>
+                    <p className="text-xs text-neutral-500 font-bold">NPWZ: {prescription.doctorNpwz || '—'}</p>
+                    <p className="text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON: {prescription.clinicRegon || '—'}</p>
                   </div>
                 </div>
               </div>
 
               <div className="shrink-0 flex flex-col items-center md:items-end">
-                <span className={`inline-flex items-center gap-1.5 text-[10px] font-black px-4 py-1.5 rounded-full ring-1 ${statusMeta.chip} uppercase tracking-tighter shadow-sm`}>
-                  <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+                <span className={`inline-flex items-center gap-2 text-[11px] font-black px-5 py-2 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-md`}>
+                  <span className={`w-2.5 h-2.5 rounded-full ${statusMeta.dot}`} />
                   {labelOf(metadata.prescriptionStatuses, prescription.status)}
                 </span>
               </div>
             </div>
           </section>
 
-          {/* LISTA LEKÓW JAKO KARTONIKI - ZMNIEJSZONE ODSTĘPY (space-y-1.5) */}
-          <section className="space-y-1.5 w-full">
-            <div className="flex items-center justify-between px-2">
-              <h2 className="text-sm font-bold text-neutral-700 uppercase tracking-widest flex items-center gap-2">
-                <Pill size={16} className="text-brand-600" />
+          {/* LISTA LEKÓW JAKO KARTONIKI */}
+          <section className="space-y-3 w-full">
+            <div className="flex items-center justify-between px-2 mb-2">
+              <h2 className="text-base font-black text-neutral-800 uppercase tracking-widest flex items-center gap-2">
+                <Pill size={20} className="text-brand-600" />
                 Pozycje leków ({prescription.drugs.length})
               </h2>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               {prescription.drugs.map((drug, i) => (
                 <div key={drug.id} className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden w-full">
-                  <div className="bg-neutral-50/50 px-4 py-1.5 border-b border-neutral-100 flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-neutral-400 uppercase">Pozycja {i + 1} z {prescription.drugs.length}</span>
-                    <span className="font-mono text-[9px] text-neutral-300">REF: {drug.oid || `000-P1-${prescription.number}`}</span>
+                  <div className="bg-neutral-50/50 px-5 py-2 border-b border-neutral-100 flex justify-between items-center">
+                    <span className="text-[11px] font-black text-neutral-500 uppercase tracking-wider">Pozycja {i + 1} z {prescription.drugs.length}</span>
+                    <span className="font-mono text-[10px] text-neutral-400 font-bold">REF: {drug.oid || `000-P1-${prescription.number}`}</span>
                   </div>
-                  <div className="p-5 flex justify-between gap-6">
-                    <div className="min-w-0 space-y-3">
+                  <div className="p-6 sm:p-8 flex justify-between gap-8">
+                    <div className="min-w-0 space-y-4 flex-1">
                       <div>
-                        <h3 className="text-xl font-black text-neutral-900 leading-tight uppercase">{drug.name}</h3>
-                        <p className="text-xs text-neutral-400 mt-0.5 font-semibold italic">Okres realizacji: od {formatDateShort(prescription.issueDate)}</p>
+                        <h3 className="text-2xl font-black text-neutral-900 leading-tight uppercase tracking-tight">{drug.name}</h3>
+                        <p className="text-sm text-neutral-500 mt-1.5 font-bold italic">Okres realizacji: od {formatDateShort(prescription.issueDate)}</p>
                       </div>
-                      <div className="space-y-1">
-                        <p className="text-[13px] text-neutral-700 font-bold">Ilość: 1 op. po {drug.quantity} {drug.unit}</p>
-                        <div className="inline-block bg-brand-50 border border-brand-100 px-3 py-1 rounded text-[13px] text-brand-900 font-black">
+                      <div className="space-y-2">
+                        <p className="text-base text-neutral-700 font-black">Ilość: 1 op. po {drug.quantity} {drug.unit}</p>
+                        <div className="inline-block bg-brand-50 border border-brand-100 px-4 py-2 rounded-lg text-base text-brand-900 font-black shadow-sm">
                           Dawkowanie: {drug.dosage}
                         </div>
                       </div>
                     </div>
-                    <div className="flex flex-col items-center justify-center border-l border-neutral-100 pl-8 min-w-[120px]">
-                      <div className="flex gap-6 mb-4">
-                        <div className="text-2xl font-black text-neutral-200 opacity-50">R</div>
-                        <div className="text-2xl font-black text-brand-600">S</div>
+                    <div className="flex flex-col items-center justify-center border-l border-neutral-100 pl-10 min-w-[140px]">
+                      <div className="flex gap-8 mb-6">
+                        <div className="text-3xl font-black text-neutral-200 opacity-60">R</div>
+                        <div className="text-3xl font-black text-brand-600">S</div>
                       </div>
                       <RealizationBadge status={drug.realizationStatus} label={realizationLabel(drug.realizationStatus)} />
                     </div>
@@ -301,9 +309,9 @@ const PrescriptionDetailPage = () => {
             </div>
           </section>
 
-          <section className="bg-white rounded-lg border border-neutral-200 shadow-sm p-4 sm:p-6 w-full">
-            <h2 className="text-sm font-bold text-neutral-700 mb-4 flex items-center gap-2 uppercase tracking-widest text-center sm:text-left">
-              <MapPin size={16} className="text-brand-600" />
+          <section className="bg-white rounded-lg border border-neutral-200 shadow-sm p-6 sm:p-8 w-full">
+            <h2 className="text-base font-black text-neutral-800 mb-6 flex items-center gap-2 uppercase tracking-widest text-center sm:text-left">
+              <MapPin size={20} className="text-brand-600" />
               Lokalizacja dostępności
             </h2>
             <PharmacyMapView
@@ -312,22 +320,22 @@ const PrescriptionDetailPage = () => {
               onSelect={togglePharmacy}
               userLocation={userLocation}
               defaultZoom={15}
-              className="h-72 sm:h-[18rem] rounded-lg border border-neutral-100"
+              className="h-80 sm:h-[24rem] rounded-lg border border-neutral-100 shadow-inner"
             />
           </section>
         </div>
 
         <div className="lg:col-span-2">
-          <h2 className="text-sm font-bold text-neutral-700 mb-4 flex items-center gap-2 px-2 uppercase tracking-widest">
-            <MapPin size={16} className="text-brand-600" />
+          <h2 className="text-base font-black text-neutral-800 mb-6 flex items-center gap-2 px-2 uppercase tracking-widest">
+            <MapPin size={20} className="text-brand-600" />
             Apteki w pobliżu ({pharmaciesWithDistance.length})
           </h2>
           {pharmaciesWithDistance.length === 0 ? (
-            <div className="bg-white rounded-xl border border-neutral-200 p-6 text-center text-sm text-neutral-500">
+            <div className="bg-white rounded-xl border border-neutral-200 p-8 text-center text-sm text-neutral-500 font-medium">
               Brak danych o dostępności w Twojej okolicy.
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {pharmaciesWithDistance.map(p => (
                 <PharmacyAvailabilityCard
                   key={p.id}
