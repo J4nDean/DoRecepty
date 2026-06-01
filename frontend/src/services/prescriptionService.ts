@@ -44,9 +44,9 @@ function mapPrescription(p: ApiPrescription, pesel: string): Prescription {
   };
 }
 
-export const fetchPrescriptions = async (): Promise<Prescription[]> => {
-  const res = await apiClient.get<ApiPrescription[]>('/prescriptions/me', noCache());
-  return res.data.map(p => mapPrescription(p, p.patient?.pesel ?? ''));
+export const fetchPrescriptions = async (pesel: string): Promise<Prescription[]> => {
+  const res = await apiClient.get<ApiPrescription[]>(`/prescriptions/${pesel}`, noCache());
+  return res.data.map(p => mapPrescription(p, pesel));
 };
 
 export const fetchPrescriptionById = async (id: string): Promise<Prescription | undefined> => {

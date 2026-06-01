@@ -9,8 +9,8 @@ import java.util.Optional;
 
 public interface PrescriptionRepository extends JpaRepository<Prescription, Long> {
 
-    @Query("SELECT p FROM Prescription p JOIN FETCH p.patient WHERE p.patient.id = :userId")
-    List<Prescription> findByPatientId(@Param("userId") Long userId);
+    @Query("SELECT p FROM Prescription p JOIN FETCH p.patient WHERE p.patient.pesel = :pesel")
+    List<Prescription> findByPatientPesel(@Param("pesel") String pesel);
 
     @Query("SELECT p FROM Prescription p LEFT JOIN FETCH p.patient WHERE p.id = :id")
     Optional<Prescription> findByIdWithPatient(@Param("id") Long id);
