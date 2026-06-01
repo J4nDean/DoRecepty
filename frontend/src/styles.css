@@ -1,45 +1,48 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
 
-/* Motyw aplikacji: czysty, „bento" — Plus Jakarta Sans, jasnoniebieski akcent,
-   ostre rogi (zero zaokrągleń) i miękkie, warstwowe cienie. */
+/* Motyw aplikacji: subtelny, styl iOS — Nunito, kolor #2563eb po lewej,
+   lekko zaokrąglone rogi (styl iOS) i delikatne cienie. */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Akcent — jasnoniebieski (rodzina koloru z logo, ale jaśniejszy). */
-  --color-brand-50:  #eff6ff;
-  --color-brand-100: #dbeafe;
-  --color-brand-200: #bfdbfe;
-  --color-brand-300: #93c5fd;
-  --color-brand-400: #60a5fa;
-  --color-brand-500: #3b82f6;
-  --color-brand-600: #1d4ed8;
-  --color-brand-700: #1e40af;
-  --color-brand-800: #1e3a8a;
-  --color-brand-900: #172554;
-  --color-brand-950: #0f1f3c;
+  /* Akcent główny — granatowy (Navy) pozostał spójny. */
+  --color-brand-50:  #f0f7ff;
+  --color-brand-100: #e0effe;
+  --color-brand-200: #bae0fd;
+  --color-brand-300: #7dc8fc;
+  --color-brand-400: #38aef8;
+  --color-brand-500: #0e8de9;
+  --color-brand-600: #2563eb; /* Ten konkretny odcień */
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a; /* Navy */
+  --color-brand-950: #172554;
 
-  /* Zero zaokrągleń — wszystkie rounded-* (poza rounded-full) stają się ostre. */
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 0px;
-  --radius-2xl: 0px;
-  --radius-3xl: 0px;
+  /* Specyficzny kolor po lewej stronie. */
+  --color-side-primary: #2563eb;
 
-  /* Miękkie, warstwowe cienie. */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.07);
+  /* Subtelne zaokrąglenia w stylu iOS (zredukowane z 2rem/1.5rem). */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;    /* Klasyczne zaokrąglenie przycisku/karty iOS */
+  --radius-xl: 0.75rem;     /* Nieco większe dla kontenerów */
+  --radius-2xl: 1rem;       /* Maksymalne dla dużych kart */
+  --radius-3xl: 1.25rem;
+
+  /* Miękkie, rozmyte cienie. */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 :root {
-  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
   line-height: 1.6;
   font-weight: 400;
 
   color-scheme: light;
   color: #1d1d1f;
-  background-color: #f5f5f7;
+  background-color: #f8fafc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -65,11 +68,11 @@ body,
 body {
   min-height: 100dvh;
   overflow-x: hidden;
-  background-color: #f5f5f7;
+  background-color: #f8fafc;
 }
 
 :focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 
@@ -82,16 +85,16 @@ body {
 }
 
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d4;
+  background: #cbd5e1;
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #a3a3a3;
+  background: #94a3b8;
 }

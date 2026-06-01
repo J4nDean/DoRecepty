@@ -27,8 +27,9 @@ public class DataSeeder implements CommandLineRunner {
 
     // Wszystkie seedy SQL z katalogu resources/db/seed (kolejność ma znaczenie — FK).
     private static final List<String> SEED_SCRIPTS = List.of(
-            "db/seed/01_pharmacies.sql",
-            "db/seed/02_medications.sql",
+            "db/seed/01_users.sql",
+            "db/seed/02_pharmacies.sql",
+            "db/seed/03_medications.sql",
             "db/seed/04_pharmacy_inventory.sql",
             "db/seed/05_prescriptions.sql"
     );

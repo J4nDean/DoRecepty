@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Calendar, User, Pill,
-  CheckCircle2, XCircle, Clock,
+  ArrowLeft, Pill,
+  CheckCircle2, Clock, XCircle,
   MapPin, FileX, AlertTriangle,
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
@@ -10,7 +10,7 @@ import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner } from '../components/ui';
 import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation } from '../api';
 import {
-  formatDate, formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
+  formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
   haversineKm, distanceLabel, statusMetaOf, type LatLng,
 } from '../utils';
 import { useMetadata } from '../MetadataContext';
@@ -39,10 +39,6 @@ const RealizationBadge = ({ status, label }: { status: DrugRealizationStatus; la
   );
 };
 
-const IconBox = ({ icon }: { icon: React.ReactNode }) => (
-  <div className="w-8 h-8 bg-brand-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">{icon}</div>
-);
-
 const ExpiryInfo = ({ status, expiryDate }: { status: string; expiryDate: string }) => {
   if (!isExpiringSoon(status, expiryDate)) {
     return <p className="text-xs text-neutral-400">Ważna do: {formatDateShort(expiryDate)}</p>;
@@ -70,7 +66,7 @@ const PharmacyAvailabilityCard = ({
 }) => (
   <div
     onClick={onClick}
-    className={`bg-white rounded-2xl border shadow-sm p-4 cursor-pointer transition-all ${
+    className={`bg-white rounded-xl border shadow-sm p-4 cursor-pointer transition-all ${
       selected ? 'border-brand-600 shadow-md' : 'border-neutral-200 hover:border-neutral-300 hover:shadow-md'
     }`}
   >
@@ -124,6 +120,21 @@ const withAvailability = (pharmacies: Pharmacy[], drugCount: number): Pharmacy[]
     return { ...p, prescriptionAvailability: have >= drugCount && drugCount > 0 ? 'FULL' : 'PARTIAL' };
   });
 
+// Poprawiony Barcode - WIĘKSZY i RÓWNY
+const BarcodeMock = () => (
+  <div className="flex h-14 w-full items-stretch justify-center gap-[1px] opacity-40">
+    {[...Array(80)].map((_, i) => (
+      <div
+        key={i}
+        className="bg-black shrink-0"
+        style={{
+          width: i % 10 === 0 ? '5px' : i % 4 === 0 ? '3px' : '1px',
+        }}
+      />
+    ))}
+  </div>
+);
+
 const PrescriptionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -163,7 +174,7 @@ const PrescriptionDetailPage = () => {
 
   if (isLoading) {
     return (
-      <AppLayout title="Szczegóły recepty">
+      <AppLayout title="E-recepta">
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       </AppLayout>
     );
@@ -171,7 +182,7 @@ const PrescriptionDetailPage = () => {
 
   if (notFound || !prescription) {
     return (
-      <AppLayout title="Szczegóły recepty">
+      <AppLayout title="E-recepta">
         <div className="flex flex-col items-center py-20 gap-4">
           <FileX size={44} className="text-neutral-300" />
           <p className="text-neutral-500 text-sm">Nie znaleziono recepty.</p>
@@ -184,7 +195,7 @@ const PrescriptionDetailPage = () => {
   const statusMeta = statusMetaOf(prescription.status);
 
   return (
-    <AppLayout title="Szczegóły recepty" subtitle={`Nr ${prescription.number}`}>
+    <AppLayout title="E-recepta" subtitle={`Dokument nr ${prescription.number}`}>
       <button
         onClick={() => navigate(-1)}
         className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-brand-700 mb-4 sm:mb-6 transition-colors"
@@ -194,63 +205,106 @@ const PrescriptionDetailPage = () => {
       </button>
 
       <div className="grid lg:grid-cols-5 gap-4 lg:gap-6">
-        <div className="lg:col-span-3 space-y-4 sm:space-y-5">
-          <section className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 sm:p-6">
-            <div className="flex items-start justify-between flex-wrap gap-3 mb-5">
-              <div className="min-w-0">
-                <p className="text-[11px] text-neutral-400 uppercase tracking-wider mb-1">Numer recepty</p>
-                <p className="font-mono text-base font-bold text-neutral-900 break-all">{prescription.number}</p>
-              </div>
-              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full ring-1 ${statusMeta.chip}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dot}`} />
-                {labelOf(metadata.prescriptionStatuses, prescription.status)}
-              </span>
+        <div className="lg:col-span-3 space-y-3">
+          {/* OFICJALNY NAGŁÓWEK RECEPTY - ZAJMUJE CAŁĄ SZEROKOŚĆ KOLUMNY */}
+          <section className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden w-full">
+            <div className="p-6 border-b border-dashed border-neutral-200 bg-neutral-50/20">
+              <BarcodeMock />
+              <p className="text-center text-[11px] text-neutral-500 font-mono font-bold mt-2 tracking-widest uppercase">
+                ID-DOCUMENT: {prescription.number}
+              </p>
             </div>
 
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
-              <div className="flex items-start gap-3">
-                <IconBox icon={<User size={15} className="text-brand-700" />} />
-                <div className="min-w-0">
-                  <p className="text-xs text-neutral-400 mb-0.5">Lekarz wystawiający</p>
-                  <p className="font-semibold text-neutral-900 text-sm truncate">{prescription.doctorName}</p>
-                  <p className="text-xs text-neutral-400 truncate">{prescription.doctorSpecialty}</p>
+            <div className="p-6 sm:p-8 flex flex-col md:flex-row justify-between gap-8">
+              <div className="flex-1 space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6">
+                  <div className="flex flex-col items-center">
+                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-2">Kod dostępu</p>
+                    <div className="relative px-8 py-3 bg-white">
+                      <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-600" />
+                      <div className="absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-600" />
+                      <div className="absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-600" />
+                      <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-600" />
+                      <span className="text-4xl font-mono font-bold text-neutral-900 tracking-widest">{prescription.number}</span>
+                    </div>
+                  </div>
+                  <div className="h-16 w-px bg-neutral-100 hidden sm:block" />
+                  <div className="text-center sm:text-left">
+                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-1">Wystawiono</p>
+                    <p className="text-lg font-bold text-neutral-900">{formatDateShort(prescription.issueDate)}</p>
+                    <ExpiryInfo status={prescription.status} expiryDate={prescription.expiryDate} />
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6 pt-6 border-t border-neutral-100">
+                  <div>
+                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-2">Pacjent</p>
+                    <p className="text-sm font-black text-neutral-900 uppercase tracking-tighter">PESEL: {prescription.patientPesel || '—'}</p>
+                    <p className="text-[11px] text-neutral-400 mt-1 font-medium italic">Cyfrowe IKP / DoRecepty</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-neutral-400 uppercase font-bold tracking-widest mb-2">Wystawca</p>
+                    <p className="text-sm font-bold text-neutral-900">{prescription.doctorName}</p>
+                    <p className="text-[11px] text-neutral-500">NPWZ: {prescription.doctorNpwz || '—'}</p>
+                    <p className="text-[11px] text-neutral-400">REGON: {prescription.clinicRegon || '—'}</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-start gap-3">
-                <IconBox icon={<Calendar size={15} className="text-brand-700" />} />
-                <div className="min-w-0">
-                  <p className="text-xs text-neutral-400 mb-0.5">Data wystawienia</p>
-                  <p className="font-semibold text-neutral-900 text-sm">{formatDate(prescription.issueDate)}</p>
-                  <ExpiryInfo status={prescription.status} expiryDate={prescription.expiryDate} />
-                </div>
+
+              <div className="shrink-0 flex flex-col items-center md:items-end">
+                <span className={`inline-flex items-center gap-1.5 text-[10px] font-black px-4 py-1.5 rounded-full ring-1 ${statusMeta.chip} uppercase tracking-tighter shadow-sm`}>
+                  <span className={`w-2 h-2 rounded-full ${statusMeta.dot}`} />
+                  {labelOf(metadata.prescriptionStatuses, prescription.status)}
+                </span>
               </div>
             </div>
           </section>
 
-          <section className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 sm:p-6">
-            <h2 className="text-sm font-semibold text-neutral-700 mb-4 flex items-center gap-2">
-              <Pill size={16} className="text-neutral-500" />
-              Leki na recepcie ({prescription.drugs.length})
-            </h2>
-            <div className="divide-y divide-neutral-100">
-              {prescription.drugs.map(drug => (
-                <div key={drug.id} className="py-3.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-semibold text-neutral-900 text-sm truncate">{drug.name}</p>
-                    <p className="text-xs text-neutral-400 mt-0.5">
-                      {drug.dosage ? `${drug.dosage} · ` : ''}{drug.quantity} {drug.unit}
-                    </p>
+          {/* LISTA LEKÓW JAKO KARTONIKI - ZMNIEJSZONE ODSTĘPY (space-y-1.5) */}
+          <section className="space-y-1.5 w-full">
+            <div className="flex items-center justify-between px-2">
+              <h2 className="text-sm font-bold text-neutral-700 uppercase tracking-widest flex items-center gap-2">
+                <Pill size={16} className="text-brand-600" />
+                Pozycje leków ({prescription.drugs.length})
+              </h2>
+            </div>
+            <div className="space-y-1.5">
+              {prescription.drugs.map((drug, i) => (
+                <div key={drug.id} className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden w-full">
+                  <div className="bg-neutral-50/50 px-4 py-1.5 border-b border-neutral-100 flex justify-between items-center">
+                    <span className="text-[10px] font-bold text-neutral-400 uppercase">Pozycja {i + 1} z {prescription.drugs.length}</span>
+                    <span className="font-mono text-[9px] text-neutral-300">REF: {drug.oid || `000-P1-${prescription.number}`}</span>
                   </div>
-                  <RealizationBadge status={drug.realizationStatus} label={realizationLabel(drug.realizationStatus)} />
+                  <div className="p-5 flex justify-between gap-6">
+                    <div className="min-w-0 space-y-3">
+                      <div>
+                        <h3 className="text-xl font-black text-neutral-900 leading-tight uppercase">{drug.name}</h3>
+                        <p className="text-xs text-neutral-400 mt-0.5 font-semibold italic">Okres realizacji: od {formatDateShort(prescription.issueDate)}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-[13px] text-neutral-700 font-bold">Ilość: 1 op. po {drug.quantity} {drug.unit}</p>
+                        <div className="inline-block bg-brand-50 border border-brand-100 px-3 py-1 rounded text-[13px] text-brand-900 font-black">
+                          Dawkowanie: {drug.dosage}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center justify-center border-l border-neutral-100 pl-8 min-w-[120px]">
+                      <div className="flex gap-6 mb-4">
+                        <div className="text-2xl font-black text-neutral-200 opacity-50">R</div>
+                        <div className="text-2xl font-black text-brand-600">S</div>
+                      </div>
+                      <RealizationBadge status={drug.realizationStatus} label={realizationLabel(drug.realizationStatus)} />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-4 sm:p-6">
-            <h2 className="text-sm font-semibold text-neutral-700 mb-4 flex items-center gap-2">
-              <MapPin size={16} className="text-neutral-500" />
-              Apteki z lekami z recepty
+          <section className="bg-white rounded-lg border border-neutral-200 shadow-sm p-4 sm:p-6 w-full">
+            <h2 className="text-sm font-bold text-neutral-700 mb-4 flex items-center gap-2 uppercase tracking-widest text-center sm:text-left">
+              <MapPin size={16} className="text-brand-600" />
+              Lokalizacja dostępności
             </h2>
             <PharmacyMapView
               pharmacies={pharmaciesWithDistance}
@@ -258,24 +312,19 @@ const PrescriptionDetailPage = () => {
               onSelect={togglePharmacy}
               userLocation={userLocation}
               defaultZoom={15}
-              className="h-72 sm:h-[28rem] md:h-[32rem] rounded-lg"
+              className="h-72 sm:h-[18rem] rounded-lg border border-neutral-100"
             />
-            {!userLocation && (
-              <p className="text-[11px] text-neutral-400 mt-2">
-                Udostępnij lokalizację, aby zobaczyć odległości do aptek.
-              </p>
-            )}
           </section>
         </div>
 
         <div className="lg:col-span-2">
-          <h2 className="text-sm font-semibold text-neutral-700 mb-4 flex items-center gap-2">
-            <MapPin size={16} className="text-neutral-500" />
-            Dostępność leków ({pharmaciesWithDistance.length})
+          <h2 className="text-sm font-bold text-neutral-700 mb-4 flex items-center gap-2 px-2 uppercase tracking-widest">
+            <MapPin size={16} className="text-brand-600" />
+            Apteki w pobliżu ({pharmaciesWithDistance.length})
           </h2>
           {pharmaciesWithDistance.length === 0 ? (
-            <div className="bg-white rounded-2xl border border-neutral-200 p-6 text-center text-sm text-neutral-500">
-              Żadna apteka nie ma obecnie na stanie leków z tej recepty.
+            <div className="bg-white rounded-xl border border-neutral-200 p-6 text-center text-sm text-neutral-500">
+              Brak danych o dostępności w Twojej okolicy.
             </div>
           ) : (
             <div className="space-y-3">

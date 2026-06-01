@@ -27,7 +27,7 @@ const Sidebar = () => {
     <aside className="hidden md:flex w-60 shrink-0 flex-col bg-white border-r border-neutral-200 h-screen sticky top-0 z-40">
       <div className="px-5 py-5 border-b border-neutral-100">
         <div className="flex items-center gap-2.5">
-          <img src="/icon.svg" alt="DoRecepty" className="w-8 h-8 rounded-lg" />
+          <img src="/icon.svg" alt="DoRecepty" className="w-8 h-8 rounded-md shadow-sm" />
           <Logo className="text-[15px]" />
         </div>
       </div>
@@ -38,16 +38,16 @@ const Sidebar = () => {
             key={to}
             to={to}
             className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
+              `flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors ${
                 isActive
-                  ? 'bg-brand-50 text-brand-700 font-semibold'
-                  : 'text-neutral-500 hover:bg-neutral-50 hover:text-brand-700 font-medium'
+                  ? 'bg-brand-50 text-brand-600 font-semibold shadow-sm'
+                  : 'text-neutral-500 hover:bg-neutral-50 hover:text-brand-600 font-medium'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                <Icon size={17} className={`shrink-0 ${isActive ? 'text-brand-700' : 'text-neutral-400'}`} />
+                <Icon size={17} className={`shrink-0 ${isActive ? 'text-brand-600' : 'text-neutral-400'}`} />
                 {label}
               </>
             )}

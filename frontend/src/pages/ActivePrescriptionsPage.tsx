@@ -11,13 +11,13 @@ type SortBy = 'newest' | 'expiring';
 
 const Section = ({ dot, label, prescriptions }: { dot: string; label: string; prescriptions: Prescription[] }) => (
   <section>
-    <div className="flex items-center gap-2 mb-4">
-      <div className={`w-2 h-2 rounded-full ${dot}`} />
-      <h2 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
-        {label} ({prescriptions.length})
+    <div className="flex items-center gap-2 mb-6">
+      <div className={`w-2.5 h-2.5 rounded-full ${dot} shadow-sm`} />
+      <h2 className="text-sm font-bold text-neutral-800 uppercase tracking-widest">
+        {label} <span className="text-neutral-400 font-medium ml-1">({prescriptions.length})</span>
       </h2>
     </div>
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
       {prescriptions.map(p => <PrescriptionCard key={p.id} prescription={p} />)}
     </div>
   </section>
