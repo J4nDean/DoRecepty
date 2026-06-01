@@ -26,11 +26,11 @@ const ArchivedPrescriptionsPage = () => {
   const archiveCodes = useMemo(() => archiveOptions.map(o => o.code), [archiveOptions]);
 
   useEffect(() => {
-    if (archiveCodes.length === 0) return;
-    fetchPrescriptions()
+    if (archiveCodes.length === 0 || !user?.pesel) return;
+    fetchPrescriptions(user.pesel)
       .then(data => setPrescriptions(data.filter(p => archiveCodes.includes(p.status))))
       .finally(() => setIsLoading(false));
-  }, [archiveCodes]);
+  }, [archiveCodes, user?.pesel]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();

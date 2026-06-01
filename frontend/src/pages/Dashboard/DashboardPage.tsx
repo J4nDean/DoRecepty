@@ -40,10 +40,11 @@ const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetchPrescriptions()
+    if (!user?.pesel) return;
+    fetchPrescriptions(user.pesel)
       .then(data => setPrescriptions(data))
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [user?.pesel]);
 
   const activeCodes   = byCategory(metadata.prescriptionStatuses, 'ACTIVE').map(o => o.code);
   const archivedCodes = byCategory(metadata.prescriptionStatuses, 'ARCHIVED').map(o => o.code);
