@@ -14,6 +14,12 @@ public interface PharmacyRepository extends JpaRepository<Pharmacy, Long> {
 
     List<Pharmacy> findByCityContainingIgnoreCase(String city);
 
+    @Query("SELECT p FROM Pharmacy p WHERE " +
+           "LOWER(p.name) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+           "LOWER(p.city) LIKE LOWER(CONCAT('%', :q, '%')) OR " +
+           "LOWER(p.address) LIKE LOWER(CONCAT('%', :q, '%'))")
+    List<Pharmacy> findByNameOrCityOrAddress(@Param("q") String query);
+
     @Query("""
             SELECT p FROM Pharmacy p
             WHERE p.latitude IS NOT NULL
