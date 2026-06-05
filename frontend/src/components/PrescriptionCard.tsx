@@ -42,8 +42,8 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
     <article
       onClick={() => navigate(`/recepty/${prescription.id}`)}
       className={`group relative overflow-hidden bg-white rounded-xl border cursor-pointer transition-all hover:shadow-md w-full flex flex-col ${
-        expiringSoon 
-          ? 'border-amber-500 ring-4 ring-amber-500/30 shadow-amber-100' 
+        expiringSoon
+          ? 'border-amber-400 ring-2 ring-amber-400'
           : 'border-neutral-200 hover:border-neutral-300'
       }`}
       aria-label={`Recepta ${prescription.number}`}
