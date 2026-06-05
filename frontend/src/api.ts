@@ -177,7 +177,7 @@ const mapPharmacy = (p: ApiPharmacy): Pharmacy => ({
   longitude: p.longitude ?? undefined,
 });
 
-export const searchPharmacies = async (city: string, page = 0, size = 50): Promise<Pharmacy[]> => {
+export const searchPharmacies = async (city: string, page = 0, size = 1000): Promise<Pharmacy[]> => {
   try {
     const res = await api.get<ApiPharmacy[]>('/pharmacies/search', { params: { city, page, size } });
     return res.data.map(mapPharmacy);
