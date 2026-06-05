@@ -132,12 +132,20 @@ const PharmaciesPage = () => {
     setIsLocating(true);
     setLocationError(null);
     try {
-      const { lat, lng } = await getUserLocation();
-      setUserLocation({ lat, lng });
+      const pos = await getUserLocation();
+      console.log('GPS Success:', pos);
+      setUserLocation(pos);
       setPendingSearch(true);
       setSortMode('distance');
-    } catch (err) {
-      setLocationError(locationErrorMessage(err));
+    } catch (err: any) {
+      console.error('GPS Error:', err);
+      let msg = 'Nie udało się pobrać lokalizacji';
+      if (err.code === 1) msg = 'Brak zgody na dostęp do lokalizacji w przeglądarce';
+      else if (err.code === 2) msg = 'Sygnał GPS jest niedostępny';
+      else if (err.code === 3) msg = 'Upłynął czas oczekiwania na sygnał GPS';
+      else if (err.message) msg = err.message;
+      
+      setLocationError(msg);
     } finally {
       setIsLocating(false);
     }
