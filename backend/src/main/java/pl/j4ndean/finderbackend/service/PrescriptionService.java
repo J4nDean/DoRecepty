@@ -59,6 +59,7 @@ public class PrescriptionService {
                         i.getStockQuantity()))
                     .toList()))
                 .sorted(Comparator.comparingInt((PharmacyAvailabilityDto d) -> d.availableMedications().size()).reversed())
+                .limit(2000)
                 .toList();
     }
 }

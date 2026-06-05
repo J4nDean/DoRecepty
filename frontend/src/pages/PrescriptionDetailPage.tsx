@@ -20,19 +20,19 @@ import type { Prescription, DrugRealizationStatus, Pharmacy, MedicationAvailabil
 const realizationStyle: Record<DrugRealizationStatus, { cls: string; icon: React.ReactNode }> = {
   ZREALIZOWANY: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200', icon: <CheckCircle2 size={12} /> },
   NIEZREALIZOWANY: { cls: 'bg-neutral-100 text-neutral-600 ring-neutral-200', icon: <Clock size={12} /> },
-  CZĘŚCIOWO: { cls: 'bg-amber-50 text-amber-700 ring-amber-200', icon: <XCircle size={12} /> },
+  CZĘŚCIOWO: { cls: 'bg-brand-50 text-brand-700 ring-brand-200', icon: <XCircle size={12} /> },
 };
 
 const availabilityStyle: Record<MedicationAvailabilityStatus, string> = {
   DOSTĘPNY: 'bg-emerald-50 text-emerald-700',
-  CZĘŚCIOWO_DOSTĘPNY: 'bg-amber-50 text-amber-700',
+  CZĘŚCIOWO_DOSTĘPNY: 'bg-brand-50 text-brand-700',
   NIEDOSTĘPNY: 'bg-rose-50 text-rose-600',
 };
 
 const RealizationBadge = ({ status, label }: { status: DrugRealizationStatus; label: string }) => {
   const { cls, icon } = realizationStyle[status];
   return (
-    <span className={`flex items-center gap-1 text-[11px] font-black px-2 py-1 rounded-full ring-1 shrink-0 uppercase tracking-tighter sm:text-[12px] sm:gap-1.5 sm:px-3 ${cls}`}>
+    <span className={`flex items-center gap-1 text-[10px] font-black px-2 py-1 rounded-full ring-1 shrink-0 uppercase tracking-tighter sm:text-[11px] sm:gap-1.5 sm:px-3 whitespace-nowrap ${cls}`}>
       {icon}
       {label}
     </span>
