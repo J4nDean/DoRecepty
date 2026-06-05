@@ -65,10 +65,20 @@ export const PharmacyCard = forwardRef<HTMLElement, PharmacyCardProps>(
           </p>
         )}
         {pharmacy.openingHours.weekdays != null && (
-          <p className="flex items-center gap-1.5">
-            <Clock size={12} className="shrink-0 text-neutral-400" />
-            Pn–Pt: {pharmacy.openingHours.weekdays}
-          </p>
+          <div className="flex items-start gap-1.5">
+            <Clock size={12} className="shrink-0 text-neutral-400 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              {pharmacy.openingHours.weekdays.includes(';') ? (
+                <ul className="space-y-0.5">
+                  {pharmacy.openingHours.weekdays.split(';').map((part, i) => (
+                    <li key={i} className="leading-tight">{part.trim()}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="leading-tight">Pn–Pt: {pharmacy.openingHours.weekdays}</p>
+              )}
+            </div>
+          </div>
         )}
         {pharmacy.phone && (
           <p className="flex items-center gap-1.5">
