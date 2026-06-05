@@ -92,20 +92,20 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
 
   return (
     <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 h-20 sm:h-24 flex items-center justify-between shrink-0 safe-area-top">
-      <div className="flex flex-col justify-center min-w-0 pr-4">
+      <div className="flex flex-col justify-center min-w-0 pr-4 h-full">
         <h1 className="text-base sm:text-xl font-extrabold text-neutral-900 leading-tight truncate tracking-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1 truncate font-semibold uppercase tracking-wider leading-none">
+          <p className="text-[10px] sm:text-xs text-neutral-400 mt-1 truncate font-semibold uppercase tracking-wider leading-none">
             {subtitle}
           </p>
         )}
       </div>
 
       {user && (
-        <div className="flex items-center gap-3 sm:gap-6 h-full">
-          <div className="flex items-center gap-2 sm:gap-4 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-100 shadow-sm">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <div className="flex items-center gap-2 sm:gap-4 bg-neutral-50 px-3 py-2 sm:py-2.5 rounded-xl border border-neutral-100 shadow-sm">
             <button 
               onClick={() => setShowPesel(!showPesel)}
               className="p-1.5 hover:bg-white rounded-lg text-neutral-400 hover:text-brand-600 transition-all hover:shadow-sm shrink-0"

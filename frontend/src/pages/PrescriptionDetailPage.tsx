@@ -260,8 +260,8 @@ const PrescriptionDetailPage = () => {
               </div>
 
               <div className="shrink-0 flex flex-col items-center md:items-end pt-2 sm:pt-0">
-                <span className={`inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-black px-4 sm:px-5 py-2 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tighter sm:tracking-tight shadow-md whitespace-nowrap`}>
-                  <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${statusMeta.dot}`} />
+                <span className={`inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black px-3 sm:px-4 py-1.5 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-md whitespace-nowrap`}>
+                  <span className={`w-2 h-2 sm:w-2 rounded-full ${statusMeta.dot}`} />
                   {labelOf(metadata.prescriptionStatuses, prescription.status)}
                 </span>
               </div>
