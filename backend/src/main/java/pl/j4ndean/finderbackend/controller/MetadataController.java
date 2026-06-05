@@ -25,6 +25,7 @@ public class MetadataController {
             List.of(
                     EnumOption.of("AKTYWNA",                "Aktywna",                "ACTIVE"),
                     EnumOption.of("CZĘŚCIOWO_ZREALIZOWANA", "Częściowo zrealizowana", "ACTIVE"),
+                    EnumOption.of("NIEZREALIZOWANA",        "Niezrealizowana",        "ACTIVE"),
                     EnumOption.of("ZREALIZOWANA",           "Zrealizowana",           "ARCHIVED"),
                     EnumOption.of("ARCHIWALNA",             "Archiwalna",             "ARCHIVED"),
                     EnumOption.of("ANULOWANA",              "Anulowana",              "ARCHIVED")

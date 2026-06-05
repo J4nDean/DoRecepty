@@ -41,7 +41,11 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
   return (
     <article
       onClick={() => navigate(`/recepty/${prescription.id}`)}
-      className="group relative overflow-hidden bg-white rounded-xl border border-neutral-200 cursor-pointer transition-all hover:border-neutral-300 hover:shadow-md w-full flex flex-col"
+      className={`group relative overflow-hidden bg-white rounded-xl border cursor-pointer transition-all hover:shadow-md w-full flex flex-col ${
+        expiringSoon 
+          ? 'border-amber-400 ring-4 ring-amber-400/30 shadow-amber-100' 
+          : 'border-neutral-200 hover:border-neutral-300'
+      }`}
       aria-label={`Recepta ${prescription.number}`}
     >
       <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:10px_10px] opacity-[0.06]" />
@@ -87,7 +91,7 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
 
         {/* Dół: Status - POWIĘKSZONY */}
         <div className="mt-5 pt-4 border-t border-neutral-50 flex items-center justify-between">
-          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-black tracking-tight ring-1 ${meta.chip} opacity-90`}>
+          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-black tracking-tighter ring-1 ${meta.chip} opacity-90 whitespace-nowrap`}>
             {labelOf(metadata.prescriptionStatuses, prescription.status)}
           </span>
 

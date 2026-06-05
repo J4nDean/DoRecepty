@@ -25,6 +25,7 @@ export interface RegisterData {
 export type PrescriptionStatus =
   | 'AKTYWNA'
   | 'CZĘŚCIOWO_ZREALIZOWANA'
+  | 'NIEZREALIZOWANA'
   | 'ZREALIZOWANA'
   | 'ARCHIWALNA'
   | 'ANULOWANA';

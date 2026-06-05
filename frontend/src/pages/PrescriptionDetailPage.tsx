@@ -32,7 +32,7 @@ const availabilityStyle: Record<MedicationAvailabilityStatus, string> = {
 const RealizationBadge = ({ status, label }: { status: DrugRealizationStatus; label: string }) => {
   const { cls, icon } = realizationStyle[status];
   return (
-    <span className={`flex items-center gap-1.5 text-[13px] font-black px-3 py-1 rounded-full ring-1 shrink-0 ${cls}`}>
+    <span className={`flex items-center gap-1 text-[11px] font-black px-2 py-1 rounded-full ring-1 shrink-0 uppercase tracking-tighter sm:text-[12px] sm:gap-1.5 sm:px-3 ${cls}`}>
       {icon}
       {label}
     </span>
@@ -260,7 +260,7 @@ const PrescriptionDetailPage = () => {
               </div>
 
               <div className="shrink-0 flex flex-col items-center md:items-end">
-                <span className={`inline-flex items-center gap-2 text-[11px] font-black px-5 py-2 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-md`}>
+                <span className={`inline-flex items-center gap-2 text-[10px] sm:text-[11px] font-black px-4 sm:px-5 py-2 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tighter sm:tracking-tight shadow-md whitespace-nowrap`}>
                   <span className={`w-2.5 h-2.5 rounded-full ${statusMeta.dot}`} />
                   {labelOf(metadata.prescriptionStatuses, prescription.status)}
                 </span>
