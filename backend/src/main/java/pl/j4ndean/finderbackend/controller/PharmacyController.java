@@ -24,6 +24,24 @@ public class PharmacyController {
         return pharmacyService.searchPharmacies(query);
     }
 
+    @GetMapping("/nearby")
+    public List<Pharmacy> getNearby(
+            @RequestParam double lat,
+            @RequestParam double lng,
+            @RequestParam(defaultValue = "10") double radiusKm,
+            @RequestParam(defaultValue = "20") int limit) {
+        return pharmacyService.getNearby(lat, lng, radiusKm, limit);
+    }
+
+    @GetMapping("/in-bounds")
+    public List<Pharmacy> getInBounds(
+            @RequestParam double north,
+            @RequestParam double south,
+            @RequestParam double east,
+            @RequestParam double west) {
+        return pharmacyService.getInBounds(north, south, east, west);
+    }
+
     @PostMapping("/update-location")
     public void updateLocation(@RequestBody Pharmacy update) {
         pharmacyService.updateLocation(update);

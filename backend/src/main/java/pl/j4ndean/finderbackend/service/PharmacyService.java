@@ -26,6 +26,31 @@ public class PharmacyService {
         return pharmacies.findByNameOrCityOrAddress(query);
     }
 
+    public List<Pharmacy> getNearby(double lat, double lng, double radiusKm, int limit) {
+        // Uproszczony bounding box dla wydajności przed filtrowaniem Haversine
+        double latDelta = radiusKm / 111.0;
+        double lngDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(lat)));
+
+        List<Pharmacy> inBox = pharmacies.findInBoundingBox(
+                lat - latDelta, lat + latDelta,
+                lng - lngDelta, lng + lngDelta
+        );
+
+        return inBox.stream()
+                .filter(p -> p.getLatitude() != null && p.getLongitude() != null)
+                .filter(p -> calculateDistance(lat, lng, p.getLatitude(), p.getLongitude()) <= radiusKm)
+                .sorted((p1, p2) -> Double.compare(
+                        calculateDistance(lat, lng, p1.getLatitude(), p1.getLongitude()),
+                        calculateDistance(lat, lng, p2.getLatitude(), p2.getLongitude())
+                ))
+                .limit(limit)
+                .toList();
+    }
+
+    public List<Pharmacy> getInBounds(double north, double south, double east, double west) {
+        return pharmacies.findInBoundingBox(south, north, west, east);
+    }
+
     public void updateLocation(Pharmacy update) {
         pharmacies.findByCityContainingIgnoreCase(update.getCity()).stream()
                 .filter(p -> p.getAddress().equalsIgnoreCase(update.getAddress()))
