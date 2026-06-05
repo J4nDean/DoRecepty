@@ -1,4 +1,13 @@
 -- ============================================================================
+-- DR. OPTIMA (Warszawa) - Pełne zaopatrzenie dla testów
+-- ============================================================================
+INSERT INTO pharmacy_inventory (pharmacy_id, medication_id, stock_quantity)
+SELECT ph.id, m.id, 50
+FROM pharmacy ph, medication m
+WHERE ph.name = 'DR. OPTIMA' AND ph.city = 'Warszawa'
+AND m.name IN ('Concor 10', 'Tritace 2,5', 'Metformina Aurovitas', 'Allertec', 'Ventolin', 'Pulmicort Turbuhaler', 'Apap', 'Crestor');
+
+-- ============================================================================
 -- APTEKA BATOREGO (Ząbki) - Pełne zaopatrzenie dla wszystkich recept
 -- ============================================================================
 INSERT INTO pharmacy_inventory (pharmacy_id, medication_id, stock_quantity)

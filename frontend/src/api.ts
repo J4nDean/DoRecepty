@@ -177,9 +177,9 @@ const mapPharmacy = (p: ApiPharmacy): Pharmacy => ({
   longitude: p.longitude ?? undefined,
 });
 
-export const searchPharmacies = async (city: string, page = 0, size = 1000): Promise<Pharmacy[]> => {
+export const searchPharmacies = async (query: string, page = 0, size = 1000): Promise<Pharmacy[]> => {
   try {
-    const res = await api.get<ApiPharmacy[]>('/pharmacies/search', { params: { city, page, size } });
+    const res = await api.get<ApiPharmacy[]>('/pharmacies/search', { params: { query, page, size } });
     return res.data.map(mapPharmacy);
   } catch {
     return [];
@@ -217,7 +217,7 @@ export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
     navigator.geolocation.getCurrentPosition(
       pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
       reject,
-      { enableHighAccuracy: true, timeout: 10_000, maximumAge: 60_000 },
+      { enableHighAccuracy: true, timeout: 15_000, maximumAge: 0 },
     );
   });
 
