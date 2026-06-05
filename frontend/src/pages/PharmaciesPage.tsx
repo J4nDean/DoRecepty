@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MapPin, ArrowDownAZ, ArrowUpDown, Star } from 'lucide-react';
+import { MapPin, ArrowDownAZ, ArrowUpDown, Star, History as HistoryIcon, X } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PharmacyCard } from '../components/PharmacyCard';
 import { SearchBar } from '../components/SearchBar';
@@ -17,6 +17,7 @@ type SortMode = 'default' | 'distance' | 'name';
 
 const NEARBY_RADIUS_KM = 20;
 const NEARBY_LIMIT = 200;
+const HISTORY_KEY = 'pharmacy_search_history';
 
 const isPermissionDenied = (err: unknown) =>
   typeof err === 'object' && err !== null && 'code' in err && 'PERMISSION_DENIED' in (err as object);
@@ -38,6 +39,7 @@ const PharmaciesPage = () => {
   const [nameFilter, setNameFilter] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [searchHistory, setSearchHistory] = useState<string[]>([]);
 
   const { isFavorite, toggleFavorite, favorites } = useFavoritePharmacies();
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -49,6 +51,14 @@ const PharmaciesPage = () => {
 
   useEffect(() => {
     getUserLocation().then(setUserLocation).catch(() => {});
+    const saved = localStorage.getItem(HISTORY_KEY);
+    if (saved) {
+      try {
+        setSearchHistory(JSON.parse(saved));
+      } catch {
+        setSearchHistory([]);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -56,6 +66,21 @@ const PharmaciesPage = () => {
     const card = cardRefs.current.get(selectedId);
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [selectedId]);
+
+  const addToHistory = (query: string) => {
+    const trimmed = query.trim();
+    if (!trimmed || trimmed.length < 2) return;
+    setSearchHistory(prev => {
+      const next = [trimmed, ...prev.filter(h => h.toLowerCase() !== trimmed.toLowerCase())].slice(0, 5);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const clearHistory = () => {
+    setSearchHistory([]);
+    localStorage.removeItem(HISTORY_KEY);
+  };
 
   const resetForNewSearch = (city?: string) => {
     setIsLoading(true);
@@ -85,6 +110,7 @@ const PharmaciesPage = () => {
   const handleCitySearch = async (query: string) => {
     const trimmed = query.trim();
     if (!trimmed) return;
+    addToHistory(trimmed);
     resetForNewSearch(trimmed);
     try {
       setPharmacies(await searchPharmacies(trimmed));
@@ -106,6 +132,7 @@ const PharmaciesPage = () => {
       const city = await reverseGeocode(centerLat, centerLng);
       if (city) {
         setSearchCity(city);
+        addToHistory(city);
         setPharmacies(await searchPharmacies(city));
       } else {
         setLocationError('Nie udało się rozpoznać miasta dla tego obszaru — spróbuj wpisać nazwę ręcznie');
@@ -166,6 +193,33 @@ const PharmaciesPage = () => {
         isLocating={isLocating}
         className="mb-3 max-w-lg"
       />
+
+      {searchHistory.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-4 -mt-1">
+          <div className="flex items-center gap-1.5 text-neutral-400 mr-1">
+            <HistoryIcon size={13} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Ostatnie:</span>
+          </div>
+          {searchHistory.map(h => (
+            <button
+              key={h}
+              type="button"
+              onClick={() => handleCitySearch(h)}
+              className="bg-neutral-100 hover:bg-neutral-200 text-neutral-600 text-[11px] font-medium px-2 py-1 rounded-md transition-colors"
+            >
+              {h}
+            </button>
+          ))}
+          <button
+            type="button"
+            onClick={clearHistory}
+            className="text-neutral-400 hover:text-rose-500 p-1 transition-colors"
+            title="Wyczyść historię"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <button
