@@ -21,7 +21,7 @@ public class PharmacyService {
 
     public List<Pharmacy> searchPharmacies(String query) {
         if (query == null || query.isBlank()) {
-            return pharmacies.findAll(PageRequest.of(0, 50)).getContent();
+            return pharmacies.findAll(PageRequest.of(0, 1000)).getContent();
         }
         return pharmacies.findByNameOrCityOrAddress(query);
     }
