@@ -28,14 +28,20 @@ public class Pharmacy {
     @Column(length = 10)
     private String postalCode;
 
-    @Column(length = 30)
+    @Column(length = 255)
     private String phone;
 
     private Double latitude;
     private Double longitude;
 
     private String status;
+
+    @Column(length = 512)
     private String openingHoursWeekdays;
+
+    @Column(length = 512)
     private String openingHoursSaturday;
+
+    @Column(length = 512)
     private String openingHoursSunday;
 }

@@ -6,7 +6,7 @@ import { SearchBar } from '../components/SearchBar';
 import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner, EmptyState } from '../components/ui';
 import {
-  searchPharmacies, fetchPharmaciesInBounds, fetchNearbyByLocation, getUserLocation, reverseGeocode,
+  searchPharmacies, fetchPharmaciesInBounds, getUserLocation, reverseGeocode,
 } from '../api';
 import { useFavoritePharmacies } from '../useFavoritePharmacies';
 import { haversineKm, type LatLng } from '../utils';
@@ -15,8 +15,6 @@ import type { Pharmacy } from '../types';
 type MapBounds = { north: number; south: number; east: number; west: number };
 type SortMode = 'default' | 'distance' | 'name';
 
-const NEARBY_RADIUS_KM = 20;
-const NEARBY_LIMIT = 200;
 const HISTORY_KEY = 'pharmacy_search_history';
 
 const isPermissionDenied = (err: unknown) =>
@@ -70,7 +68,12 @@ const PharmaciesPage = () => {
   }, [selectedId]);
 
   const handleLoadInArea = async (bounds: MapBounds) => {
-    resetForNewSearch(undefined);
+    setIsLoading(true);
+    setSearched(true);
+    setPharmacies([]);
+    setSelectedId(null);
+    setLocationError(null);
+    
     try {
       const inBounds = await fetchPharmaciesInBounds(bounds);
       if (inBounds.length > 0) {
@@ -147,31 +150,6 @@ const PharmaciesPage = () => {
     resetForNewSearch(trimmed);
     try {
       setPharmacies(await searchPharmacies(trimmed));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLoadInArea = async (bounds: MapBounds) => {
-    resetForNewSearch(undefined);
-    try {
-      const inBounds = await fetchPharmaciesInBounds(bounds);
-      if (inBounds.length > 0) {
-        setPharmacies(inBounds);
-        return;
-      }
-      const centerLat = (bounds.north + bounds.south) / 2;
-      const centerLng = (bounds.east + bounds.west) / 2;
-      const city = await reverseGeocode(centerLat, centerLng);
-      if (city) {
-        setSearchCity(city);
-        addToHistory(city);
-        setPharmacies(await searchPharmacies(city));
-      } else {
-        setLocationError('Nie udało się rozpoznać miasta dla tego obszaru — spróbuj wpisać nazwę ręcznie');
-      }
-    } catch {
-      setLocationError('Nie udało się pobrać aptek dla tego obszaru');
     } finally {
       setIsLoading(false);
     }
