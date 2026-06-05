@@ -26,7 +26,7 @@ export const daysUntilExpiry = (expiryDate: string): number => {
 /** Czy recepta jest aktywna i wygasa za ≤ 7 dni. */
 export const isExpiringSoon = (status: string, expiryDate?: string): boolean => {
   if (!expiryDate) return false;
-  if (status !== 'AKTYWNA' && status !== 'CZĘŚCIOWO_ZREALIZOWANA') return false;
+  if (status !== 'AKTYWNA' && status !== 'CZĘŚCIOWO_ZREALIZOWANA' && status !== 'NIEZREALIZOWANA') return false;
   const d = daysUntilExpiry(expiryDate);
   return d >= 0 && d <= 7;
 };
@@ -70,6 +70,7 @@ export interface StatusMeta {
 export const STATUS_META: Record<PrescriptionStatus, StatusMeta> = {
   AKTYWNA:                { dot: 'bg-emerald-500', chip: 'bg-emerald-50 text-emerald-700 ring-emerald-200', rail: 'bg-emerald-500' },
   CZĘŚCIOWO_ZREALIZOWANA: { dot: 'bg-amber-500',   chip: 'bg-amber-50 text-amber-700 ring-amber-200',       rail: 'bg-amber-400' },
+  NIEZREALIZOWANA:        { dot: 'bg-rose-500',    chip: 'bg-rose-50 text-rose-700 ring-rose-200',          rail: 'bg-rose-500' },
   ZREALIZOWANA:           { dot: 'bg-zinc-400',    chip: 'bg-zinc-100 text-zinc-600 ring-zinc-200',         rail: 'bg-zinc-300' },
   ARCHIWALNA:             { dot: 'bg-zinc-400',    chip: 'bg-zinc-100 text-zinc-500 ring-zinc-200',         rail: 'bg-zinc-300' },
   ANULOWANA:              { dot: 'bg-rose-500',    chip: 'bg-rose-50 text-rose-600 ring-rose-200',          rail: 'bg-rose-400' },

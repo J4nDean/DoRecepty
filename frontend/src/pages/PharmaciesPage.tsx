@@ -40,6 +40,8 @@ const PharmaciesPage = () => {
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null);
+  const [pendingSearch, setPendingSearch] = useState(false);
 
   const { isFavorite, toggleFavorite, favorites } = useFavoritePharmacies();
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -67,6 +69,38 @@ const PharmaciesPage = () => {
     if (card) card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }, [selectedId]);
 
+  const handleLoadInArea = async (bounds: MapBounds) => {
+    resetForNewSearch(undefined);
+    try {
+      const inBounds = await fetchPharmaciesInBounds(bounds);
+      if (inBounds.length > 0) {
+        setPharmacies(inBounds);
+        return;
+      }
+      const centerLat = (bounds.north + bounds.south) / 2;
+      const centerLng = (bounds.east + bounds.west) / 2;
+      const city = await reverseGeocode(centerLat, centerLng);
+      if (city) {
+        setSearchCity(city);
+        addToHistory(city);
+        setPharmacies(await searchPharmacies(city));
+      } else {
+        setLocationError('Nie udało się rozpoznać miasta dla tego obszaru — spróbuj wpisać nazwę ręcznie');
+      }
+    } catch {
+      setLocationError('Nie udało się pobrać aptek dla tego obszaru');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (pendingSearch && currentBounds) {
+      setPendingSearch(false);
+      handleLoadInArea(currentBounds);
+    }
+  }, [pendingSearch, currentBounds]);
+
   const addToHistory = (query: string) => {
     const trimmed = query.trim();
     if (!trimmed || trimmed.length < 2) return;
@@ -93,16 +127,15 @@ const PharmaciesPage = () => {
 
   const loadNearby = async () => {
     setIsLocating(true);
-    resetForNewSearch(undefined);
+    setLocationError(null);
     try {
       const { lat, lng } = await getUserLocation();
       setUserLocation({ lat, lng });
-      setPharmacies(await fetchNearbyByLocation(lat, lng, NEARBY_RADIUS_KM, NEARBY_LIMIT));
+      setPendingSearch(true);
       setSortMode('distance');
     } catch (err) {
       setLocationError(locationErrorMessage(err));
     } finally {
-      setIsLoading(false);
       setIsLocating(false);
     }
   };
@@ -264,6 +297,7 @@ const PharmaciesPage = () => {
           selectedId={selectedId}
           onSelect={handleSelect}
           onLoadInArea={handleLoadInArea}
+          onBoundsChange={setCurrentBounds}
           userLocation={userLocation}
           searchCity={searchCity}
           className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"

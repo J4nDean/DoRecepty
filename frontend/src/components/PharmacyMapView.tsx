@@ -74,6 +74,7 @@ interface MapContentProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (bounds: MapBounds) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -82,7 +83,7 @@ interface MapContentProps {
 }
 
 const MapContent = ({
-  pharmacies, selectedId, onSelect, onLoadInArea, onVisibleChange,
+  pharmacies, selectedId, onSelect, onLoadInArea, onBoundsChange, onVisibleChange,
   userLocation, searchCity, defaultZoom = DEFAULT_ZOOM, className,
 }: MapContentProps) => {
   const isLoaded = useApiIsLoaded();
@@ -151,8 +152,11 @@ const MapContent = ({
   useEffect(() => { onVisibleChangeRef.current?.(visibleDisplayed); }, [visibleDisplayed]);
 
   const handleCameraChanged = useCallback((ev: { detail: { bounds?: MapBounds } }) => {
-    if (ev.detail.bounds) setMapBounds(ev.detail.bounds);
-  }, []);
+    if (ev.detail.bounds) {
+      setMapBounds(ev.detail.bounds);
+      onBoundsChange?.(ev.detail.bounds);
+    }
+  }, [onBoundsChange]);
 
   const handleSearchArea = useCallback(() => {
     if (mapBounds) onLoadInArea?.(mapBounds);
@@ -205,6 +209,7 @@ export interface PharmacyMapViewProps {
   selectedId?: string | null;
   onSelect?: (id: string) => void;
   onLoadInArea?: (bounds: MapBounds) => void;
+  onBoundsChange?: (bounds: MapBounds) => void;
   onVisibleChange?: (visible: Pharmacy[]) => void;
   userLocation?: LatLng | null;
   searchCity?: string;
@@ -213,7 +218,7 @@ export interface PharmacyMapViewProps {
 }
 
 const PharmacyMapView = ({
-  pharmacies = [], selectedId, onSelect, onLoadInArea, onVisibleChange,
+  pharmacies = [], selectedId, onSelect, onLoadInArea, onBoundsChange, onVisibleChange,
   userLocation, searchCity, defaultZoom, className = '',
 }: PharmacyMapViewProps) => {
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string | undefined;
@@ -228,6 +233,7 @@ const PharmacyMapView = ({
         selectedId={selectedId}
         onSelect={onSelect}
         onLoadInArea={onLoadInArea}
+        onBoundsChange={onBoundsChange}
         onVisibleChange={onVisibleChange}
         userLocation={userLocation}
         searchCity={searchCity}
