@@ -91,27 +91,31 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   const [showPesel, setShowPesel] = useState(false);
 
   return (
-    <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 py-5 flex items-center justify-between shrink-0 min-h-20 safe-area-top">
+    <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 h-20 sm:h-24 flex items-center justify-between shrink-0 safe-area-top">
       <div className="flex flex-col justify-center min-w-0 pr-4">
-        <h1 className="text-base sm:text-lg font-bold text-neutral-900 leading-tight truncate tracking-tight">
+        <h1 className="text-base sm:text-xl font-extrabold text-neutral-900 leading-tight truncate tracking-tight">
           {title}
         </h1>
-        {subtitle && <p className="text-xs sm:text-sm text-neutral-400 mt-1 truncate font-medium leading-none">{subtitle}</p>}
+        {subtitle && (
+          <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1 truncate font-semibold uppercase tracking-wider leading-none">
+            {subtitle}
+          </p>
+        )}
       </div>
 
       {user && (
-        <div className="flex items-center gap-3 sm:gap-6 shrink-0 h-full">
-          <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-3 sm:gap-6 h-full">
+          <div className="flex items-center gap-2 sm:gap-4 bg-neutral-50 px-3 py-2 rounded-xl border border-neutral-100 shadow-sm">
             <button 
               onClick={() => setShowPesel(!showPesel)}
-              className="p-1.5 sm:p-2 hover:bg-neutral-100 rounded-full text-neutral-400 hover:text-brand-600 transition-colors shrink-0"
+              className="p-1.5 hover:bg-white rounded-lg text-neutral-400 hover:text-brand-600 transition-all hover:shadow-sm shrink-0"
               title={showPesel ? "Ukryj" : "Pokaż"}
             >
-              {showPesel ? <EyeOff size={20} className="sm:w-[22px] sm:h-[22px]" /> : <Eye size={20} className="sm:w-[22px] sm:h-[22px]" />}
+              {showPesel ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
-            <div className="flex flex-col justify-center">
-              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-black uppercase tracking-widest leading-none mb-1">PESEL</span>
-              <span className={`font-mono text-sm sm:text-xl font-black text-neutral-900 tracking-wider transition-all duration-300 leading-none ${!showPesel ? 'blur-[5px] select-none opacity-40' : 'blur-0'}`}>
+            <div className="flex flex-col justify-center border-l border-neutral-200 pl-3">
+              <span className="text-[8px] text-neutral-400 font-black uppercase tracking-widest leading-none mb-1">PESEL</span>
+              <span className={`font-mono text-xs sm:text-lg font-black text-neutral-900 tracking-wider transition-all duration-300 leading-none ${!showPesel ? 'blur-[5px] select-none opacity-40' : 'blur-0'}`}>
                 {user.pesel}
               </span>
             </div>
