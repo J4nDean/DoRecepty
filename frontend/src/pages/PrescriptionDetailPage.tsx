@@ -125,7 +125,7 @@ const BarcodeMock = ({ number }: { number: string }) => {
   const fullBarcodeNumber = `100101723${number}316993141033672942435380593264361040`.slice(0, 44);
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="flex h-16 w-full max-w-[440px] items-stretch justify-center gap-[1.5px] opacity-40">
+      <div className="flex h-12 sm:h-16 w-full max-w-[440px] items-stretch justify-center gap-[1.5px] opacity-40">
         {[...Array(100)].map((_, i) => (
           <div
             key={i}
@@ -136,7 +136,7 @@ const BarcodeMock = ({ number }: { number: string }) => {
           />
         ))}
       </div>
-      <p className="text-[12px] text-neutral-700 font-mono font-bold tracking-[0.25em] mt-1.5 leading-none">
+      <p className="max-w-full text-[8px] sm:text-[12px] text-neutral-700 font-mono font-bold tracking-[0.12em] sm:tracking-[0.25em] mt-1.5 leading-none text-center break-all">
         {fullBarcodeNumber}
       </p>
     </div>
@@ -201,6 +201,7 @@ const PrescriptionDetailPage = () => {
   }
 
   const statusMeta = statusMetaOf(prescription.status);
+  const expiringSoon = isExpiringSoon(prescription.status, prescription.expiryDate);
 
   return (
     <AppLayout title="E-recepta" subtitle={`Dokument nr ${prescription.number}`}>
@@ -215,7 +216,9 @@ const PrescriptionDetailPage = () => {
       <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
         <div className="lg:col-span-3 space-y-4">
           {/* OFICJALNY NAGŁÓWEK RECEPTY */}
-          <section className="bg-white rounded-lg border border-neutral-200 shadow-sm overflow-hidden w-full">
+          <section className={`bg-white rounded-lg border shadow-sm overflow-hidden w-full transition-all ${
+            expiringSoon ? 'border-amber-400 ring-2 ring-amber-400' : 'border-neutral-200'
+          }`}>
             <div className="p-4 sm:p-8 border-b border-dashed border-neutral-200 bg-neutral-50/20 flex flex-col items-center">
               <BarcodeMock number={prescription.number} />
               <p className="text-center text-[9px] sm:text-[11px] text-neutral-500 font-mono font-bold mt-2 tracking-[0.2em] sm:tracking-[0.4em] uppercase opacity-70">
@@ -223,9 +226,10 @@ const PrescriptionDetailPage = () => {
               </p>
             </div>
 
-            <div className="p-5 sm:p-10 flex flex-col md:flex-row justify-between gap-6 sm:gap-10">
-              <div className="flex-1 space-y-6 sm:space-y-8">
-                <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+            <div className="p-5 sm:p-10 space-y-6 sm:space-y-8">
+              {/* Górny rząd: kod dostępu + data po lewej, status wyrównany do góry po prawej */}
+              <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-start md:justify-between">
+                <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
                   <div className="flex flex-col items-center">
                     <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-2 sm:mb-3">Kod dostępu</p>
                     <div className="relative px-6 py-3 sm:px-10 sm:py-4 bg-white shadow-inner rounded">
@@ -236,7 +240,7 @@ const PrescriptionDetailPage = () => {
                       <span className="text-3xl sm:text-5xl font-mono font-black text-neutral-900 tracking-widest">{prescription.number}</span>
                     </div>
                   </div>
-                  <div className="h-16 w-px bg-neutral-100 hidden sm:block mx-4" />
+                  <div className="h-16 w-px bg-neutral-100 hidden sm:block mx-2 sm:mx-4" />
                   <div className="text-center sm:text-left">
                     <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1">Wystawiono</p>
                     <p className="text-xl sm:text-2xl font-black text-neutral-900">{formatDateShort(prescription.issueDate)}</p>
@@ -244,26 +248,27 @@ const PrescriptionDetailPage = () => {
                   </div>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 pt-6 sm:pt-8 border-t border-neutral-100">
-                  <div>
-                    <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Pacjent</p>
-                    <p className="text-sm sm:text-base font-black text-neutral-900 uppercase tracking-tighter">PESEL: {prescription.patientPesel || '—'}</p>
-                    <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1 font-bold italic leading-none">Cyfrowe IKP / DoRecepty</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
-                    <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">{prescription.doctorName}</p>
-                    <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">NPWZ: {prescription.doctorNpwz || '—'}</p>
-                    <p className="text-[9px] sm:text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON: {prescription.clinicRegon || '—'}</p>
-                  </div>
+                {/* Status — wyśrodkowany na mobile, wyrównany do góry po prawej na desktop */}
+                <div className="flex justify-center md:block shrink-0">
+                  <span className={`inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black px-3 sm:px-4 py-1.5 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-sm max-w-full`}>
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${statusMeta.dot}`} />
+                    <span className="truncate">{labelOf(metadata.prescriptionStatuses, prescription.status)}</span>
+                  </span>
                 </div>
               </div>
 
-              <div className="shrink-0 flex flex-col items-center md:items-end pt-2 sm:pt-0">
-                <span className={`inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black px-3 sm:px-4 py-1.5 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-md whitespace-nowrap`}>
-                  <span className={`w-2 h-2 sm:w-2 rounded-full ${statusMeta.dot}`} />
-                  {labelOf(metadata.prescriptionStatuses, prescription.status)}
-                </span>
+              <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 pt-6 sm:pt-8 border-t border-neutral-100">
+                <div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Pacjent</p>
+                  <p className="text-sm sm:text-base font-black text-neutral-900 uppercase tracking-tighter break-all">PESEL: {prescription.patientPesel || '—'}</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1 font-bold italic leading-none">Cyfrowe IKP / DoRecepty</p>
+                </div>
+                <div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
+                  <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">{prescription.doctorName}</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">NPWZ: {prescription.doctorNpwz || '—'}</p>
+                  <p className="text-[9px] sm:text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON: {prescription.clinicRegon || '—'}</p>
+                </div>
               </div>
             </div>
           </section>
