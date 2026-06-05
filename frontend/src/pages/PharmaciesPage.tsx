@@ -50,7 +50,7 @@ const PharmaciesPage = () => {
   };
 
   useEffect(() => {
-    getUserLocation().then(setUserLocation).catch(() => {});
+    loadNearby();
     const saved = localStorage.getItem(HISTORY_KEY);
     if (saved) {
       try {

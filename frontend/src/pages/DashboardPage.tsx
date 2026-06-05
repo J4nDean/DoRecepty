@@ -85,7 +85,7 @@ const DashboardPage = () => {
         {!isLoading && expiringSoon.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-6">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shadow-sm" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-sm" />
               <h2 className="text-sm font-black text-neutral-800 uppercase tracking-widest">Ważne terminy</h2>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
@@ -97,7 +97,7 @@ const DashboardPage = () => {
                     to={`/recepty/${p.id}`}
                     className="group relative overflow-hidden bg-white border border-neutral-200 rounded-lg h-24 p-5 flex items-center gap-4 shadow-sm hover:border-neutral-300 transition-all"
                   >
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400" />
+                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
                     <div className="w-11 h-11 bg-amber-50 rounded-lg flex items-center justify-center text-amber-600 shrink-0">
                       <AlertTriangle size={19} />
                     </div>

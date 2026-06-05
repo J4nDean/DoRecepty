@@ -43,7 +43,7 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
       onClick={() => navigate(`/recepty/${prescription.id}`)}
       className={`group relative overflow-hidden bg-white rounded-xl border cursor-pointer transition-all hover:shadow-md w-full flex flex-col ${
         expiringSoon 
-          ? 'border-amber-400 ring-4 ring-amber-400/30 shadow-amber-100' 
+          ? 'border-amber-500 ring-4 ring-amber-500/30 shadow-amber-100' 
           : 'border-neutral-200 hover:border-neutral-300'
       }`}
       aria-label={`Recepta ${prescription.number}`}
@@ -96,7 +96,7 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
           </span>
 
           {expiringSoon ? (
-            <span className="text-[11px] font-bold text-amber-600 flex items-center gap-1.5 animate-pulse">
+            <span className="text-[11px] font-bold text-amber-500 flex items-center gap-1.5">
               <AlertTriangle size={14} />
               {days === 0 ? 'DZIŚ' : `${days} DNI`}
             </span>
