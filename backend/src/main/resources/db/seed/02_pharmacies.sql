@@ -1,4 +1,4 @@
--- Generated from Excel data with precise weekday hours and preserved coordinates
+-- Generated with batching for cloud stability
 DELETE FROM pharmacy;
 INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('ORLIK', 'ul. gen. Romana Abrahama 18/313', 'Warszawa', '03-982', '22-673-37-20', NULL, NULL, '08:00-20:00', '09:00-15:00', NULL, 'aktywna'),
@@ -50,7 +50,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('Apteka', 'ul. Czerniakowska 231', 'Warszawa', '00-416', '22-745-22-80', NULL, NULL, '07:30-20:00', '09:00-13:00', NULL, 'aktywna'),
 ('Apteka', 'ul. gen. Waleriana Czumy 3A', 'Warszawa', '01-355', '22-665-33-18', NULL, NULL, '08:00-20:00', '09:00-20:00', NULL, 'aktywna'),
 ('DR. MAX', 'ul. Gustawa Daniłowskiego 2/4', 'Warszawa', '01-833', '22 834-07-57', NULL, NULL, '08:00-20:00', '09:00-15:00', NULL, 'aktywna'),
-('APTEKA NA WAWRZYSZEWIE', 'ul. Dantego Alighieri 5', 'Warszawa', '01-914', '22-835-92-72', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
+('APTEKA NA WAWRZYSZEWIE', 'ul. Dantego Alighieri 5', 'Warszawa', '01-914', '22-835-92-72', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('Apteka', 'ul. Jarosława Dąbrowskiego 75B', 'Warszawa', '02-586', '695908090', NULL, NULL, '08:00-20:00', '08:00-14:00', NULL, 'aktywna'),
 ('APTEKA SŁONECZNA', 'Dąbrowskiej 13A', 'Warszawa', '01-903', '22 633-02-92', NULL, NULL, '07:00-21:00', '08:00-15:00', NULL, 'aktywna'),
 ('CEF@RM 36,6', 'ul. Edwarda Dembowskiego 8', 'Warszawa', '02-748', '22 643-95-61', NULL, NULL, '07:30-22:00', '07:30-22:00', '08:00-21:00', 'aktywna'),
@@ -100,7 +101,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('Apteka Słoneczna', 'ul. Krochmalna 3', 'Warszawa', '00-864', '22 699-03-45', NULL, NULL, '07:00-21:00', '8:00-15:00', NULL, 'aktywna'),
 ('COSMEDICA', 'ul. Książkowa 9C', 'Warszawa', '03-134', '22-466-03-43', NULL, NULL, '08:00-20:00', '08:00-15:00', '09:00-16:00', 'aktywna'),
 ('Apteka', 'ul. Kazimierza Kuratowskiego 6/A', 'Warszawa', '02-747', '22 858-22-18', NULL, NULL, '08:00-20:00', '08:00-14:00', NULL, 'aktywna'),
-('Dr. Max', 'ul. Franciszka Marii Lanciego 11', 'Warszawa', '02-792', '22 859-70-98', NULL, NULL, '08:00-20:00', '08:00-16:00', NULL, 'aktywna'),
+('Dr. Max', 'ul. Franciszka Marii Lanciego 11', 'Warszawa', '02-792', '22 859-70-98', NULL, NULL, '08:00-20:00', '08:00-16:00', NULL, 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('HETMAŃSKA', 'ul. Stanisława Lentza 35', 'Warszawa', '02-954', '22 651-98-59', NULL, NULL, '08:00-16:00', NULL, NULL, 'aktywna'),
 ('DR. OPTIMA', 'ul. Leszczynowa 14', 'Warszawa', '03-197', '22-814-58-31', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
 ('CEF@RM 36,6', 'ul. Leszno 38', 'Warszawa', '01-175', '22 632-13-92', NULL, NULL, '08:00-22:00', '08:00-22:00', '09:00-21:00', 'aktywna'),
@@ -150,7 +152,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('COSMEDICA', 'ul. Potocka 14/6', 'Warszawa', '01-652', '22 833-42-24; 22 833-29-82', NULL, NULL, '08:00-20:00', '09:00-14:00', '09:00-16:00', 'aktywna'),
 ('DR PORADA', 'ul. Korkowa 96', 'Warszawa', '04-519', '22-613-04-26', NULL, NULL, '08:00-21:00', '08:00-15:00', NULL, 'aktywna'),
 ('CEF@RM 36,6', 'ul. Powstańców Śląskich 10', 'Warszawa', '01-381', '22 664-84-30', NULL, NULL, '09:00-17:00', '09:00-17:00', NULL, 'aktywna'),
-('APTEKA BEMOWO', 'ul. Powstańców Śląskich 104', 'Warszawa', '01-466', '22-448-50-25', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
+('APTEKA BEMOWO', 'ul. Powstańców Śląskich 104', 'Warszawa', '01-466', '22-448-50-25', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('Apteka Słoneczna', 'ul. Prosta 2/14', 'Warszawa', '00-850', '22 853-15-02', NULL, NULL, '07:00-21:00', '08:00-15:00', NULL, 'aktywna'),
 ('Apteka', 'ul. Pruszkowska 4D', 'Warszawa', '02-118', '22-822-55-94', NULL, NULL, '08:00-20:00', '08:30-13:30', NULL, 'aktywna'),
 ('Apteka', 'ul. Puławska 392', 'Warszawa', '02-801', '22-894-40-54; 604-781-916', NULL, NULL, '08:00-21:00', '08:00-14:00', NULL, 'aktywna'),
@@ -200,7 +203,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('Apteka Słoneczna', 'Wąwolnicka 4', 'Warszawa', '04-023', '22 820 79 63', NULL, NULL, '07:00-21:00', '08:00-15:00', NULL, 'aktywna'),
 ('CEF@RM 36,6', 'ul. Widok 19', 'Warszawa', '00-326', '22 827-35-93', NULL, NULL, '08:00-16:00', NULL, NULL, 'aktywna'),
 ('CENTRALNA', 'Stanisława Wojciechowskiego 37', 'Warszawa', '02-495', '22-662-65-34', NULL, NULL, '08:00-21:00', '08:00-16:00', NULL, 'aktywna'),
-('CENTRALNA', 'Stanisława Wojciechowskiego 58', 'Warszawa', '02-495', '22-867-63-46', NULL, NULL, 'Całodobowo', 'Całodobowo', 'Całodobowo', 'aktywna'),
+('CENTRALNA', 'Stanisława Wojciechowskiego 58', 'Warszawa', '02-495', '22-867-63-46', NULL, NULL, 'Całodobowo', 'Całodobowo', 'Całodobowo', 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('Cosmedica Express', 'ul. Wolska 58', 'Warszawa', '01-134', '885-707-104', NULL, NULL, '08:00-20:00', '08:00-15:00', '09:00-16:00', 'aktywna'),
 ('SUPER-PHARM', 'ul. Wołoska 12', 'Warszawa', '02-675', '23 439-06-14; 797-709-001', NULL, NULL, '09:00-22:00', '09:00-22:00', '09:00-21:00', 'aktywna'),
 ('Dr. Max', 'ul. Wołoska 137', 'Warszawa', '02-507', '22 845-63-78', NULL, NULL, '08:00-18:00', NULL, NULL, 'aktywna'),
@@ -250,7 +254,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('NASZA', 'ul. Przy Agorze 17/1', 'Warszawa', '01-960', '22-834-39-96', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
 ('GŁÓWNA', 'ul. Karola Dickensa 27', 'Warszawa', '02-382', '22-403-77-75', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
 ('DOZ APTEKA DBAM O ZDROWIE', 'ul. gen. Tadeusza Pełczyńskiego 32A/1', 'Warszawa', '01-471', '880 348 708', NULL, NULL, '07:30-20:30', '08:00-16:00', NULL, 'aktywna'),
-('APTEKARZ WARSZAWSKI', 'ul. Nowowiejska 5', 'Warszawa', '00-643', '22-825-22-42', NULL, NULL, '07:00-20:00', '08:00-15:00', NULL, 'aktywna'),
+('APTEKARZ WARSZAWSKI', 'ul. Nowowiejska 5', 'Warszawa', '00-643', '22-825-22-42', NULL, NULL, '07:00-20:00', '08:00-15:00', NULL, 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('Apteka', 'ul. Gilarska 159', 'Warszawa', '03-589', '22 743-72-91; 602-820-665', NULL, NULL, '08:00-21:00', '09:00-14:00', NULL, 'aktywna'),
 ('NASZA', 'ul. Przy Agorze 28/4', 'Warszawa', '01-930', '22-412-02-23', NULL, NULL, '08:00-21:00', '08:00-21:00', '09:00-18:00', 'aktywna'),
 ('GŁÓWNA', 'al. Aleja Władysława Reymonta 6', 'Warszawa', '01-842', '22 669-86-01', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
@@ -300,7 +305,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('STAWKI 2A, WARSZAWA 00-193', 'ul. Stawki 2A', 'Warszawa', '00-193', '22 838-56-78', NULL, NULL, '08:00-20:00', '09:00-16:00', NULL, 'aktywna'),
 ('ZIKO', 'ul. Władysława Broniewskiego 28', 'Warszawa', '01-771', '22 663-00-08', NULL, NULL, '07:30-21:45', '08:15-21:00', '09:15-19:45', 'aktywna'),
 ('AMICA', 'Korkowa 29/U1', 'Warszawa', '04-502', '22-241-26-85', NULL, NULL, '08:00-21:00', '09:00-15:00', '09:00-15:00', 'aktywna'),
-('LA VIE', 'ul. Kleszczowa 18', 'Warszawa', '02-485', '22-632-61-83', NULL, NULL, '10:00-20:00', '10:00-20:00', '10:00-18:00', 'aktywna'),
+('LA VIE', 'ul. Kleszczowa 18', 'Warszawa', '02-485', '22-632-61-83', NULL, NULL, '10:00-20:00', '10:00-20:00', '10:00-18:00', 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('SYRENKA', 'al. Aleja Dzieci Polskich 21', 'Warszawa', '04-730', '22 613-35-11', NULL, NULL, '08:00-19:00', '09:00-15:00', NULL, 'aktywna'),
 ('Z Uśmiechem', 'ul. Indiry Gandhi 35/U07', 'Warszawa', '02-776', '22 855-07-63; 728-311-376', NULL, NULL, 'Całodobowo', 'Całodobowo', 'Całodobowo', 'aktywna'),
 ('GŁÓWNA', 'ul. Grójecka 47/51', 'Warszawa', '02-031', '22 659-20-23; 665-404-877', NULL, NULL, '07:00-21:00', '08:00-18:00', NULL, 'aktywna'),
@@ -350,7 +356,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('DBAM O ZDROWIE', 'Aleje Jerozolimskie 54/H 02', 'Warszawa', '00-024', '736-697-477', NULL, NULL, '08:00-22:00', '08:00-22:00', '8:00-22:00', 'aktywna'),
 ('APTEKA WILEŃSKA', 'ul. Wileńska 18', 'Warszawa', '03-416', '22 473-88-89', NULL, NULL, '08:00-20:00', '08:30-13:00', NULL, 'aktywna'),
 ('Apteka', 'ul. Wąwozowa 31', 'Warszawa', '02-796', '22 649-01-73', NULL, NULL, '08:00-20:00', '09:00-15:00', '09:45-14:15', 'aktywna'),
-('DUO-FARM', 'ul. Kobielska 47/51', 'Warszawa', '04-371', '22 8109443', NULL, NULL, '08:00-21:00', '09:00-14:30', '09:00-14:30', 'aktywna'),
+('DUO-FARM', 'ul. Kobielska 47/51', 'Warszawa', '04-371', '22 8109443', NULL, NULL, '08:00-21:00', '09:00-14:30', '09:00-14:30', 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('Dr. Max', 'ul. Modlińska 8/S11', 'Warszawa', '03-053', '22 811-81-63', NULL, NULL, '09:00-21:00', '08:00-21:00', '09:30-19:30', 'aktywna'),
 ('Apteka', 'ul. Łucka 20/19', 'Warszawa', '00-845', '22 654-46-81', NULL, NULL, 'Pn, Czw, Wt, Śr: 08:00-20:00; Pt: 08:00-18:00', '09:00-14:00', NULL, 'aktywna'),
 ('DOZ Apteka dbam o zdrowie Balsamina', 'Kartezjusza 2', 'Warszawa', '01-480', '22 419-32-19', NULL, NULL, '08:00-20:00', '09:00-14:00', '08:00-16:00', 'aktywna'),
@@ -400,7 +407,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('SPOŁECZNA', 'al. Aleja Komisji Edukacji Narodowej 55/4', 'Warszawa', '02-797', '22 643-34-05', NULL, NULL, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
 ('SŁONECZNA', 'ul. Odkryta 44A', 'Warszawa', '03-140', '22 781-71-74;', NULL, NULL, '07:00-21:00', '08:00-21:00', '08:00-21:00', 'aktywna'),
 ('ZIKO', 'al. Aleja Komisji Edukacji Narodowej 83/U9', 'Warszawa', '02-777', '12 177-87-04; 571-243-778', NULL, NULL, '07:30-21:45', '08:00-16:00', NULL, 'aktywna'),
-('COSMEDICA', 'ul. Myśliborska 104', 'Warszawa', '03-185', '22 464-87-25', NULL, NULL, '08:00-20:00', '08:00-15:00', '09:00-16:00', 'aktywna'),
+('COSMEDICA', 'ul. Myśliborska 104', 'Warszawa', '03-185', '22 464-87-25', NULL, NULL, '08:00-20:00', '08:00-15:00', '09:00-16:00', 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('BLISKA', 'ul. Sokołowska 9/U20', 'Warszawa', '01-142', '22 299-10-36; 502-545-019', NULL, NULL, '08:00-20:00', '08:00-16:00', NULL, 'aktywna'),
 ('DR ZDROWIE', 'ul. Powsińska 31/138-139', 'Warszawa', '02-903', '22 370-39-58; 22 370-39-59', NULL, NULL, '09:00-21:00', '09:00-21:00', '10:00-20:00', 'aktywna'),
 ('ZIKO', 'ul. Warecka 8', 'Warszawa', '00-040', '12 177-87-05; kom. 571 243 779', NULL, NULL, '07:30-20:30', '09:00-17:00', NULL, 'aktywna'),
@@ -450,8 +458,9 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('HIBISKUS', 'ul. Targowa 67', 'Warszawa', '03-729', '22 619-03-88', NULL, NULL, '07:30-19:30', '09:00-13:00', NULL, 'aktywna'),
 ('Dr Zdrowie', 'Kazimierza Szpotańskiego 4/025', 'Warszawa', '04-760', '22 205-81-20', NULL, NULL, '09:00-21:00', '09:00-21:00', '10:00-20:00', 'aktywna'),
 ('FARMACJA24', 'ul. Światowida 18', 'Warszawa', '03-144', '22 675-25-70', NULL, NULL, '08:00-21:00', '08:00-21:00', '09:00-20:00', 'aktywna'),
-('FARMACJA24', 'al. Aleja Stanów Zjednoczonych 72/8', 'Warszawa', '04-036', '22 613-02-89', NULL, NULL, '07:00-21:00', '08:00-16:00', NULL, 'aktywna'),
-('SŁONECZNA', 'ul. Zbaraska 5A', 'Warszawa', '04-009', '22 613-00-48', 52.2394, 21.0785, '07:00-21:00', '08:00-15:00', NULL, 'aktywna'),
+('FARMACJA24', 'al. Aleja Stanów Zjednoczonych 72/8', 'Warszawa', '04-036', '22 613-02-89', NULL, NULL, '07:00-21:00', '08:00-16:00', NULL, 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
+('SŁONECZNA', 'ul. Zbaraska 5A', 'Warszawa', '04-009', '22 613-00-48', NULL, NULL, '07:00-21:00', '08:00-15:00', NULL, 'aktywna'),
 ('Apteka', 'ul. Wilhelma Konrada Roentgena 5', 'Warszawa', '02-781', '22 649-00-60; 22 649-11-45; 22 649-25-13', NULL, NULL, '08:00-20:00', '08:00-16:00', '08:00-16:00', 'aktywna'),
 ('Z UŚMIECHEM', 'ul. Montwiłłowska 2/U-4, U-5', 'Warszawa', '03-890', '22 115-31-24', NULL, NULL, '08:00-21:00', '08:00-16:00', NULL, 'aktywna'),
 ('ZIKO', 'ul. Bukowińska 22/5H', 'Warszawa', '02-703', '12 177-87-13; 507 498 538', NULL, NULL, '08:00-21:00', '08:00-16:00', NULL, 'aktywna'),
@@ -500,7 +509,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('SUPER-PHARM', 'ul. gen. Felicjana Sławoja Składkowskiego 4/A04', 'Warszawa', '02-497', '22 270-30-27; 797-709-066', NULL, NULL, '10:00-21:30', '10:00-21:30', '10:00-20:00', 'aktywna'),
 ('FARMACJA 24', 'ul. Jutrzenki 156/005', 'Warszawa', '02-231', '22 339-31-92', NULL, NULL, '09:00-21:00', '09:00-21:00', '09:00-19:00', 'aktywna'),
 ('NAMEX', 'ul. Władysława Umińskiego 1A', 'Warszawa', '03-984', '22 613-44-40', NULL, NULL, 'Całodobowo', 'Całodobowo', 'Całodobowo', 'aktywna'),
-('NAMEX', 'ul. Wincentego Rzymowskiego 33/U-1', 'Warszawa', '02-697', '22 370-28-48', NULL, NULL, '08:00-20:00', '09:00-15:00', NULL, 'aktywna'),
+('NAMEX', 'ul. Wincentego Rzymowskiego 33/U-1', 'Warszawa', '02-697', '22 370-28-48', NULL, NULL, '08:00-20:00', '09:00-15:00', NULL, 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('DR. MAX', 'ul. Batalionów Chłopskich 73', 'Warszawa', '01-374', '798 062 341', NULL, NULL, '07:00-22:00', '07:00-22:00', '09:00-19:00', 'aktywna'),
 ('ZIKO', 'ul. Adama Mickiewicza 27', 'Warszawa', '01-562', '22 633-14-55; 517-772-056', NULL, NULL, 'Pt, Śr, Pn, Czw: 07:00-21:00; Wt: 07:00-19:00', '08:00-16:00', NULL, 'aktywna'),
 ('APTEKA SŁONECZNA', 'ul. Wileńska 14/1C', 'Warszawa', '03-414', '22 211-32-63', NULL, NULL, '07:00-21:00', '08:00-21:00', NULL, 'aktywna'),
@@ -550,7 +560,8 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('Ziko', 'ul. Ludwika Kondratowicza 37/AP.1', 'Warszawa', '03-285', '514 721 070', NULL, NULL, '08:00-21:00', '08:00-16:00', NULL, 'aktywna'),
 ('ŚWIAT ZDROWIA', 'ul. Pociskowa 4/1.07', 'Warszawa', '04-471', '22 290-24-25; 500-453-828', NULL, NULL, '08:00-21:00', '09:00-20:00', '10:00-19:00', 'aktywna'),
 ('SŁONECZNA', 'ul. Przy Agorze 28/U1', 'Warszawa', '01-930', '22 697-08-13', NULL, NULL, '07:00-21:00', '08:00-15:00', NULL, 'aktywna'),
-('PHARMA ODYN Sp. z o.o.', 'ul. Siedmiogrodzka 1/U10', 'Warszawa', '01-204', '22 258-51-08', NULL, NULL, '08:00-20:00', NULL, '09:00-16:00', 'aktywna'),
+('PHARMA ODYN Sp. z o.o.', 'ul. Siedmiogrodzka 1/U10', 'Warszawa', '01-204', '22 258-51-08', NULL, NULL, '08:00-20:00', NULL, '09:00-16:00', 'aktywna');
+INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('ŚW. ŁUKASZA', 'ul. Wołoska 16', 'Warszawa', '02-675', '507-010-302; 507-010-304', NULL, NULL, '08:00-21:00', '08:00-21:00', NULL, 'aktywna'),
 ('TWOJA FARMACJA Sp. z o.o.', 'ul. Belgradzka 3/UH6', 'Warszawa', '02-793', '22 400-09-55', NULL, NULL, '09:00-21:00', '09:00-18:00', '09:00-17:00', 'aktywna'),
 ('PHARMA ODYN Sp. z o.o.', 'ul. Przyokopowa 33/B2', 'Warszawa', '01-208', '885-707-150', NULL, NULL, '07:30-20:30', '08:00-15:00', '09:00-16:00', 'aktywna'),
