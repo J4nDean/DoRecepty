@@ -91,27 +91,27 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   const [showPesel, setShowPesel] = useState(false);
 
   return (
-    <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 py-5 flex items-center justify-between shrink-0 h-20">
-      <div className="flex flex-col justify-center">
-        <h1 className="text-base sm:text-lg font-bold text-neutral-900 leading-none truncate tracking-tight">
+    <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 py-5 flex items-center justify-between shrink-0 min-h-20 safe-area-top">
+      <div className="flex flex-col justify-center min-w-0 pr-4">
+        <h1 className="text-base sm:text-lg font-bold text-neutral-900 leading-tight truncate tracking-tight">
           {title}
         </h1>
-        {subtitle && <p className="text-xs sm:text-sm text-neutral-400 mt-1.5 truncate font-medium leading-none">{subtitle}</p>}
+        {subtitle && <p className="text-xs sm:text-sm text-neutral-400 mt-1 truncate font-medium leading-none">{subtitle}</p>}
       </div>
 
       {user && (
-        <div className="flex items-center gap-6 pr-2 h-full">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 sm:gap-6 shrink-0 h-full">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button 
               onClick={() => setShowPesel(!showPesel)}
-              className="p-2 hover:bg-neutral-100 rounded-full text-neutral-400 hover:text-brand-600 transition-colors shrink-0"
+              className="p-1.5 sm:p-2 hover:bg-neutral-100 rounded-full text-neutral-400 hover:text-brand-600 transition-colors shrink-0"
               title={showPesel ? "Ukryj" : "Pokaż"}
             >
-              {showPesel ? <EyeOff size={22} /> : <Eye size={22} />}
+              {showPesel ? <EyeOff size={20} className="sm:w-[22px] sm:h-[22px]" /> : <Eye size={20} className="sm:w-[22px] sm:h-[22px]" />}
             </button>
             <div className="flex flex-col justify-center">
-              <span className="text-[9px] text-neutral-400 font-black uppercase tracking-widest leading-none mb-1">Twój PESEL</span>
-              <span className={`font-mono text-base sm:text-xl font-black text-neutral-900 tracking-wider transition-all duration-300 leading-none ${!showPesel ? 'blur-[6px] select-none opacity-40' : 'blur-0'}`}>
+              <span className="text-[8px] sm:text-[9px] text-neutral-400 font-black uppercase tracking-widest leading-none mb-1">PESEL</span>
+              <span className={`font-mono text-sm sm:text-xl font-black text-neutral-900 tracking-wider transition-all duration-300 leading-none ${!showPesel ? 'blur-[5px] select-none opacity-40' : 'blur-0'}`}>
                 {user.pesel}
               </span>
             </div>
