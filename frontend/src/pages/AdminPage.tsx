@@ -222,7 +222,7 @@ const MedSearch = ({ onSelect }: { onSelect: (m: AdminMedication) => void }) => 
   const [q, setQ] = useState('');
   const [results, setResults] = useState<AdminMedication[]>([]);
   const [open, setOpen] = useState(false);
-  const timer = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const search = (val: string) => {
     setQ(val);
