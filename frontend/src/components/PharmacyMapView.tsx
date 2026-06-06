@@ -71,14 +71,12 @@ const CLUSTER_CELL_PX = 64;
 
 const buildClusters = (items: GeoPharmacy[], zoom: number): Cluster[] => {
   const cellDeg = (360 / (256 * 2 ** Math.max(zoom, 1))) * CLUSTER_CELL_PX;
-  const cells = new Map<string, GeoPharmacy[]>();
+  const cells: Record<string, GeoPharmacy[]> = {};
   for (const p of items) {
     const key = `${Math.floor(p.longitude / cellDeg)}_${Math.floor(p.latitude / cellDeg)}`;
-    const bucket = cells.get(key);
-    if (bucket) bucket.push(p);
-    else cells.set(key, [p]);
+    (cells[key] ??= []).push(p);
   }
-  return [...cells.entries()].map(([id, bucket]) => ({
+  return Object.entries(cells).map(([id, bucket]) => ({
     id,
     lat: bucket.reduce((s, p) => s + p.latitude, 0) / bucket.length,
     lng: bucket.reduce((s, p) => s + p.longitude, 0) / bucket.length,
