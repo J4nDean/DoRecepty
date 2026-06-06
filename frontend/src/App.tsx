@@ -13,7 +13,7 @@ import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import './styles.css';
 
-const protect = (el: React.ReactNode) => <ProtectedRoute>{el}</ProtectedRoute>;
+const protect = (el: React.ReactNode) => <ProtectedRoute patientOnly>{el}</ProtectedRoute>;
 
 const App = () => (
   <AuthProvider>

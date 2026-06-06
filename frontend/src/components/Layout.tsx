@@ -4,17 +4,19 @@ import { LayoutDashboard, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shiel
 import { useAuth } from '../AuthContext';
 import type { User } from '../types';
 
-const NAV = [
+const PATIENT_NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Pulpit', short: 'Pulpit' },
   { to: '/recepty/aktywne', icon: FileCheck, label: 'Aktywne recepty', short: 'Recepty' },
   { to: '/recepty/archiwalne', icon: Archive, label: 'Archiwalne recepty', short: 'Archiwum' },
   { to: '/apteki', icon: MapPin, label: 'Najbliższe apteki', short: 'Apteki' },
 ];
 
-const ADMIN_NAV = { to: '/admin', icon: Shield, label: 'Panel administratora', short: 'Admin' };
+const ADMIN_NAV = [
+  { to: '/admin', icon: Shield, label: 'Panel administratora', short: 'Admin' },
+];
 
 const navFor = (user: User | null) =>
-  user?.role === 'ADMIN' ? [...NAV, ADMIN_NAV] : NAV;
+  user?.role === 'ADMIN' ? ADMIN_NAV : PATIENT_NAV;
 
 const Logo = ({ className = '' }: { className?: string }) => (
   <span className={`font-semibold tracking-tight text-brand-800 ${className}`}>
@@ -164,9 +166,11 @@ export const AppLayout = ({
   </div>
 );
 
-export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+export const ProtectedRoute = ({ children, patientOnly }: { children: ReactNode; patientOnly?: boolean }) => {
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (patientOnly && user?.role === 'ADMIN') return <Navigate to="/admin" replace />;
+  return <>{children}</>;
 };
 
 export const AdminRoute = ({ children }: { children: ReactNode }) => {

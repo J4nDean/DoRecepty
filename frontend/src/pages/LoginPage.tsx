@@ -19,7 +19,9 @@ const LoginPage = () => {
     setIsLoading(true);
     try {
       await login(email, password);
-      navigate('/dashboard');
+      const stored = localStorage.getItem('rx_user');
+      const role = stored ? JSON.parse(stored).role : null;
+      navigate(role === 'ADMIN' ? '/admin' : '/dashboard');
     } catch {
       setError('Nieprawidłowy email lub hasło. Spróbuj ponownie.');
     } finally {
