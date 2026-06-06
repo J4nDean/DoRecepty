@@ -14,7 +14,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface Session {
-  id: number; firstName: string; lastName: string; email: string; pesel: string; token: string;
+  id: number; firstName: string; lastName: string; email: string; pesel: string; role?: string; token: string;
 }
 
 function saveSession(data: Session): User {
@@ -24,6 +24,7 @@ function saveSession(data: Session): User {
     lastName: data.lastName,
     email: data.email,
     pesel: data.pesel,
+    role: data.role,
   };
   localStorage.setItem('rx_user', JSON.stringify(user));
   localStorage.setItem('rx_token', data.token);

@@ -2,7 +2,9 @@ package pl.j4ndean.finderbackend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import pl.j4ndean.finderbackend.model.Pharmacy;
 import pl.j4ndean.finderbackend.repository.PharmacyRepository;
 
@@ -48,6 +50,31 @@ public class PharmacyService {
 
     public List<Pharmacy> getInBounds(double north, double south, double east, double west) {
         return pharmacies.findInBoundingBox(south, north, west, east);
+    }
+
+    public Pharmacy createPharmacy(Pharmacy pharmacy) {
+        pharmacy.setId(null);
+        if (pharmacy.getStatus() == null || pharmacy.getStatus().isBlank()) {
+            pharmacy.setStatus("ACTIVE");
+        }
+        return pharmacies.save(pharmacy);
+    }
+
+    public Pharmacy updatePharmacy(Long id, Pharmacy update) {
+        Pharmacy existing = pharmacies.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Apteka nie istnieje"));
+        existing.setName(update.getName());
+        existing.setAddress(update.getAddress());
+        existing.setCity(update.getCity());
+        existing.setPostalCode(update.getPostalCode());
+        existing.setPhone(update.getPhone());
+        existing.setLatitude(update.getLatitude());
+        existing.setLongitude(update.getLongitude());
+        existing.setStatus(update.getStatus());
+        existing.setOpeningHoursWeekdays(update.getOpeningHoursWeekdays());
+        existing.setOpeningHoursSaturday(update.getOpeningHoursSaturday());
+        existing.setOpeningHoursSunday(update.getOpeningHoursSunday());
+        return pharmacies.save(existing);
     }
 
     public void updateLocation(Pharmacy update) {
