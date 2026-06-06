@@ -108,7 +108,7 @@ INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitu
 ('Dr. Max', 'ul. Franciszka Marii Lanciego 11', 'Warszawa', '02-792', '22 859-70-98', 52.1442696, 21.0569192, '08:00-20:00', '08:00-16:00', NULL, 'aktywna');
 INSERT INTO pharmacy (name, address, city, postal_code, phone, latitude, longitude, opening_hours_weekdays, opening_hours_saturday, opening_hours_sunday, status) VALUES
 ('HETMAŃSKA', 'ul. Stanisława Lentza 35', 'Warszawa', '02-954', '22 651-98-59', 52.1709402, 21.0715698, '08:00-16:00', NULL, NULL, 'aktywna'),
-('DR. OPTIMA', 'ul. Leszczynowa 14', 'Warszawa', '03-197', '22-814-58-31', 52.2137117, 21.2304773, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
+('DR. OPTIMA', 'ul. Leszczynowa 14', 'Warszawa', '03-197', '22-814-58-31', 52.3055603, 20.9831294, '08:00-20:00', '08:00-15:00', NULL, 'aktywna'),
 ('CEF@RM 36,6', 'ul. Leszno 38', 'Warszawa', '01-175', '22 632-13-92', 52.2375516, 20.9722265, '08:00-22:00', '08:00-22:00', '09:00-21:00', 'aktywna'),
 ('Apteka', 'ul. Lucerny 117', 'Warszawa', '04-687', '22-812-65-17', 52.21425670000001, 21.1554639, '08:00-21:00', '09:00-16:00', NULL, 'aktywna'),
 ('Apteka', 'ul. Łabiszyńska 16', 'Warszawa', '03-385', '22-811-05-41', 52.2959206, 21.0334765, '08:00-21:00', '08:00-16:00', '09:00-16:00', 'aktywna'),
