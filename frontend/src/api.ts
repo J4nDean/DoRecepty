@@ -37,7 +37,7 @@ export const changePassword = (userId: string, currentPassword: string, newPassw
   api.put(`/users/${userId}/password`, { currentPassword, newPassword }).then(() => undefined);
 
 export const fetchMetadata = (): Promise<AppMetadata> =>
-  api.get<AppMetadata>('/metadata').then(r => r.data);
+  api.get<AppMetadata>('/prescriptions/metadata').then(r => r.data);
 
 const STATUS_MAP: Record<string, PrescriptionStatus> = {
   ACTIVE: 'AKTYWNA',

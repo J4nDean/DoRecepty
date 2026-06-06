@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import pl.j4ndean.finderbackend.model.DrugRealizationStatus;
+import pl.j4ndean.finderbackend.model.MedicationAvailabilityStatus;
 import pl.j4ndean.finderbackend.model.Pharmacy;
 import pl.j4ndean.finderbackend.model.Prescription;
 import pl.j4ndean.finderbackend.model.PrescriptionItem;
@@ -11,6 +13,7 @@ import pl.j4ndean.finderbackend.model.PrescriptionStatus;
 import pl.j4ndean.finderbackend.service.PrescriptionService;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -19,6 +22,31 @@ import java.util.List;
 public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
+
+    public record EnumOption(String code, String label, String category) {}
+
+    public record AppMetadata(
+        List<EnumOption> prescriptionStatuses,
+        List<EnumOption> drugRealizationStatuses,
+        List<EnumOption> medicationAvailabilityStatuses
+    ) {}
+
+    private static final AppMetadata METADATA = new AppMetadata(
+            Arrays.stream(PrescriptionStatus.values())
+                    .map(s -> new EnumOption(s.name(), s.label, s.category))
+                    .toList(),
+            Arrays.stream(DrugRealizationStatus.values())
+                    .map(s -> new EnumOption(s.name(), s.label, null))
+                    .toList(),
+            Arrays.stream(MedicationAvailabilityStatus.values())
+                    .map(s -> new EnumOption(s.name(), s.label, null))
+                    .toList()
+    );
+
+    @GetMapping("/metadata")
+    public AppMetadata getMetadata() {
+        return METADATA;
+    }
 
     public record PrescriptionDto(
         Long id, String accessCode, LocalDate issueDate, LocalDate expirationDate,
