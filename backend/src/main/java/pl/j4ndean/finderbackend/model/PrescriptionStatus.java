@@ -1,6 +1,7 @@
 package pl.j4ndean.finderbackend.model;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 
 public enum PrescriptionStatus {
@@ -19,18 +20,29 @@ public enum PrescriptionStatus {
         this.category = category;
     }
 
+    private static final int TRANSITIONAL_DAYS = 30;
+
     public static PrescriptionStatus from(String code) {
-        return Arrays.stream(values())
-                .filter(s -> s.name().equals(code))
-                .findFirst()
-                .orElse(ARCHIWALNA);
+        if (code == null) return ARCHIWALNA;
+        for (PrescriptionStatus s : values()) {
+            if (s.name().equals(code)) return s;
+        }
+        return switch (code) {
+            case "ACTIVE"            -> AKTYWNA;
+            case "PARTIALLY_REALIZED"-> CZĘŚCIOWO_ZREALIZOWANA;
+            case "REALIZED"          -> ZREALIZOWANA;
+            case "CANCELLED"         -> ANULOWANA;
+            default                  -> ARCHIWALNA;
+        };
     }
 
     public PrescriptionStatus effective(LocalDate expirationDate) {
-        if ((this == AKTYWNA || this == CZĘŚCIOWO_ZREALIZOWANA)
-                && expirationDate != null
-                && LocalDate.now().isAfter(expirationDate)) {
-            return NIEZREALIZOWANA;
+        if (this == ANULOWANA || this == ZREALIZOWANA || this == ARCHIWALNA) {
+            return this;
+        }
+        if (expirationDate != null && LocalDate.now().isAfter(expirationDate)) {
+            long daysExpired = ChronoUnit.DAYS.between(expirationDate, LocalDate.now());
+            return daysExpired <= TRANSITIONAL_DAYS ? NIEZREALIZOWANA : ARCHIWALNA;
         }
         return this;
     }
