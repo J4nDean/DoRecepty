@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Pill,
   CheckCircle2, Clock, XCircle,
-  MapPin, FileX, AlertTriangle,
+  MapPin, FileX, AlertTriangle, Navigation,
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import PharmacyMapView from '../components/PharmacyMapView';
@@ -114,6 +114,17 @@ const withDistance = (pharmacies: Pharmacy[], loc: LatLng | null): Pharmacy[] =>
     .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
 };
 
+// Buduje link do nawigacji Google Maps — otwiera apkę/przeglądarkę i od razu
+// rozpoczyna wyznaczanie trasy do wybranej apteki (preferujemy współrzędne).
+const buildDirectionsUrl = (pharmacy: Pharmacy, origin: LatLng | null): string => {
+  const destination = pharmacy.latitude != null && pharmacy.longitude != null
+    ? `${pharmacy.latitude},${pharmacy.longitude}`
+    : [pharmacy.address, pharmacy.postalCode, pharmacy.city].filter(Boolean).join(', ');
+  const params = new URLSearchParams({ api: '1', destination, travelmode: 'driving' });
+  if (origin) params.set('origin', `${origin.lat},${origin.lng}`);
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+};
+
 const withAvailability = (pharmacies: Pharmacy[], drugCount: number): Pharmacy[] =>
   pharmacies.map(p => {
     const have = p.availableMedications?.filter(m => m.isAvailable).length ?? 0;
@@ -176,6 +187,8 @@ const PrescriptionDetailPage = () => {
   );
 
   const togglePharmacy = (pid: string) => setSelectedPharmacyId(prev => (prev === pid ? null : pid));
+
+  const selectedPharmacy = pharmaciesWithDistance.find(p => p.id === selectedPharmacyId) ?? null;
 
   if (isLoading) {
     return (
@@ -257,8 +270,11 @@ const PrescriptionDetailPage = () => {
               <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 pt-6 sm:pt-8 border-t border-neutral-100">
                 <div>
                   <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Pacjent</p>
-                  <p className="text-sm sm:text-base font-black text-neutral-900 uppercase tracking-tighter break-all">PESEL: {prescription.patientPesel || '—'}</p>
-                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-0.5 sm:mt-1 font-bold italic leading-none">Cyfrowe IKP / DoRecepty</p>
+                  <div className="inline-flex flex-col bg-brand-50 border border-brand-100 rounded-lg px-4 py-2.5 sm:px-5 sm:py-3 shadow-sm max-w-full">
+                    <span className="text-[9px] sm:text-[10px] text-brand-700/70 uppercase font-black tracking-[0.2em] mb-1">PESEL</span>
+                    <span className="text-2xl sm:text-4xl font-black text-neutral-900 font-mono tracking-wider tabular-nums break-all leading-none">{prescription.patientPesel || '—'}</span>
+                  </div>
+                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-1.5 font-bold italic leading-none">Cyfrowe IKP / DoRecepty</p>
                 </div>
                 <div>
                   <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
@@ -325,8 +341,26 @@ const PrescriptionDetailPage = () => {
               onSelect={togglePharmacy}
               userLocation={userLocation}
               defaultZoom={15}
-              className="h-80 sm:h-[24rem] rounded-lg border border-neutral-100 shadow-inner"
+              className="h-[26rem] sm:h-[34rem] lg:h-[38rem] rounded-lg border border-neutral-100 shadow-inner"
             />
+
+            {/* CTA — nawigacja Google Maps do zaznaczonej apteki */}
+            {selectedPharmacy ? (
+              <a
+                href={buildDirectionsUrl(selectedPharmacy, userLocation)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 w-full inline-flex items-center justify-center gap-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-black uppercase tracking-wide text-sm sm:text-base px-5 py-3.5 rounded-lg shadow-sm transition-colors"
+              >
+                <Navigation size={18} className="shrink-0" />
+                Nawiguj do: {selectedPharmacy.name}
+              </a>
+            ) : (
+              <p className="mt-4 w-full flex items-center justify-center gap-2 bg-neutral-50 border border-dashed border-neutral-200 text-neutral-400 font-bold text-sm px-5 py-3.5 rounded-lg text-center">
+                <MapPin size={16} className="shrink-0" />
+                Zaznacz aptekę na mapie, aby wyznaczyć trasę
+              </p>
+            )}
           </section>
         </div>
 
