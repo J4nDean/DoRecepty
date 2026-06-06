@@ -91,13 +91,13 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   const [showPesel, setShowPesel] = useState(false);
 
   return (
-    <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between gap-3 shrink-0 safe-area-top">
+    <header className="bg-white/80 backdrop-blur border-b border-neutral-200 px-4 sm:px-6 py-2.5 sm:py-3 min-h-[4.25rem] sm:min-h-16 flex items-center justify-between gap-3 shrink-0 safe-area-top">
       <div className="flex flex-col justify-center min-w-0">
-        <h1 className="text-sm sm:text-lg font-extrabold text-neutral-900 leading-tight truncate tracking-tight">
+        <h1 className="text-base sm:text-lg font-extrabold text-neutral-900 leading-tight truncate tracking-tight">
           {title}
         </h1>
         {subtitle && (
-          <p className="hidden min-[380px]:block text-[10px] sm:text-xs text-neutral-400 truncate font-semibold uppercase tracking-wider leading-none">
+          <p className="hidden min-[380px]:block text-[10px] sm:text-xs text-neutral-400 mt-0.5 truncate font-semibold uppercase tracking-wider leading-none">
             {subtitle}
           </p>
         )}
@@ -107,7 +107,7 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <div className="flex flex-col items-end leading-none">
             <span className="text-[8px] text-neutral-400 font-black uppercase tracking-widest mb-0.5">PESEL</span>
-            <span className={`font-mono text-xs sm:text-base font-black text-neutral-900 tracking-tight sm:tracking-wider transition-all duration-300 leading-none ${!showPesel ? 'blur-[5px] select-none opacity-40' : 'blur-0'}`}>
+            <span className={`font-mono text-sm sm:text-base font-black text-neutral-900 tracking-tight sm:tracking-wider whitespace-nowrap transition-all duration-300 leading-none ${!showPesel ? 'blur-[5px] select-none opacity-40' : 'blur-0'}`}>
               {user.pesel}
             </span>
           </div>
