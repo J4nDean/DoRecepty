@@ -3,9 +3,6 @@ import { NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 
-// Cała powłoka aplikacji: nawigacja boczna, górna belka, pasek dolny (mobile),
-// układ strony oraz strażnik tras wymagających logowania.
-
 const NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Pulpit', short: 'Pulpit' },
   { to: '/recepty/aktywne', icon: FileCheck, label: 'Aktywne recepty', short: 'Recepty' },

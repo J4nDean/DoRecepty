@@ -1,8 +1,3 @@
-// Wszystkie typy aplikacji w jednym miejscu.
-// Sekcja 1: modele używane w UI. Sekcja 2: surowe kształty odpowiedzi z API.
-
-// ---------- Użytkownik / autoryzacja ----------
-
 export interface User {
   id: string;
   firstName: string;
@@ -19,8 +14,6 @@ export interface RegisterData {
   password: string;
   confirmPassword: string;
 }
-
-// ---------- Recepty ----------
 
 export type PrescriptionStatus =
   | 'AKTYWNA'
@@ -57,8 +50,6 @@ export interface Prescription {
   notes?: string;
 }
 
-// ---------- Apteki ----------
-
 export type MedicationAvailabilityStatus = 'DOSTĘPNY' | 'NIEDOSTĘPNY' | 'CZĘŚCIOWO_DOSTĘPNY';
 
 export interface MedicationAvailability {
@@ -92,8 +83,6 @@ export interface Pharmacy {
   prescriptionAvailability?: 'FULL' | 'PARTIAL';
 }
 
-// ---------- Metadane (listy enumów z backendu) ----------
-
 export interface EnumOption {
   code: string;
   label: string;
@@ -105,8 +94,6 @@ export interface AppMetadata {
   drugRealizationStatuses: EnumOption[];
   medicationAvailabilityStatuses: EnumOption[];
 }
-
-// ---------- Surowe odpowiedzi z API ----------
 
 export interface ApiMedication {
   id: number | null;

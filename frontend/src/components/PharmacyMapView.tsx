@@ -35,19 +35,16 @@ const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
 const DEFAULT_ZOOM = 13;
 const GEOCODE_BATCH_LIMIT = 25;
 
-// Przybliżone granice Polski — odrzucamy współrzędne, które ewidentnie wpadły poza kraj.
 const POLAND_BOUNDS = { south: 48.9, north: 55.0, west: 14.0, east: 24.2 } as const;
 const inPoland = (lat: number, lng: number) =>
   lat >= POLAND_BOUNDS.south && lat <= POLAND_BOUNDS.north &&
   lng >= POLAND_BOUNDS.west && lng <= POLAND_BOUNDS.east;
 
-// Domyślna pinezka — czerwona jak pinezka w logo. Zaznaczona — granatowa (kolor akcentu).
 const DEFAULT_PIN = { background: '#EA4335', borderColor: '#B31412', glyphColor: '#7F0F0A' } as const;
 const SELECTED_PIN = { background: '#1d4ed8', borderColor: '#1e40af', glyphColor: '#1e40af' } as const;
 const FULL_AVAILABILITY_PIN = { background: '#15803D', borderColor: '#14532D', glyphColor: '#14532D' } as const;
 const PARTIAL_AVAILABILITY_PIN = { background: '#EAB308', borderColor: '#854D0E', glyphColor: '#713F12' } as const;
 
-// Zastępczy widok, gdy nie ma klucza API do Google Maps.
 const MapPlaceholder = ({ className = '', message }: { className?: string; message?: string }) => (
   <div
     className={`bg-neutral-100 rounded-xl flex flex-col items-center justify-center text-neutral-400 border border-neutral-200 ${className}`}
@@ -67,11 +64,6 @@ const isGeocoded = (p: Pharmacy): p is Pharmacy & { latitude: number; longitude:
 
 const inBounds = (lat: number, lng: number, b: MapBounds) =>
   lat >= b.south && lat <= b.north && lng >= b.west && lng <= b.east;
-
-// ---------- Grupowanie pinezek (clustering) ----------
-// Dzieli widoczne apteki na komórki siatki zależne od zoomu, aby na mapie nie
-// pojawiały się dziesiątki nakładających się pinezek. Liczba aptek w grupie jest
-// pokazywana w dymku (informacja nie ginie), a kliknięcie przybliża do grupy.
 
 type GeoPharmacy = Pharmacy & { latitude: number; longitude: number };
 type Cluster = { id: string; lat: number; lng: number; items: GeoPharmacy[] };
@@ -171,14 +163,12 @@ const MapContent = ({
 
     const geocoder = new window.google.maps.Geocoder();
     missing.forEach(pharmacy => {
-      // Pełniejszy adres (z kodem pocztowym) + ograniczenie do Polski = dokładniejsze trafienie.
       const query = [pharmacy.address, pharmacy.postalCode, pharmacy.city].filter(Boolean).join(', ');
       geocoder.geocode(
         { address: `${query}, Polska`, componentRestrictions: { country: 'PL' } },
         (results, status) => {
           if (status !== 'OK' || !results?.[0]) return;
           const best = results[0];
-          // Odrzuć niepewne dopasowania — Google zwraca wtedy środek miasta/regionu zamiast adresu.
           if (best.partial_match || best.geometry.location_type === 'APPROXIMATE') return;
           const lat = best.geometry.location.lat();
           const lng = best.geometry.location.lng();
@@ -197,7 +187,6 @@ const MapContent = ({
 
   useEffect(() => { onVisibleChangeRef.current?.(visibleDisplayed); }, [visibleDisplayed]);
 
-  // Apteka zaznaczona zawsze jako osobna pinezka; reszta podlega grupowaniu.
   const selectedPharmacy = useMemo(
     () => visibleDisplayed.find(p => p.id === selectedId) ?? null,
     [visibleDisplayed, selectedId],

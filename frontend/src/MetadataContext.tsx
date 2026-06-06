@@ -12,9 +12,7 @@ const EMPTY: AppMetadata = {
 interface MetadataContextValue {
   metadata: AppMetadata;
   loaded: boolean;
-  /** Etykieta po polsku dla danego kodu — pusty string jeśli nie znaleziono. */
   labelOf: (list: EnumOption[], code: string) => string;
-  /** Filtrowanie opcji statusu po kategorii (np. ACTIVE / ARCHIVED). */
   byCategory: (list: EnumOption[], category: string) => EnumOption[];
 }
 

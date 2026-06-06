@@ -16,7 +16,6 @@ import {
 import { useMetadata } from '../MetadataContext';
 import type { Prescription, DrugRealizationStatus, Pharmacy, MedicationAvailabilityStatus } from '../types';
 
-// Tylko styling — etykiety przychodzą z backend metadata.
 const realizationStyle: Record<DrugRealizationStatus, { cls: string; icon: React.ReactNode }> = {
   ZREALIZOWANY: { cls: 'bg-emerald-50 text-emerald-700 ring-emerald-200', icon: <CheckCircle2 size={12} /> },
   NIEZREALIZOWANY: { cls: 'bg-neutral-100 text-neutral-600 ring-neutral-200', icon: <Clock size={12} /> },
@@ -114,8 +113,6 @@ const withDistance = (pharmacies: Pharmacy[], loc: LatLng | null): Pharmacy[] =>
     .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
 };
 
-// Buduje link do nawigacji Google Maps — otwiera apkę/przeglądarkę i od razu
-// rozpoczyna wyznaczanie trasy do wybranej apteki (preferujemy współrzędne).
 const buildDirectionsUrl = (pharmacy: Pharmacy, origin: LatLng | null): string => {
   const destination = pharmacy.latitude != null && pharmacy.longitude != null
     ? `${pharmacy.latitude},${pharmacy.longitude}`
@@ -131,7 +128,6 @@ const withAvailability = (pharmacies: Pharmacy[], drugCount: number): Pharmacy[]
     return { ...p, prescriptionAvailability: have >= drugCount && drugCount > 0 ? 'FULL' : 'PARTIAL' };
   });
 
-// Poprawiony Barcode - WIĘKSZY i RÓWNY
 const BarcodeMock = ({ number }: { number: string }) => {
   const fullBarcodeNumber = `100101723${number}316993141033672942435380593264361040`.slice(0, 44);
   return (
@@ -225,7 +221,6 @@ const PrescriptionDetailPage = () => {
 
       <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
         <div className="lg:col-span-3 space-y-4">
-          {/* OFICJALNY NAGŁÓWEK RECEPTY */}
           <section className={`bg-white rounded-lg border shadow-sm overflow-hidden w-full transition-all ${
             expiringSoon ? 'border-amber-400 ring-2 ring-amber-400' : 'border-neutral-200'
           }`}>
@@ -237,7 +232,6 @@ const PrescriptionDetailPage = () => {
             </div>
 
             <div className="p-5 sm:p-10 space-y-6 sm:space-y-8">
-              {/* Górny rząd: kod dostępu + data po lewej, status wyrównany do góry po prawej */}
               <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-start md:justify-between">
                 <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
                   <div className="flex flex-col items-center">
@@ -258,7 +252,6 @@ const PrescriptionDetailPage = () => {
                   </div>
                 </div>
 
-                {/* Status — wyśrodkowany na mobile, wyrównany do góry po prawej na desktop */}
                 <div className="flex justify-center md:block shrink-0">
                   <span className={`inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black px-3 sm:px-4 py-1.5 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-sm max-w-full`}>
                     <span className={`w-2 h-2 rounded-full shrink-0 ${statusMeta.dot}`} />
@@ -286,7 +279,6 @@ const PrescriptionDetailPage = () => {
             </div>
           </section>
 
-          {/* LISTA LEKÓW JAKO KARTONIKI */}
           <section className="space-y-3 w-full">
             <div className="flex items-center justify-between px-2 mb-2">
               <h2 className="text-sm sm:text-base font-black text-neutral-800 uppercase tracking-widest flex items-center gap-2">
@@ -344,7 +336,6 @@ const PrescriptionDetailPage = () => {
               className="h-[26rem] sm:h-[34rem] lg:h-[38rem] rounded-lg border border-neutral-100 shadow-inner"
             />
 
-            {/* CTA — nawigacja Google Maps do zaznaczonej apteki */}
             {selectedPharmacy ? (
               <a
                 href={buildDirectionsUrl(selectedPharmacy, userLocation)}

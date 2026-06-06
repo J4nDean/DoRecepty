@@ -4,11 +4,9 @@ import type { Prescription } from '../types';
 import { statusMetaOf, daysUntilExpiry, isExpiringSoon } from '../utils';
 import { useMetadata } from '../MetadataContext';
 
-// Poprawiony Barcode - wycentrowany, z reprezentacją liczbową
 const BarcodeMock = ({ number }: { number: string }) => {
-  // Generowanie mocka 44 cyfr na podstawie numeru recepty
   const fullBarcodeNumber = `100101${number}316993141033672942435380593264361040`.slice(0, 44);
-  
+
   return (
     <div className="flex flex-col items-center w-full">
       <div className="flex h-10 w-full max-w-[240px] items-stretch justify-center gap-[1px] opacity-50 group-hover:opacity-70 transition-opacity overflow-hidden">
@@ -51,7 +49,6 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
       <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:10px_10px] opacity-[0.06]" />
 
       <div className="relative p-5 flex flex-col flex-1">
-        {/* Góra: Kod kreskowy i ID - POWIĘKSZONE */}
         <div className="mb-5 flex flex-col items-center w-full text-center">
           <BarcodeMock number={prescription.number} />
           <p className="text-[10px] text-neutral-400 font-mono font-bold tracking-[0.3em] mt-2 uppercase opacity-70">
@@ -59,7 +56,6 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
           </p>
         </div>
 
-        {/* Środek: Kod dostępu - POWIĘKSZONY */}
         <div className="flex flex-col items-center justify-center py-4 border-y border-dashed border-neutral-100">
           <p className="text-[11px] text-neutral-400 uppercase font-bold tracking-widest mb-1.5">Kod dostępu</p>
           <div className="relative px-8 py-2.5 bg-white/50 rounded">
@@ -73,7 +69,6 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
           </div>
         </div>
 
-        {/* Lista leków - WIĘKSZE CZCIONKI */}
         <div className="mt-5 space-y-2 flex-1">
           {drugs.map((drug, i) => (
             <div key={i} className="relative border border-neutral-100 p-4 bg-neutral-50/50 rounded-lg flex justify-between gap-3 group-hover:bg-neutral-50/80 transition-colors w-full shadow-sm">
@@ -89,7 +84,6 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
           ))}
         </div>
 
-        {/* Dół: Status - POWIĘKSZONY */}
         <div className="mt-5 pt-4 border-t border-neutral-50 flex items-center justify-between">
           <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-black tracking-tighter ring-1 ${meta.chip} opacity-90 whitespace-nowrap`}>
             {labelOf(metadata.prescriptionStatuses, prescription.status)}

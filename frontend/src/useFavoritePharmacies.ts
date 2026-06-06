@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { fetchFavorites, addFavorite, removeFavorite } from './api';
 
-// Ulubione apteki trzymamy w localStorage (szybki odczyt) i synchronizujemy z backendem.
 const STORAGE_PREFIX = 'rx_favorite_pharmacies';
 
 const storageKey = (userId: string | null) =>
@@ -22,7 +21,7 @@ const writeToStorage = (userId: string | null, ids: Set<string>) => {
   try {
     localStorage.setItem(storageKey(userId), JSON.stringify([...ids]));
   } catch {
-    /* quota / tryb prywatny — ignorujemy */
+    return;
   }
 };
 
@@ -44,7 +43,7 @@ export const useFavoritePharmacies = () => {
         setFavorites(remote);
         writeToStorage(userId, remote);
       })
-      .catch(() => { /* offline / backend down — zostaje lokalna kopia */ });
+      .catch(() => undefined);
 
     return () => { cancelled = true; };
   }, [userId]);
@@ -62,7 +61,6 @@ export const useFavoritePharmacies = () => {
       if (userId) {
         const call = willAdd ? addFavorite(userId, pharmacyId) : removeFavorite(userId, pharmacyId);
         call.catch(() => {
-          // rollback przy błędzie sieci
           setFavorites(rollback => {
             const reverted = new Set(rollback);
             if (willAdd) reverted.delete(pharmacyId);

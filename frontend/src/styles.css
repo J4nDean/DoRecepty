@@ -1,36 +1,30 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap');
 
-/* Motyw aplikacji: subtelny, styl iOS — Nunito, kolor #2563eb po lewej,
-   lekko zaokrąglone rogi (styl iOS) i delikatne cienie. */
 @theme {
   --font-sans: 'Nunito', ui-sans-serif, system-ui, -apple-system, sans-serif;
 
-  /* Akcent główny — granatowy (Navy) pozostał spójny. */
   --color-brand-50:  #f0f7ff;
   --color-brand-100: #e0effe;
   --color-brand-200: #bae0fd;
   --color-brand-300: #7dc8fc;
   --color-brand-400: #38aef8;
   --color-brand-500: #0e8de9;
-  --color-brand-600: #2563eb; /* Ten konkretny odcień */
+  --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
   --color-brand-800: #1e40af;
-  --color-brand-900: #1e3a8a; /* Navy */
+  --color-brand-900: #1e3a8a;
   --color-brand-950: #172554;
 
-  /* Specyficzny kolor po lewej stronie. */
   --color-side-primary: #2563eb;
 
-  /* Subtelne zaokrąglenia w stylu iOS (zredukowane z 2rem/1.5rem). */
   --radius-sm: 0.25rem;
   --radius-md: 0.5rem;
-  --radius-lg: 0.625rem;    /* Klasyczne zaokrąglenie przycisku/karty iOS */
-  --radius-xl: 0.75rem;     /* Nieco większe dla kontenerów */
-  --radius-2xl: 1rem;       /* Maksymalne dla dużych kart */
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
   --radius-3xl: 1.25rem;
 
-  /* Miękkie, rozmyte cienie. */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }

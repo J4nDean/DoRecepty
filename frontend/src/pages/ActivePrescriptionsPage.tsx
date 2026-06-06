@@ -82,7 +82,6 @@ const ActivePrescriptionsPage = () => {
         />
       ) : (
         <div className="space-y-10">
-          {/* Częściowo zrealizowane mają najwyższy priorytet — zawsze na górze listy. */}
           {partial.length > 0 && <Section dot="bg-amber-400" label="Częściowo zrealizowane" prescriptions={partial} />}
           {active.length > 0 && <Section dot="bg-emerald-500" label="Aktywne" prescriptions={active} />}
         </div>

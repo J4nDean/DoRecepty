@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import pl.j4ndean.finderbackend.model.User;
 import pl.j4ndean.finderbackend.service.AuthService;
 
-/**
- * Obsługa autoryzacji. Kontroler jest "cienką" warstwą nad AuthService.
- */
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor

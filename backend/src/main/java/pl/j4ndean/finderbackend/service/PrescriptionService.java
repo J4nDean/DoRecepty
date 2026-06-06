@@ -14,10 +14,6 @@ import java.util.Comparator;
 import java.util.List;
 import static java.util.stream.Collectors.groupingBy;
 
-/**
- * Warstwa logiki biznesowej dla recept.
- * Separuje dostęp do danych (repozytoria) od prezentacji (kontroler).
- */
 @Service
 @RequiredArgsConstructor
 public class PrescriptionService {

@@ -20,7 +20,6 @@ public class PrescriptionItem {
     @JoinColumn(name = "prescription_id", nullable = false)
     private Prescription prescription;
 
-    /** OID nadawany przez system P1/CSIOZ, np. "PL.CSIOZ.2019.xxx". */
     @Column(name = "prescription_oid", length = 44, unique = true)
     private String prescriptionOid;
 
@@ -39,15 +38,12 @@ public class PrescriptionItem {
     @Column(length = 500)
     private String dosageInstructions;
 
-    /** Najwcześniejsza data realizacji ("Data realizacji: od"). */
     @Column(name = "realization_date_from")
     private LocalDate realizationDateFrom;
 
-    /** Poziom refundacji NFZ: bezpłatny | 30% | 50% | ryczałt | 100% | null dla pełnopłatnych. */
     @Column(name = "refund_level", length = 20)
     private String refundLevel;
 
-    /** ACTIVE | REALIZED | EXPIRED | CANCELLED */
     @Column(length = 20)
     private String status;
 }
