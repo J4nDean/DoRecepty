@@ -1,11 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { Gauge, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shield } from 'lucide-react';
+import { LayoutGrid, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import type { User } from '../types';
 
 const PATIENT_NAV = [
-  { to: '/dashboard', icon: Gauge, label: 'Pulpit', short: 'Pulpit' },
+  { to: '/dashboard', icon: LayoutGrid, label: 'Pulpit', short: 'Pulpit' },
   { to: '/recepty/aktywne', icon: FileCheck, label: 'Aktywne recepty', short: 'Recepty' },
   { to: '/recepty/archiwalne', icon: Archive, label: 'Archiwalne recepty', short: 'Archiwum' },
   { to: '/apteki', icon: MapPin, label: 'Najbliższe apteki', short: 'Apteki' },
