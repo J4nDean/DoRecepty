@@ -5,6 +5,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import pl.j4ndean.finderbackend.dto.AdminMedicationDto;
+import pl.j4ndean.finderbackend.dto.AdminPrescriptionDto;
+import pl.j4ndean.finderbackend.dto.AdminUserDto;
+import pl.j4ndean.finderbackend.dto.CreatePrescriptionRequest;
 import pl.j4ndean.finderbackend.model.*;
 import pl.j4ndean.finderbackend.repository.*;
 import pl.j4ndean.finderbackend.service.PharmacyService;
@@ -48,32 +52,11 @@ public class AdminController {
 
     // ─── Recepty ──────────────────────────────────────────────────────────────
 
-    public record AdminPrescriptionDto(
-        Long id, String accessCode, String issueDate, String expirationDate,
-        String status, String patientPesel, String patientName, Long patientId,
-        List<AdminItemDto> items
-    ) {}
-
-    public record AdminItemDto(
-        Long id, Long medicationId, String medicationName, String strength,
-        Integer quantity, String dosageInstructions, String status
-    ) {}
-
-    public record CreatePrescriptionRequest(
-        Long patientId, String accessCode, String issueDate, String expirationDate,
-        String doctorNpwz, String clinicRegon, String status, List<CreateItemRequest> items
-    ) {
-        public record CreateItemRequest(Long medicationId, Integer quantity, String dosageInstructions) {}
-    }
-
-    public record AdminUserDto(Long id, String firstName, String lastName, String email, String pesel) {}
-    public record AdminMedicationDto(Long id, String name, String strength, String pharmaceuticalForm) {}
-
     @GetMapping("/prescriptions")
     @Transactional(readOnly = true)
     public List<AdminPrescriptionDto> getAllPrescriptions() {
         return prescriptionRepository.findAllWithPatient().stream()
-            .map(p -> toDto(p, prescriptionItemRepository.findByPrescriptionId(p.getId())))
+            .map(p -> AdminPrescriptionDto.from(p, prescriptionItemRepository.findByPrescriptionId(p.getId())))
             .toList();
     }
 
@@ -110,7 +93,7 @@ public class AdminController {
             }
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(toDto(saved, savedItems));
+        return ResponseEntity.status(HttpStatus.CREATED).body(AdminPrescriptionDto.from(saved, savedItems));
     }
 
     @PutMapping("/prescriptions/{id}/status")
@@ -120,7 +103,7 @@ public class AdminController {
             .orElseThrow(() -> new RuntimeException("Prescription not found"));
         prescription.setStatus(body.get("status"));
         prescriptionRepository.save(prescription);
-        return toDto(prescription, prescriptionItemRepository.findByPrescriptionId(id));
+        return AdminPrescriptionDto.from(prescription, prescriptionItemRepository.findByPrescriptionId(id));
     }
 
     @GetMapping("/users")
@@ -138,24 +121,5 @@ public class AdminController {
         return meds.stream()
             .map(m -> new AdminMedicationDto(m.getId(), m.getName(), m.getStrength(), m.getPharmaceuticalForm()))
             .toList();
-    }
-
-    // ─── Helper ───────────────────────────────────────────────────────────────
-
-    private AdminPrescriptionDto toDto(Prescription p, List<PrescriptionItem> items) {
-        String pesel = p.getPatient() != null ? p.getPatient().getPesel() : null;
-        String name = p.getPatient() != null
-            ? p.getPatient().getFirstName() + " " + p.getPatient().getLastName() : null;
-        Long patientId = p.getPatient() != null ? p.getPatient().getId() : null;
-        var itemDtos = items.stream().map(i -> new AdminItemDto(
-            i.getId(), i.getMedication().getId(), i.getMedication().getName(),
-            i.getMedication().getStrength(), i.getQuantity(), i.getDosageInstructions(), i.getStatus()
-        )).toList();
-        return new AdminPrescriptionDto(
-            p.getId(), p.getAccessCode(),
-            p.getIssueDate() != null ? p.getIssueDate().toString() : null,
-            p.getExpirationDate() != null ? p.getExpirationDate().toString() : null,
-            p.getStatus(), pesel, name, patientId, itemDtos
-        );
     }
 }

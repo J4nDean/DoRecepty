@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, AlertTriangle } from 'lucide-react';
 import type { Prescription } from '../types';
-import { statusMetaOf, daysUntilExpiry, isExpiringSoon } from '../utils';
+import { statusMetaOf, daysUntilExpiry, isExpiringSoon, drugFullName } from '../utils';
 import { useMetadata } from '../MetadataContext';
 
 const BarcodeMock = ({ number }: { number: string }) => {
@@ -73,8 +73,11 @@ export const PrescriptionCard = ({ prescription }: { prescription: Prescription 
           {drugs.map((drug, i) => (
             <div key={i} className="relative border border-neutral-100 p-4 bg-neutral-50/50 rounded-lg flex justify-between gap-3 group-hover:bg-neutral-50/80 transition-colors w-full shadow-sm">
               <div className="min-w-0">
-                <p className="text-[15px] font-black text-neutral-900 leading-tight uppercase mb-1">{drug.name}</p>
-                <p className="text-[11px] text-neutral-500 font-medium italic opacity-90">D.S. {drug.dosage}</p>
+                <p className="text-[15px] font-black text-neutral-900 leading-tight uppercase mb-1">{drugFullName(drug)}</p>
+                <p className="text-[11px] text-neutral-500 font-medium italic opacity-90">D.S. {drug.dosage || 'wg zaleceń lekarza'}</p>
+                {drug.refundLevel && (
+                  <p className="text-[10px] text-neutral-400 font-bold uppercase tracking-wide mt-0.5">Odpłatność: {drug.refundLevel}</p>
+                )}
               </div>
               <div className="flex flex-col items-center justify-center border-l border-neutral-200 pl-3 text-[11px] font-black text-neutral-200 shrink-0">
                 <span className="leading-none">R</span>

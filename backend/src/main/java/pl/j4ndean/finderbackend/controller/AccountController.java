@@ -3,6 +3,7 @@ package pl.j4ndean.finderbackend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pl.j4ndean.finderbackend.dto.ChangePasswordRequest;
 import pl.j4ndean.finderbackend.service.AccountService;
 
 import java.util.List;
@@ -13,8 +14,6 @@ import java.util.List;
 public class AccountController {
 
     private final AccountService accountService;
-
-    public record ChangePasswordRequest(String currentPassword, String newPassword) {}
 
     @PutMapping("/{id}/password")
     public ResponseEntity<Void> changePassword(@PathVariable Long id, @RequestBody ChangePasswordRequest req) {

@@ -1,4 +1,20 @@
-import type { PrescriptionStatus } from './types';
+import type { Drug, PrescriptionStatus } from './types';
+
+// "Laroaks 2,5 mg" — nazwa handlowa z mocą, jak w nagłówku pozycji recepty P1.
+export const drugFullName = (d: Drug): string =>
+  [d.name, d.strength].filter(Boolean).join(' ');
+
+// "Tabletki powlekane · 28 tabl." — postać i wielkość opakowania.
+export const drugFormLine = (d: Drug): string =>
+  [d.form, d.packageSize].filter(Boolean).join(' · ');
+
+// "1 op. po 28 tabl." — liczba opakowań i ich wielkość, jak na wydruku P1.
+export const packageQuantityLabel = (d: Drug): string =>
+  `${d.quantity} op.${d.packageSize ? ` po ${d.packageSize}` : ''}`;
+
+// Identyfikator dokumentu w stylu OID systemu P1 (jak "ID: 2.19.840.1.113993...").
+export const documentOid = (accessCode: string): string =>
+  `2.19.840.1.113993.3.4424.2.7.${accessCode}.1`;
 
 export const parseLocalDate = (dateStr: string): Date => {
   const [y, m, d] = dateStr.split('-').map(Number);
