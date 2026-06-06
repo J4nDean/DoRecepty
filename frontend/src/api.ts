@@ -17,6 +17,25 @@ api.interceptors.request.use(config => {
   return config;
 });
 
+// Wygasły / nieprawidłowy token → wyczyść sesję i przekieruj na logowanie.
+// Pomijamy endpointy auth, aby nie zapętlać ekranu logowania przy błędnych danych.
+api.interceptors.response.use(
+  response => response,
+  error => {
+    const status = error?.response?.status;
+    const url: string = error?.config?.url ?? '';
+    const isAuthCall = url.includes('/auth/');
+    if ((status === 401 || status === 403) && !isAuthCall && localStorage.getItem('rx_token')) {
+      localStorage.removeItem('rx_token');
+      localStorage.removeItem('rx_user');
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.assign('/login');
+      }
+    }
+    return Promise.reject(error);
+  },
+);
+
 const noCache = () => ({ params: { _t: Date.now() }, headers: { 'Cache-Control': 'no-cache' } });
 
 export default api;

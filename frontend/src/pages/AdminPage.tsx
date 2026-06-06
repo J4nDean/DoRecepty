@@ -2,17 +2,21 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Plus, Pencil, Search, Building2, X, MapPin, CheckCircle2, AlertCircle,
-  ClipboardList, FileText, ChevronDown,
+  ClipboardList, FileText, ChevronDown, Crosshair,
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { Spinner, EmptyState } from '../components/ui';
+import { PharmacyCard } from '../components/PharmacyCard';
+import PharmacyMapView from '../components/PharmacyMapView';
 import {
   fetchAdminPharmacies, createPharmacy, updatePharmacy, type PharmacyInput,
   fetchAdminPrescriptions, createAdminPrescription, updateAdminPrescriptionStatus,
   fetchAdminUsers, searchAdminMedications,
+  searchPharmacies, fetchNearbyByLocation, getUserLocation,
   type AdminPrescription, type AdminUser, type AdminMedication,
 } from '../api';
-import type { ApiPharmacy } from '../types';
+import { haversineKm, type LatLng } from '../utils';
+import type { ApiPharmacy, Pharmacy } from '../types';
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -222,33 +226,63 @@ const MedSearch = ({ onSelect }: { onSelect: (m: AdminMedication) => void }) => 
   const [q, setQ] = useState('');
   const [results, setResults] = useState<AdminMedication[]>([]);
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const registryLoaded = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const search = (val: string) => {
-    setQ(val);
+  // Pusty `q` → backend zwraca rejestr leków (pierwsze 30). Niepusty → wyszukiwanie po nazwie.
+  const run = (val: string) => {
     clearTimeout(timer.current);
-    if (val.length < 2) { setResults([]); setOpen(false); return; }
+    setLoading(true);
     timer.current = setTimeout(async () => {
-      const res = await searchAdminMedications(val);
-      setResults(res); setOpen(true);
-    }, 300);
+      try {
+        const res = await searchAdminMedications(val.trim());
+        setResults(res); setOpen(true);
+        if (!val.trim()) registryLoaded.current = true;
+      } catch { setResults([]); }
+      finally { setLoading(false); }
+    }, 250);
   };
 
-  const pick = (m: AdminMedication) => {
-    onSelect(m); setQ(m.name); setOpen(false);
+  const handleChange = (val: string) => { setQ(val); run(val); };
+
+  const handleFocus = () => {
+    setOpen(true);
+    if (!registryLoaded.current && results.length === 0) run('');
   };
+
+  const pick = (m: AdminMedication) => { onSelect(m); setQ(m.name); setOpen(false); };
+
+  const isRegistry = q.trim().length === 0;
 
   return (
     <div className="relative">
-      <input className={inputClass} value={q} onChange={e => search(e.target.value)} onFocus={() => results.length > 0 && setOpen(true)} placeholder="Szukaj leku..." />
-      {open && results.length > 0 && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
-          {results.map(m => (
-            <button key={m.id} type="button" onMouseDown={() => pick(m)} className="w-full text-left px-3 py-2 text-sm hover:bg-brand-50 transition-colors">
-              <span className="font-medium text-neutral-900">{m.name}</span>
-              {m.strength && <span className="text-neutral-400 ml-1 text-xs">{m.strength}</span>}
-            </button>
-          ))}
+      <input
+        className={inputClass}
+        value={q}
+        onChange={e => handleChange(e.target.value)}
+        onFocus={handleFocus}
+        onBlur={() => setTimeout(() => setOpen(false), 120)}
+        placeholder="Wpisz nazwę leku lub wybierz z rejestru..."
+      />
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-neutral-200 rounded-lg shadow-lg max-h-56 overflow-y-auto">
+          <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-neutral-400 border-b border-neutral-100 sticky top-0 bg-white">
+            {isRegistry ? 'Rejestr leków' : 'Wyniki wyszukiwania'}
+          </div>
+          {loading ? (
+            <div className="px-3 py-3 text-xs text-neutral-400">Ładowanie...</div>
+          ) : results.length === 0 ? (
+            <div className="px-3 py-3 text-xs text-neutral-400">Brak leków do wyświetlenia</div>
+          ) : (
+            results.map(m => (
+              <button key={m.id} type="button" onMouseDown={() => pick(m)} className="w-full text-left px-3 py-2 text-sm hover:bg-brand-50 transition-colors">
+                <span className="font-medium text-neutral-900">{m.name}</span>
+                {m.strength && <span className="text-neutral-400 ml-1 text-xs">{m.strength}</span>}
+                {m.pharmaceuticalForm && <span className="text-neutral-300 ml-1 text-[11px]">· {m.pharmaceuticalForm}</span>}
+              </button>
+            ))
+          )}
         </div>
       )}
     </div>
@@ -477,9 +511,130 @@ const PrescriptionsTab = () => {
   );
 };
 
+// ─── Nearby pharmacies tab ──────────────────────────────────────────────────
+
+const NearbyTab = () => {
+  const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [userLocation, setUserLocation] = useState<LatLng | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLocating, setIsLocating] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [error, setError] = useState('');
+  const [query, setQuery] = useState('');
+
+  const loadNearby = async () => {
+    setIsLocating(true); setError('');
+    try {
+      const pos = await getUserLocation();
+      setUserLocation(pos);
+      setSearched(true); setSelectedId(null); setIsLoading(true);
+      try { setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 12, 500)); }
+      finally { setIsLoading(false); }
+    } catch {
+      setError('Nie udało się pobrać lokalizacji — udziel zgody w przeglądarce lub wyszukaj po mieście.');
+    } finally { setIsLocating(false); }
+  };
+
+  const handleCitySearch = async (e: FormEvent) => {
+    e.preventDefault();
+    const trimmed = query.trim();
+    if (!trimmed) return;
+    setError(''); setSearched(true); setSelectedId(null); setUserLocation(null); setIsLoading(true);
+    try { setPharmacies(await searchPharmacies(trimmed)); }
+    catch { setError('Nie udało się wyszukać aptek'); }
+    finally { setIsLoading(false); }
+  };
+
+  const withDistance = useMemo(() => {
+    if (!userLocation) return pharmacies;
+    return pharmacies
+      .map(p => p.latitude != null && p.longitude != null
+        ? { ...p, distance: haversineKm(userLocation, { lat: p.latitude, lng: p.longitude }) }
+        : p)
+      .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
+  }, [pharmacies, userLocation]);
+
+  const handleSelect = (id: string) => setSelectedId(prev => (prev === id ? null : id));
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <button
+          type="button"
+          onClick={loadNearby}
+          disabled={isLocating}
+          className="flex items-center justify-center gap-2 h-10 px-4 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 transition-colors shadow-sm shrink-0"
+        >
+          <Crosshair size={16} />
+          {isLocating ? 'Lokalizowanie...' : 'Użyj mojej lokalizacji'}
+        </button>
+        <form onSubmit={handleCitySearch} className="relative flex-1 max-w-md">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <input
+            className={inputClass + ' pl-9'}
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Szukaj aptek po mieście..."
+          />
+        </form>
+      </div>
+
+      {error && (
+        <div role="alert" className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700 flex items-center gap-2">
+          <AlertCircle size={15} className="shrink-0" />{error}
+        </div>
+      )}
+
+      {searched && !isLoading && withDistance.length > 0 && (
+        <p className="text-xs text-neutral-400">
+          Znaleziono {withDistance.length} aptek{userLocation ? ' — posortowano od najbliższej' : ''}
+        </p>
+      )}
+
+      <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-320px)] lg:min-h-[400px]">
+        <PharmacyMapView
+          pharmacies={withDistance}
+          selectedId={selectedId}
+          onSelect={handleSelect}
+          userLocation={userLocation}
+          className="h-[48dvh] min-h-[260px] lg:h-auto lg:min-h-0 lg:flex-1 rounded-xl"
+        />
+
+        <div className="h-[32dvh] min-h-[180px] overflow-y-auto overscroll-contain space-y-3 pb-2 lg:h-auto lg:w-80 lg:pr-1 scroll-smooth">
+          {isLoading ? (
+            <div className="flex justify-center py-12"><Spinner size="lg" /></div>
+          ) : !searched ? (
+            <EmptyState
+              title="Znajdź najbliższe apteki"
+              description="Użyj swojej lokalizacji lub wyszukaj apteki po nazwie miasta."
+              icon={<MapPin size={40} />}
+            />
+          ) : withDistance.length === 0 ? (
+            <EmptyState
+              title="Nie znaleziono aptek"
+              description="Spróbuj wyszukać w innym mieście lub udostępnić lokalizację."
+              icon={<MapPin size={40} />}
+            />
+          ) : (
+            withDistance.map(p => (
+              <PharmacyCard
+                key={p.id}
+                pharmacy={p}
+                selected={selectedId === p.id}
+                onClick={() => handleSelect(p.id)}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-type Tab = 'pharmacies' | 'prescriptions';
+type Tab = 'pharmacies' | 'prescriptions' | 'nearby';
 
 const AdminPage = () => {
   const [tab, setTab] = useState<Tab>('pharmacies');
@@ -500,9 +655,15 @@ const AdminPage = () => {
           >
             <FileText size={16} /> Recepty
           </button>
+          <button
+            onClick={() => setTab('nearby')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === 'nearby' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'}`}
+          >
+            <MapPin size={16} /> Najbliższe apteki
+          </button>
         </div>
 
-        {tab === 'pharmacies' ? <PharmacyTab /> : <PrescriptionsTab />}
+        {tab === 'pharmacies' ? <PharmacyTab /> : tab === 'prescriptions' ? <PrescriptionsTab /> : <NearbyTab />}
       </div>
     </AppLayout>
   );
