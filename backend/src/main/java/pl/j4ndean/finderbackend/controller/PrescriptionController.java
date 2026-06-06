@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import pl.j4ndean.finderbackend.model.Pharmacy;
 import pl.j4ndean.finderbackend.model.Prescription;
 import pl.j4ndean.finderbackend.model.PrescriptionItem;
+import pl.j4ndean.finderbackend.model.PrescriptionStatus;
 import pl.j4ndean.finderbackend.service.PrescriptionService;
 
 import java.time.LocalDate;
@@ -35,7 +36,8 @@ public class PrescriptionController {
                     new MedicationDto(m.getId(), m.getName(), m.getCommonName(), m.getStrength(), m.getPharmaceuticalForm(), m.getPackageSize()),
                     i.getQuantity(), i.getDosageInstructions(), i.getStatus());
             }).toList();
-            return new PrescriptionDto(p.getId(), p.getAccessCode(), p.getIssueDate(), p.getExpirationDate(), p.getDoctorNpwz(), p.getClinicRegon(), p.getStatus(), patient, itemDtos);
+            String effectiveStatus = PrescriptionStatus.from(p.getStatus()).effective(p.getExpirationDate()).name();
+            return new PrescriptionDto(p.getId(), p.getAccessCode(), p.getIssueDate(), p.getExpirationDate(), p.getDoctorNpwz(), p.getClinicRegon(), effectiveStatus, patient, itemDtos);
         }
     }
 
