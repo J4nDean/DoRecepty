@@ -4,6 +4,7 @@ export interface User {
   lastName: string;
   email: string;
   pesel: string;
+  role?: string;
 }
 
 export interface RegisterData {

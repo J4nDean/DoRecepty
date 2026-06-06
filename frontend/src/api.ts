@@ -23,7 +23,7 @@ export default api;
 
 interface AuthResponse {
   id: number; firstName: string; lastName: string;
-  email: string; pesel: string; token: string;
+  email: string; pesel: string; role?: string; token: string;
 }
 
 export const loginRequest = (email: string, password: string) =>
@@ -192,6 +192,31 @@ export const updatePharmacyLocation = (
   api.post('/pharmacies/update-location', { name, address, city, latitude, longitude })
     .then(() => undefined)
     .catch(() => undefined);
+
+// --- Panel administratora (WF-11, WF-12) ---
+
+export type PharmacyInput = {
+  name: string;
+  address: string;
+  city: string;
+  postalCode?: string;
+  phone?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  status?: string;
+  openingHoursWeekdays?: string;
+  openingHoursSaturday?: string;
+  openingHoursSunday?: string;
+};
+
+export const fetchAdminPharmacies = (): Promise<ApiPharmacy[]> =>
+  api.get<ApiPharmacy[]>('/admin/pharmacies', noCache()).then(r => r.data);
+
+export const createPharmacy = (data: PharmacyInput): Promise<ApiPharmacy> =>
+  api.post<ApiPharmacy>('/admin/pharmacies', data).then(r => r.data);
+
+export const updatePharmacy = (id: number, data: PharmacyInput): Promise<ApiPharmacy> =>
+  api.put<ApiPharmacy>(`/admin/pharmacies/${id}`, data).then(r => r.data);
 
 export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
   new Promise((resolve, reject) => {

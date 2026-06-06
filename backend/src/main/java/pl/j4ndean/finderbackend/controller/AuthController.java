@@ -28,9 +28,10 @@ public class AuthController {
         @NotBlank @Size(min = 6) String password
     ) {}
 
-    public record AuthResponse(Long id, String firstName, String lastName, String email, String pesel, String token) {
+    public record AuthResponse(Long id, String firstName, String lastName, String email, String pesel, String role, String token) {
         public static AuthResponse from(User u, String token) {
-            return new AuthResponse(u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getPesel(), token);
+            return new AuthResponse(u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getPesel(),
+                    u.getRole() != null ? u.getRole().name() : null, token);
         }
     }
 

@@ -1,7 +1,8 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff } from 'lucide-react';
+import { LayoutDashboard, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuth } from '../AuthContext';
+import type { User } from '../types';
 
 const NAV = [
   { to: '/dashboard', icon: LayoutDashboard, label: 'Pulpit', short: 'Pulpit' },
@@ -9,6 +10,11 @@ const NAV = [
   { to: '/recepty/archiwalne', icon: Archive, label: 'Archiwalne recepty', short: 'Archiwum' },
   { to: '/apteki', icon: MapPin, label: 'Najbliższe apteki', short: 'Apteki' },
 ];
+
+const ADMIN_NAV = { to: '/admin', icon: Shield, label: 'Panel administratora', short: 'Admin' };
+
+const navFor = (user: User | null) =>
+  user?.role === 'ADMIN' ? [...NAV, ADMIN_NAV] : NAV;
 
 const Logo = ({ className = '' }: { className?: string }) => (
   <span className={`font-semibold tracking-tight text-brand-800 ${className}`}>
@@ -30,7 +36,7 @@ const Sidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 py-8 space-y-1 overflow-y-auto">
-        {NAV.map(({ to, icon: Icon, label }) => (
+        {navFor(user).map(({ to, icon: Icon, label }) => (
           <NavLink
             key={to}
             to={to}
@@ -121,10 +127,12 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   );
 };
 
-const BottomNav = () => (
+const BottomNav = () => {
+  const { user } = useAuth();
+  return (
   <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-neutral-200 z-50 safe-area-bottom">
     <div className="flex items-stretch">
-      {NAV.map(({ to, icon: Icon, short }) => (
+      {navFor(user).map(({ to, icon: Icon, short }) => (
         <NavLink
           key={to}
           to={to}
@@ -140,7 +148,8 @@ const BottomNav = () => (
       ))}
     </div>
   </nav>
-);
+  );
+};
 
 export const AppLayout = ({
   children, title, subtitle,
@@ -158,6 +167,12 @@ export const AppLayout = ({
 export const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { isAuthenticated } = useAuth();
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+};
+
+export const AdminRoute = ({ children }: { children: ReactNode }) => {
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  return user?.role === 'ADMIN' ? <>{children}</> : <Navigate to="/dashboard" replace />;
 };
 
 export { Logo };
