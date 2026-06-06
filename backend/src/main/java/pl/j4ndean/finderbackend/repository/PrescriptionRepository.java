@@ -14,4 +14,7 @@ public interface PrescriptionRepository extends JpaRepository<Prescription, Long
 
     @Query("SELECT p FROM Prescription p LEFT JOIN FETCH p.patient WHERE p.id = :id")
     Optional<Prescription> findByIdWithPatient(@Param("id") Long id);
+
+    @Query("SELECT p FROM Prescription p LEFT JOIN FETCH p.patient ORDER BY p.issueDate DESC NULLS LAST")
+    List<Prescription> findAllWithPatient();
 }

@@ -218,6 +218,69 @@ export const createPharmacy = (data: PharmacyInput): Promise<ApiPharmacy> =>
 export const updatePharmacy = (id: number, data: PharmacyInput): Promise<ApiPharmacy> =>
   api.put<ApiPharmacy>(`/admin/pharmacies/${id}`, data).then(r => r.data);
 
+// --- Panel administratora — recepty ---
+
+export interface AdminPrescription {
+  id: number;
+  accessCode: string;
+  issueDate: string | null;
+  expirationDate: string | null;
+  status: string;
+  patientPesel: string | null;
+  patientName: string | null;
+  patientId: number | null;
+  items: AdminPrescriptionItem[];
+}
+
+export interface AdminPrescriptionItem {
+  id: number;
+  medicationId: number;
+  medicationName: string;
+  strength: string | null;
+  quantity: number | null;
+  dosageInstructions: string | null;
+  status: string;
+}
+
+export interface AdminUser {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  pesel: string;
+}
+
+export interface AdminMedication {
+  id: number;
+  name: string;
+  strength: string | null;
+  pharmaceuticalForm: string | null;
+}
+
+export const fetchAdminPrescriptions = (): Promise<AdminPrescription[]> =>
+  api.get<AdminPrescription[]>('/admin/prescriptions', noCache()).then(r => r.data);
+
+export const createAdminPrescription = (data: {
+  patientId: number;
+  accessCode: string;
+  issueDate: string;
+  expirationDate: string;
+  doctorNpwz?: string;
+  clinicRegon?: string;
+  status: string;
+  items: { medicationId: number; quantity: number; dosageInstructions?: string }[];
+}): Promise<AdminPrescription> =>
+  api.post<AdminPrescription>('/admin/prescriptions', data).then(r => r.data);
+
+export const updateAdminPrescriptionStatus = (id: number, status: string): Promise<AdminPrescription> =>
+  api.put<AdminPrescription>(`/admin/prescriptions/${id}/status`, { status }).then(r => r.data);
+
+export const fetchAdminUsers = (): Promise<AdminUser[]> =>
+  api.get<AdminUser[]>('/admin/users', noCache()).then(r => r.data);
+
+export const searchAdminMedications = (q: string): Promise<AdminMedication[]> =>
+  api.get<AdminMedication[]>('/admin/medications', { params: { q } }).then(r => r.data);
+
 export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
   new Promise((resolve, reject) => {
     if (!('geolocation' in navigator)) {
