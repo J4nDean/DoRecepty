@@ -6,7 +6,7 @@ import { SearchBar } from '../components/SearchBar';
 import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner, EmptyState } from '../components/ui';
 import {
-  searchPharmacies, fetchPharmaciesInBounds, getUserLocation, reverseGeocode,
+  searchPharmacies, fetchPharmaciesInBounds, fetchNearbyByLocation, getUserLocation, reverseGeocode,
 } from '../api';
 import { useFavoritePharmacies } from '../useFavoritePharmacies';
 import { haversineKm, type LatLng } from '../utils';
@@ -38,8 +38,6 @@ const PharmaciesPage = () => {
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [currentBounds, setCurrentBounds] = useState<MapBounds | null>(null);
-  const [pendingSearch, setPendingSearch] = useState(false);
 
   const { isFavorite, toggleFavorite, favorites } = useFavoritePharmacies();
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -97,13 +95,6 @@ const PharmaciesPage = () => {
     }
   };
 
-  useEffect(() => {
-    if (pendingSearch && currentBounds) {
-      setPendingSearch(false);
-      handleLoadInArea(currentBounds);
-    }
-  }, [pendingSearch, currentBounds]);
-
   const addToHistory = (query: string) => {
     const trimmed = query.trim();
     if (!trimmed || trimmed.length < 2) return;
@@ -133,10 +124,15 @@ const PharmaciesPage = () => {
     setLocationError(null);
     try {
       const pos = await getUserLocation();
-      console.log('GPS Success:', pos);
       setUserLocation(pos);
-      setPendingSearch(true);
       setSortMode('distance');
+      // Szukamy aptek dokładnie wokół pozycji użytkownika (nie wg widoku mapy).
+      resetForNewSearch(undefined);
+      try {
+        setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 10, 100));
+      } finally {
+        setIsLoading(false);
+      }
     } catch (err) {
       console.error('GPS Error:', err);
       setLocationError(locationErrorMessage(err));
@@ -277,7 +273,6 @@ const PharmaciesPage = () => {
           selectedId={selectedId}
           onSelect={handleSelect}
           onLoadInArea={handleLoadInArea}
-          onBoundsChange={setCurrentBounds}
           userLocation={userLocation}
           searchCity={searchCity}
           className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"

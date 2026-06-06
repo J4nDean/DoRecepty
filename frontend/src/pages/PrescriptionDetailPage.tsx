@@ -125,17 +125,14 @@ const BarcodeMock = ({ number }: { number: string }) => {
   const fullBarcodeNumber = `100101723${number}316993141033672942435380593264361040`.slice(0, 44);
   return (
     <div className="flex flex-col items-center w-full">
-      <div className="flex h-12 sm:h-16 w-full max-w-[440px] items-stretch justify-center gap-[1.5px] opacity-40">
-        {[...Array(100)].map((_, i) => (
-          <div
-            key={i}
-            className="bg-black shrink-0"
-            style={{
-              width: i % 12 === 0 ? '5px' : i % 4 === 0 ? '3px' : '1.5px',
-            }}
-          />
-        ))}
-      </div>
+      <div
+        aria-hidden
+        className="h-12 sm:h-16 w-full max-w-[440px] opacity-40"
+        style={{
+          backgroundImage:
+            'repeating-linear-gradient(90deg, #000 0, #000 2px, transparent 2px, transparent 4px, #000 4px, #000 7px, transparent 7px, transparent 9px, #000 9px, #000 10px, transparent 10px, transparent 13px)',
+        }}
+      />
       <p className="max-w-full text-[8px] sm:text-[12px] text-neutral-700 font-mono font-bold tracking-[0.12em] sm:tracking-[0.25em] mt-1.5 leading-none text-center break-all">
         {fullBarcodeNumber}
       </p>
