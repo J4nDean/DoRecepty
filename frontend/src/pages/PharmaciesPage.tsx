@@ -29,6 +29,9 @@ const PharmaciesPage = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchCity, setSearchCity] = useState<string | undefined>(undefined);
+  // Osobny stan: tylko jawne wyszukiwanie miasta przesuwa mapę. Wyszukiwanie
+  // „w tym obszarze" NIE przesuwa widoku (nie skacze do centrum miasta).
+  const [mapCenterCity, setMapCenterCity] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
@@ -71,7 +74,8 @@ const PharmaciesPage = () => {
     setPharmacies([]);
     setSelectedId(null);
     setLocationError(null);
-    
+    setMapCenterCity(undefined); // zostań na bieżącym widoku mapy
+
     try {
       const inBounds = await fetchPharmaciesInBounds(bounds);
       if (inBounds.length > 0) {
@@ -117,6 +121,7 @@ const PharmaciesPage = () => {
     setSelectedId(null);
     setLocationError(null);
     setSearchCity(city);
+    setMapCenterCity(city); // przesuń mapę tylko przy jawnym wyszukiwaniu miasta
   };
 
   const loadNearby = async () => {
@@ -129,7 +134,7 @@ const PharmaciesPage = () => {
       // Szukamy aptek dokładnie wokół pozycji użytkownika (nie wg widoku mapy).
       resetForNewSearch(undefined);
       try {
-        setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 10, 100));
+        setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 12, 500));
       } finally {
         setIsLoading(false);
       }
@@ -274,7 +279,7 @@ const PharmaciesPage = () => {
           onSelect={handleSelect}
           onLoadInArea={handleLoadInArea}
           userLocation={userLocation}
-          searchCity={searchCity}
+          searchCity={mapCenterCity}
           className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
         />
 

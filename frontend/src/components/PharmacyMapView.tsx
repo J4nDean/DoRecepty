@@ -9,8 +9,9 @@ type MapBounds = { north: number; south: number; east: number; west: number };
 
 type GeocoderAddressComponent = { long_name: string; types: string[] };
 type GeocoderResult = {
-  geometry: { location: { lat(): number; lng(): number } };
+  geometry: { location: { lat(): number; lng(): number }; location_type?: string };
   address_components?: GeocoderAddressComponent[];
+  partial_match?: boolean;
 };
 
 declare global {
@@ -19,7 +20,9 @@ declare global {
       maps: {
         Geocoder: new () => {
           geocode(
-            request: { address: string } | { location: { lat: number; lng: number } },
+            request:
+              | { address: string; componentRestrictions?: { country: string } }
+              | { location: { lat: number; lng: number } },
             callback: (results: GeocoderResult[] | null, status: string) => void,
           ): void;
         };
@@ -31,6 +34,12 @@ declare global {
 const DEFAULT_CENTER: LatLng = { lat: 52.237, lng: 21.017 };
 const DEFAULT_ZOOM = 13;
 const GEOCODE_BATCH_LIMIT = 25;
+
+// Przybliżone granice Polski — odrzucamy współrzędne, które ewidentnie wpadły poza kraj.
+const POLAND_BOUNDS = { south: 48.9, north: 55.0, west: 14.0, east: 24.2 } as const;
+const inPoland = (lat: number, lng: number) =>
+  lat >= POLAND_BOUNDS.south && lat <= POLAND_BOUNDS.north &&
+  lng >= POLAND_BOUNDS.west && lng <= POLAND_BOUNDS.east;
 
 // Domyślna pinezka — czerwona jak pinezka w logo. Zaznaczona — granatowa (kolor akcentu).
 const DEFAULT_PIN = { background: '#EA4335', borderColor: '#B31412', glyphColor: '#7F0F0A' } as const;
@@ -67,7 +76,7 @@ const inBounds = (lat: number, lng: number, b: MapBounds) =>
 type GeoPharmacy = Pharmacy & { latitude: number; longitude: number };
 type Cluster = { id: string; lat: number; lng: number; items: GeoPharmacy[] };
 
-const CLUSTER_CELL_PX = 64;
+const CLUSTER_CELL_PX = 96;
 
 const buildClusters = (items: GeoPharmacy[], zoom: number): Cluster[] => {
   const cellDeg = (360 / (256 * 2 ** Math.max(zoom, 1))) * CLUSTER_CELL_PX;
@@ -162,12 +171,18 @@ const MapContent = ({
 
     const geocoder = new window.google.maps.Geocoder();
     missing.forEach(pharmacy => {
+      // Pełniejszy adres (z kodem pocztowym) + ograniczenie do Polski = dokładniejsze trafienie.
+      const query = [pharmacy.address, pharmacy.postalCode, pharmacy.city].filter(Boolean).join(', ');
       geocoder.geocode(
-        { address: `${pharmacy.address}, ${pharmacy.city}, Poland` },
+        { address: `${query}, Polska`, componentRestrictions: { country: 'PL' } },
         (results, status) => {
           if (status !== 'OK' || !results?.[0]) return;
-          const lat = results[0].geometry.location.lat();
-          const lng = results[0].geometry.location.lng();
+          const best = results[0];
+          // Odrzuć niepewne dopasowania — Google zwraca wtedy środek miasta/regionu zamiast adresu.
+          if (best.partial_match || best.geometry.location_type === 'APPROXIMATE') return;
+          const lat = best.geometry.location.lat();
+          const lng = best.geometry.location.lng();
+          if (!inPoland(lat, lng)) return;
           setDisplayed(prev => prev.map(p => (p.id === pharmacy.id ? { ...p, latitude: lat, longitude: lng } : p)));
           updatePharmacyLocation(pharmacy.name, pharmacy.address, pharmacy.city, lat, lng);
         },
