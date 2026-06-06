@@ -27,6 +27,12 @@
 
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+
+  /* Tokeny semantyczne aplikacji — jedyne źródło prawdy dla globalnych kolorów. */
+  --color-app-bg: #f8fafc;
+  --color-ink: #1d1d1f;
+  --color-scrollbar: #cbd5e1;
+  --color-scrollbar-hover: #94a3b8;
 }
 
 :root {
@@ -35,8 +41,8 @@
   font-weight: 400;
 
   color-scheme: light;
-  color: #1d1d1f;
-  background-color: #f8fafc;
+  color: var(--color-ink);
+  background-color: var(--color-app-bg);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -62,11 +68,11 @@ body,
 body {
   min-height: 100dvh;
   overflow-x: hidden;
-  background-color: #f8fafc;
+  background-color: var(--color-app-bg);
 }
 
 :focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--color-brand-600);
   outline-offset: 2px;
 }
 
@@ -86,9 +92,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--color-scrollbar);
   border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--color-scrollbar-hover);
 }

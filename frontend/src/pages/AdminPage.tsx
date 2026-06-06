@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
-  Plus, Pencil, Search, Building2, X, MapPin, CheckCircle2, AlertCircle,
+  Plus, Pencil, Search, Building2, X, MapPin, CheckCircle2,
   ClipboardList, FileText, ChevronDown, Crosshair, Users,
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
-import { Spinner, EmptyState } from '../components/ui';
+import { Spinner, EmptyState, Alert } from '../components/ui';
+import { fieldClass, BTN_PRIMARY } from '../theme';
 import { PharmacyCard } from '../components/PharmacyCard';
 import PharmacyMapView from '../components/PharmacyMapView';
 import {
@@ -15,14 +16,12 @@ import {
   searchPharmacies, fetchNearbyByLocation, getUserLocation,
   type AdminPrescription, type AdminUser, type AdminMedication,
 } from '../api';
-import { haversineKm, type LatLng } from '../utils';
+import { withDistance, type LatLng } from '../utils';
 import type { ApiPharmacy, Pharmacy } from '../types';
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 
-const inputClass =
-  'w-full h-10 px-3 border border-neutral-200 rounded-lg text-sm bg-white text-neutral-900 ' +
-  'placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-900/20 transition-all';
+const inputClass = `${fieldClass()} w-full h-10 px-3`;
 const labelClass = 'block text-xs font-semibold text-neutral-600 mb-1';
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
   <div><label className={labelClass}>{label}</label>{children}</div>
@@ -172,8 +171,8 @@ const PharmacyTab = () => {
               </button>
             )}
           </div>
-          {error && <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-600 flex items-center gap-2"><AlertCircle size={15} className="shrink-0" />{error}</div>}
-          {message && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700 flex items-center gap-2"><CheckCircle2 size={15} className="shrink-0" />{message}</div>}
+          {error && <Alert>{error}</Alert>}
+          {message && <Alert variant="success">{message}</Alert>}
           <Field label="Nazwa apteki *"><input className={inputClass} value={form.name} onChange={e => set('name', e.target.value)} placeholder="Apteka pod Orłem" /></Field>
           <Field label="Adres *"><input className={inputClass} value={form.address} onChange={e => set('address', e.target.value)} placeholder="ul. Główna 12" /></Field>
           <div className="grid grid-cols-2 gap-3">
@@ -196,7 +195,7 @@ const PharmacyTab = () => {
             <Field label="Sobota"><input className={inputClass} value={form.openingHoursSaturday} onChange={e => set('openingHoursSaturday', e.target.value)} placeholder="09:00 - 14:00" /></Field>
             <Field label="Niedziela"><input className={inputClass} value={form.openingHoursSunday} onChange={e => set('openingHoursSunday', e.target.value)} placeholder="nieczynne" /></Field>
           </div>
-          <button type="submit" disabled={saving} className="w-full h-11 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm">
+          <button type="submit" disabled={saving} className={`${BTN_PRIMARY} w-full h-11 rounded-lg text-sm shadow-sm`}>
             {saving ? 'Zapisywanie...' : editingId != null ? 'Zapisz zmiany' : 'Dodaj aptekę'}
           </button>
         </form>
@@ -426,8 +425,8 @@ const PrescriptionsTab = () => {
         {/* Formularz dodawania */}
         <form onSubmit={handleSubmit} className="bg-white border border-neutral-200 rounded-xl p-5 space-y-4 h-fit">
           <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2"><Plus size={18} /> Dodaj receptę</h2>
-          {error && <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-600 flex items-center gap-2"><AlertCircle size={15} className="shrink-0" />{error}</div>}
-          {message && <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-sm text-emerald-700 flex items-center gap-2"><CheckCircle2 size={15} className="shrink-0" />{message}</div>}
+          {error && <Alert>{error}</Alert>}
+          {message && <Alert variant="success">{message}</Alert>}
 
           <Field label="Pacjent *">
             <select className={inputClass} value={patientId} onChange={e => setPatientId(e.target.value)}>
@@ -489,7 +488,7 @@ const PrescriptionsTab = () => {
             ))}
           </div>
 
-          <button type="submit" disabled={saving} className="w-full h-11 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors shadow-sm">
+          <button type="submit" disabled={saving} className={`${BTN_PRIMARY} w-full h-11 rounded-lg text-sm shadow-sm`}>
             {saving ? 'Zapisywanie...' : 'Dodaj receptę'}
           </button>
         </form>
@@ -583,14 +582,10 @@ export const NearbyTab = () => {
     finally { setIsLoading(false); }
   };
 
-  const withDistance = useMemo(() => {
-    if (!userLocation) return pharmacies;
-    return pharmacies
-      .map(p => p.latitude != null && p.longitude != null
-        ? { ...p, distance: haversineKm(userLocation, { lat: p.latitude, lng: p.longitude }) }
-        : p)
-      .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-  }, [pharmacies, userLocation]);
+  const pharmaciesWithDistance = useMemo(
+    () => withDistance(pharmacies, userLocation, true),
+    [pharmacies, userLocation],
+  );
 
   const handleSelect = (id: string) => setSelectedId(prev => (prev === id ? null : id));
 
@@ -601,7 +596,7 @@ export const NearbyTab = () => {
           type="button"
           onClick={loadNearby}
           disabled={isLocating}
-          className="flex items-center justify-center gap-2 h-10 px-4 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 transition-colors shadow-sm shrink-0"
+          className={`${BTN_PRIMARY} flex items-center justify-center gap-2 h-10 px-4 rounded-lg text-sm shadow-sm shrink-0`}
         >
           <Crosshair size={16} />
           {isLocating ? 'Lokalizowanie...' : 'Użyj mojej lokalizacji'}
@@ -617,21 +612,17 @@ export const NearbyTab = () => {
         </form>
       </div>
 
-      {error && (
-        <div role="alert" className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-700 flex items-center gap-2">
-          <AlertCircle size={15} className="shrink-0" />{error}
-        </div>
-      )}
+      {error && <Alert variant="info">{error}</Alert>}
 
-      {searched && !isLoading && withDistance.length > 0 && (
+      {searched && !isLoading && pharmaciesWithDistance.length > 0 && (
         <p className="text-xs text-neutral-400">
-          Znaleziono {withDistance.length} aptek{userLocation ? ' — posortowano od najbliższej' : ''}
+          Znaleziono {pharmaciesWithDistance.length} aptek{userLocation ? ' — posortowano od najbliższej' : ''}
         </p>
       )}
 
       <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-320px)] lg:min-h-[400px]">
         <PharmacyMapView
-          pharmacies={withDistance}
+          pharmacies={pharmaciesWithDistance}
           selectedId={selectedId}
           onSelect={handleSelect}
           userLocation={userLocation}
@@ -647,14 +638,14 @@ export const NearbyTab = () => {
               description="Użyj swojej lokalizacji lub wyszukaj apteki po nazwie miasta."
               icon={<MapPin size={40} />}
             />
-          ) : withDistance.length === 0 ? (
+          ) : pharmaciesWithDistance.length === 0 ? (
             <EmptyState
               title="Nie znaleziono aptek"
               description="Spróbuj wyszukać w innym mieście lub udostępnić lokalizację."
               icon={<MapPin size={40} />}
             />
           ) : (
-            withDistance.map(p => (
+            pharmaciesWithDistance.map(p => (
               <PharmacyCard
                 key={p.id}
                 pharmacy={p}

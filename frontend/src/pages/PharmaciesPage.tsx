@@ -9,7 +9,7 @@ import {
   searchPharmacies, fetchPharmaciesInBounds, fetchNearbyByLocation, getUserLocation, reverseGeocode,
 } from '../api';
 import { useFavoritePharmacies } from '../useFavoritePharmacies';
-import { haversineKm, type LatLng } from '../utils';
+import { withDistance, type LatLng } from '../utils';
 import type { Pharmacy } from '../types';
 
 type MapBounds = { north: number; south: number; east: number; west: number };
@@ -157,18 +157,14 @@ const PharmaciesPage = () => {
 
   const handleSelect = (id: string) => setSelectedId(prev => (prev === id ? null : id));
 
-  const withDistance = useMemo(() => {
-    if (!userLocation) return pharmacies;
-    return pharmacies.map(p =>
-      p.latitude != null && p.longitude != null
-        ? { ...p, distance: haversineKm(userLocation, { lat: p.latitude, lng: p.longitude }) }
-        : p,
-    );
-  }, [pharmacies, userLocation]);
+  const pharmaciesWithDistance = useMemo(
+    () => withDistance(pharmacies, userLocation),
+    [pharmacies, userLocation],
+  );
 
   const listPharmacies = useMemo(() => {
     const q = nameFilter.trim().toLowerCase();
-    let list = withDistance;
+    let list = pharmaciesWithDistance;
 
     if (showFavoritesOnly) list = list.filter(p => isFavorite(p.id));
     if (q) {
@@ -185,7 +181,7 @@ const PharmaciesPage = () => {
       list = [...list].sort((a, b) => a.name.localeCompare(b.name, 'pl'));
     }
     return list;
-  }, [withDistance, nameFilter, sortMode, showFavoritesOnly, isFavorite]);
+  }, [pharmaciesWithDistance, nameFilter, sortMode, showFavoritesOnly, isFavorite]);
 
   const openCount = listPharmacies.filter(p => p.isOpen).length;
   const cycleSortMode = () =>

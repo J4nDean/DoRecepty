@@ -1,11 +1,11 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shield } from 'lucide-react';
+import { Gauge, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shield } from 'lucide-react';
 import { useAuth } from '../AuthContext';
 import type { User } from '../types';
 
 const PATIENT_NAV = [
-  { to: '/dashboard', icon: LayoutDashboard, label: 'Pulpit', short: 'Pulpit' },
+  { to: '/dashboard', icon: Gauge, label: 'Pulpit', short: 'Pulpit' },
   { to: '/recepty/aktywne', icon: FileCheck, label: 'Aktywne recepty', short: 'Recepty' },
   { to: '/recepty/archiwalne', icon: Archive, label: 'Archiwalne recepty', short: 'Archiwum' },
   { to: '/apteki', icon: MapPin, label: 'Najbliższe apteki', short: 'Apteki' },
@@ -19,11 +19,20 @@ const ADMIN_NAV = [
 const navFor = (user: User | null) =>
   user?.role === 'ADMIN' ? ADMIN_NAV : PATIENT_NAV;
 
-const Logo = ({ className = '' }: { className?: string }) => (
-  <span className={`font-semibold tracking-tight text-brand-800 ${className}`}>
-    <span className="text-brand-400">Do</span>Recepty
-  </span>
-);
+const LOGO_TONE = {
+  brand:    { base: 'text-brand-800',   accent: 'text-brand-400' },
+  neutral:  { base: 'text-neutral-900', accent: 'text-neutral-400' },
+  inverted: { base: 'text-white',       accent: 'text-white/70' },
+};
+
+const Logo = ({ className = '', tone = 'brand' }: { className?: string; tone?: keyof typeof LOGO_TONE }) => {
+  const t = LOGO_TONE[tone];
+  return (
+    <span className={`font-semibold tracking-tight ${t.base} ${className}`}>
+      <span className={t.accent}>Do</span>Recepty
+    </span>
+  );
+};
 
 const Sidebar = () => {
   const { user, logout } = useAuth();

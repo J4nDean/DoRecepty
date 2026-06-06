@@ -4,6 +4,7 @@ import { FileCheck, Archive, MapPin, ChevronRight, FileText, AlertTriangle } fro
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { Spinner, EmptyState } from '../components/ui';
+import { CARD_GRID } from '../theme';
 import { useAuth } from '../AuthContext';
 import { useMetadata } from '../MetadataContext';
 import { fetchPrescriptions } from '../api';
@@ -17,14 +18,13 @@ interface StatCardProps {
   label: string;
 }
 
+// Wspólny wygląd kafelka skrótu na pulpicie.
+const TILE = 'bg-white border border-neutral-200 rounded-lg p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all shadow-sm h-24';
+const TILE_ICON = 'w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm';
+
 const StatCard = ({ to, icon, count, label }: StatCardProps) => (
-  <Link
-    to={to}
-    className="bg-white border border-neutral-200 rounded-lg p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all shadow-sm h-24"
-  >
-    <div className="w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm">
-      {icon}
-    </div>
+  <Link to={to} className={TILE}>
+    <div className={TILE_ICON}>{icon}</div>
     <div>
       <p className="text-2xl font-black text-neutral-900 leading-tight tracking-tight">{count}</p>
       <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">{label}</p>
@@ -65,11 +65,8 @@ const DashboardPage = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard to="/recepty/aktywne" icon={<FileCheck size={20} />} count={isLoading ? '–' : activeCount} label="Aktywne" />
           <StatCard to="/recepty/archiwalne" icon={<Archive size={20} />} count={isLoading ? '–' : archivedCount} label="Archiwalne" />
-          <Link
-            to="/apteki"
-            className="bg-white border border-neutral-200 rounded-lg p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all shadow-sm h-24"
-          >
-            <div className="w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm">
+          <Link to="/apteki" className={TILE}>
+            <div className={TILE_ICON}>
               <MapPin size={20} />
             </div>
             <div className="min-w-0">
@@ -85,7 +82,7 @@ const DashboardPage = () => {
               <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shadow-sm" />
               <h2 className="text-sm font-black text-neutral-800 uppercase tracking-widest">Ważne terminy</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <div className={`${CARD_GRID} gap-4`}>
               {expiringSoon.map(p => {
                 const days = daysUntilExpiry(p.expiryDate!);
                 return (
@@ -129,7 +126,7 @@ const DashboardPage = () => {
           ) : recent.length === 0 ? (
             <EmptyState title="Brak recept" description="Nie masz jeszcze żadnych recept w systemie." icon={<FileText size={44} />} />
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+            <div className={`${CARD_GRID} gap-5`}>
               {recent.map(p => <PrescriptionCard key={p.id} prescription={p} />)}
             </div>
           )}

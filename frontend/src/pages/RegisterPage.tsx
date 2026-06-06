@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent, ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { useAuth } from '../AuthContext';
+import { Logo } from '../components/Layout';
+import { RevealToggle } from '../components/ui';
+import { fieldClass, BTN_PRIMARY } from '../theme';
 
 interface FormState {
   firstName: string;
@@ -38,12 +41,7 @@ const validate = (f: FormState): FieldErrors => {
   return errs;
 };
 
-const inputClass = (error?: string) =>
-  `w-full h-10 px-3 border rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 transition-all ${
-    error
-      ? 'border-rose-400 focus:border-rose-400 focus:ring-rose-100'
-      : 'border-neutral-200 focus:border-brand-400 focus:ring-brand-600/20'
-  }`;
+const inputClass = (error?: string) => `${fieldClass(!!error)} w-full h-10 px-3`;
 
 interface FieldProps {
   id: keyof FormState;
@@ -131,25 +129,14 @@ const RegisterPage = () => {
     );
   }
 
-  const passwordToggle = (
-    <button
-      type="button"
-      aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
-      onClick={() => setShowPassword(v => !v)}
-      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-    >
-      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-    </button>
-  );
+  const passwordToggle = <RevealToggle shown={showPassword} onToggle={() => setShowPassword(v => !v)} />;
 
   return (
     <div className="min-h-screen bg-neutral-50 flex flex-col items-center justify-center px-4 py-8 sm:py-12">
       <div className="w-full max-w-md">
         <div className="flex items-center gap-2 mb-6 sm:mb-8">
           <img src="/icon.svg" alt="DoRecepty" className="w-8 h-8 rounded-lg" />
-          <span className="font-semibold text-neutral-900">
-            <span className="text-neutral-400">Do</span>Recepty
-          </span>
+          <Logo tone="neutral" />
         </div>
 
         <div className="bg-white rounded-2xl border border-neutral-200 shadow-sm p-6 sm:p-8">
@@ -181,7 +168,7 @@ const RegisterPage = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-2"
+              className={`${BTN_PRIMARY} w-full h-11 rounded-xl text-sm mt-2`}
             >
               {isLoading ? 'Tworzenie konta...' : 'Utwórz konto'}
             </button>

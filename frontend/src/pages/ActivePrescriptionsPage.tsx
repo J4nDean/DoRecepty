@@ -2,7 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { FileCheck, Calendar, Clock } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
-import { Spinner, EmptyState } from '../components/ui';
+import { Spinner, EmptyState, SectionHeading } from '../components/ui';
+import { CARD_GRID } from '../theme';
 import { useMetadata } from '../MetadataContext';
 import { fetchPrescriptions } from '../api';
 import type { Prescription } from '../types';
@@ -11,13 +12,8 @@ type SortBy = 'newest' | 'expiring';
 
 const Section = ({ dot, label, prescriptions }: { dot: string; label: string; prescriptions: Prescription[] }) => (
   <section>
-    <div className="flex items-center gap-2 mb-6">
-      <div className={`w-2.5 h-2.5 rounded-full ${dot} shadow-sm`} />
-      <h2 className="text-sm font-bold text-neutral-800 uppercase tracking-widest">
-        {label} <span className="text-neutral-400 font-medium ml-1">({prescriptions.length})</span>
-      </h2>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+    <SectionHeading dot={dot} label={label} count={prescriptions.length} className="mb-6" />
+    <div className={`${CARD_GRID} gap-4`}>
       {prescriptions.map(p => <PrescriptionCard key={p.id} prescription={p} />)}
     </div>
   </section>

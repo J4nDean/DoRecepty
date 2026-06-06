@@ -2,6 +2,7 @@ import { forwardRef } from 'react';
 import { MapPin, Phone, Clock, CheckCircle2, XCircle, Star } from 'lucide-react';
 import type { Pharmacy } from '../types';
 import { distanceLabel } from '../utils';
+import { openBadgeColor } from '../theme';
 
 interface PharmacyCardProps {
   pharmacy: Pharmacy;
@@ -29,11 +30,7 @@ export const PharmacyCard = forwardRef<HTMLElement, PharmacyCardProps>(
         </h3>
         <div className="flex items-center gap-1.5 shrink-0">
           <span
-            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ring-1 ${
-              pharmacy.isOpen
-                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                : 'bg-neutral-100 text-neutral-500 ring-neutral-200'
-            }`}
+            className={`flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ring-1 ${openBadgeColor(pharmacy.isOpen)}`}
           >
             {pharmacy.isOpen ? <CheckCircle2 size={10} /> : <XCircle size={10} />}
             {pharmacy.isOpen ? 'Otwarte' : 'Zamknięte'}

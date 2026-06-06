@@ -3,7 +3,8 @@ import { Archive } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { SearchBar } from '../components/SearchBar';
-import { Spinner, EmptyState } from '../components/ui';
+import { Spinner, EmptyState, SectionHeading } from '../components/ui';
+import { fieldClass, CARD_GRID } from '../theme';
 import { useMetadata } from '../MetadataContext';
 import { fetchPrescriptions } from '../api';
 import type { Prescription } from '../types';
@@ -52,7 +53,7 @@ const ArchivedPrescriptionsPage = () => {
           value={statusFilter}
           onChange={e => setStatusFilter(e.target.value)}
           aria-label="Filtruj po statusie"
-          className="h-11 px-3 border border-neutral-200 rounded-xl text-sm text-neutral-700 bg-white focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-600/20 transition-all min-w-[180px]"
+          className={`${fieldClass()} h-11 px-3 min-w-[180px]`}
         >
           <option value="">Wszystkie statusy</option>
           {archiveOptions.map(o => <option key={o.code} value={o.code}>{o.label}</option>)}
@@ -71,13 +72,8 @@ const ArchivedPrescriptionsPage = () => {
         />
       ) : (
         <div className="mt-8">
-          <div className="flex items-center gap-2 mb-6">
-            <div className="w-2.5 h-2.5 rounded-full bg-neutral-300 shadow-sm" />
-            <h2 className="text-sm font-bold text-neutral-800 uppercase tracking-widest">
-              Wyniki wyszukiwania <span className="text-neutral-400 font-medium ml-1">({filtered.length})</span>
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          <SectionHeading dot="bg-neutral-300" label="Wyniki wyszukiwania" count={filtered.length} className="mb-6" />
+          <div className={`${CARD_GRID} gap-4`}>
             {filtered.map(p => <PrescriptionCard key={p.id} prescription={p} />)}
           </div>
         </div>
