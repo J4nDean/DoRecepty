@@ -27,7 +27,6 @@ public class PharmacyService {
     }
 
     public List<Pharmacy> getNearby(double lat, double lng, double radiusKm, int limit) {
-        // Uproszczony bounding box dla wydajności przed filtrowaniem Haversine
         double latDelta = radiusKm / 111.0;
         double lngDelta = radiusKm / (111.0 * Math.cos(Math.toRadians(lat)));
 
@@ -62,7 +61,6 @@ public class PharmacyService {
                 });
     }
 
-    // Metoda pomocnicza (Utility) mogłaby zostać w serwisie lub klasie Utils
     public double calculateDistance(double lat1, double lng1, double lat2, double lng2) {
         double dLat = Math.toRadians(lat2 - lat1);
         double dLng = Math.toRadians(lng2 - lng1);

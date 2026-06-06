@@ -7,9 +7,6 @@ import pl.j4ndean.finderbackend.service.AccountService;
 
 import java.util.List;
 
-/**
- * Konsolidacja operacji użytkownika. Kontroler deleguje logikę do AccountService.
- */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor

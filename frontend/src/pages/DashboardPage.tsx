@@ -62,8 +62,6 @@ const DashboardPage = () => {
   return (
     <AppLayout title={`Dzień dobry, ${user?.firstName ?? ''}`} subtitle="Oto Twoje podsumowanie">
       <div className="space-y-12">
-        
-        {/* Statystyki */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           <StatCard to="/recepty/aktywne" icon={<FileCheck size={20} />} count={isLoading ? '–' : activeCount} label="Aktywne" />
           <StatCard to="/recepty/archiwalne" icon={<Archive size={20} />} count={isLoading ? '–' : archivedCount} label="Archiwalne" />
@@ -81,7 +79,6 @@ const DashboardPage = () => {
           </Link>
         </div>
 
-        {/* WAŻNE TERMINY */}
         {!isLoading && expiringSoon.length > 0 && (
           <section>
             <div className="flex items-center gap-2 mb-6">
@@ -116,7 +113,6 @@ const DashboardPage = () => {
           </section>
         )}
 
-        {/* NAJNOWSZE DOKUMENTY */}
         <section>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">

@@ -1,4 +1,3 @@
-// Cała komunikacja z backendem w jednym miejscu: klient axios + funkcje per zasób.
 import axios from 'axios';
 import type {
   Prescription, PrescriptionStatus, DrugRealizationStatus,
@@ -12,19 +11,15 @@ export const API_BASE_URL =
 
 const api = axios.create({ baseURL: API_BASE_URL });
 
-// Token JWT dokładany automatycznie do każdego żądania.
 api.interceptors.request.use(config => {
   const token = localStorage.getItem('rx_token');
   if (token) config.headers['Authorization'] = `Bearer ${token}`;
   return config;
 });
 
-// Parametry łamiące cache — dla GET-ów, które bywają agresywnie cache'owane.
 const noCache = () => ({ params: { _t: Date.now() }, headers: { 'Cache-Control': 'no-cache' } });
 
 export default api;
-
-// ---------- Autoryzacja ----------
 
 interface AuthResponse {
   id: number; firstName: string; lastName: string;
@@ -41,14 +36,9 @@ export const registerRequest = (data: {
 export const changePassword = (userId: string, currentPassword: string, newPassword: string) =>
   api.put(`/users/${userId}/password`, { currentPassword, newPassword }).then(() => undefined);
 
-// ---------- Metadane ----------
-
 export const fetchMetadata = (): Promise<AppMetadata> =>
   api.get<AppMetadata>('/metadata').then(r => r.data);
 
-// ---------- Recepty ----------
-
-// Backend mapuje wewnętrzne statusy na polskie etykiety enum; tu domykamy mapowanie kodów.
 const STATUS_MAP: Record<string, PrescriptionStatus> = {
   ACTIVE: 'AKTYWNA',
   REALIZED: 'ZREALIZOWANA',
@@ -91,7 +81,6 @@ const mapPrescription = (p: ApiPrescription): Prescription => ({
   })),
 });
 
-// Właściciel recept wynika z tokenu JWT (endpoint /me), nie z PESEL-a.
 export const fetchPrescriptions = async (): Promise<Prescription[]> => {
   const res = await api.get<ApiPrescription[]>('/prescriptions/me', noCache());
   return res.data.map(mapPrescription);
@@ -133,8 +122,6 @@ export const fetchPharmaciesForPrescription = async (prescriptionId: string): Pr
     })),
   }));
 };
-
-// ---------- Apteki ----------
 
 type Bounds = { north: number; south: number; east: number; west: number };
 
@@ -198,15 +185,12 @@ export const fetchPharmaciesInBounds = async (bounds: Bounds): Promise<Pharmacy[
   return res.data.map(mapPharmacy);
 };
 
-export const updatePharmacyLocation = async (
+export const updatePharmacyLocation = (
   name: string, address: string, city: string, latitude: number, longitude: number,
-): Promise<void> => {
-  try {
-    await api.post('/pharmacies/update-location', { name, address, city, latitude, longitude });
-  } catch {
-    /* best-effort — błąd zapisu współrzędnych nie powinien psuć mapy */
-  }
-};
+): Promise<void> =>
+  api.post('/pharmacies/update-location', { name, address, city, latitude, longitude })
+    .then(() => undefined)
+    .catch(() => undefined);
 
 export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
   new Promise((resolve, reject) => {
@@ -221,8 +205,6 @@ export const getUserLocation = (): Promise<{ lat: number; lng: number }> =>
     );
   });
 
-// ---------- Ulubione apteki ----------
-
 export const fetchFavorites = (userId: string): Promise<string[]> =>
   api.get<number[]>(`/users/${userId}/favorites`, noCache()).then(r => r.data.map(String));
 
@@ -231,8 +213,6 @@ export const addFavorite = (userId: string, pharmacyId: string): Promise<void> =
 
 export const removeFavorite = (userId: string, pharmacyId: string): Promise<void> =>
   api.delete(`/users/${userId}/favorites/${pharmacyId}`).then(() => undefined);
-
-// ---------- Geokodowanie (Google Maps, po stronie przeglądarki) ----------
 
 const CITY_PRIORITY_TYPES = [
   'locality', 'postal_town', 'administrative_area_level_3',

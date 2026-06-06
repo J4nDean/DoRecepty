@@ -19,7 +19,6 @@ public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
 
-    // --- DTOs (Zostają tutaj dla kontraktu API, ale mapowanie wykonuje Serwis) ---
     public record PrescriptionDto(
         Long id, String accessCode, LocalDate issueDate, LocalDate expirationDate,
         String doctorNpwz, String clinicRegon, String status, PatientDto patient, List<ItemDto> items
@@ -47,7 +46,6 @@ public class PrescriptionController {
         }
     }
 
-    // --- Endpoints (Cienkie metody wywołujące serwis) ---
     @GetMapping("/me")
     public List<PrescriptionDto> getMine(Authentication auth) {
         return prescriptionService.getUserPrescriptions(Long.valueOf(auth.getName()));

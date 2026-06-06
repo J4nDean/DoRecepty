@@ -11,10 +11,6 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Centralny punkt obsługi błędów w aplikacji.
- * Przechwytuje wyjątki rzucane w serwisach/kontrolerach i zamienia je na czytelny JSON.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -38,7 +34,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleValidation(MethodArgumentNotValidException e) {
         Map<String, String> errors = new HashMap<>();
         e.getBindingResult().getFieldErrors().forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
-        
+
         Map<String, Object> body = new HashMap<>();
         body.put("timestamp", LocalDateTime.now());
         body.put("status", HttpStatus.BAD_REQUEST.value());

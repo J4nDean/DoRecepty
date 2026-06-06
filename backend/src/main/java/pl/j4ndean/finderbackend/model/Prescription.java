@@ -30,15 +30,12 @@ public class Prescription {
     @JoinColumn(name = "patient_id")
     private User patient;
 
-    /** NPwZ lekarza wystawiającego (7 cyfr). */
     @Column(columnDefinition = "CHAR(7)")
     private String doctorNpwz;
 
-    /** REGON podmiotu leczniczego (9 lub 14 znaków). */
     @Column(length = 14)
     private String clinicRegon;
 
-    /** ACTIVE | PARTIALLY_REALIZED | REALIZED | EXPIRED | CANCELLED */
     @Column(length = 20)
     private String status;
 }

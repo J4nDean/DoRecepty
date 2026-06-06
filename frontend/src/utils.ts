@@ -1,21 +1,13 @@
-// Drobne funkcje pomocnicze: daty, odległości oraz styl statusów recept.
 import type { PrescriptionStatus } from './types';
 
-// ---------- Daty ----------
-
-/** Parsuje "YYYY-MM-DD" jako datę lokalną (bez przesunięcia strefy UTC). */
 export const parseLocalDate = (dateStr: string): Date => {
   const [y, m, d] = dateStr.split('-').map(Number);
   return new Date(y, m - 1, d);
 };
 
-export const formatDate = (dateStr: string): string =>
-  parseLocalDate(dateStr).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long', day: 'numeric' });
-
 export const formatDateShort = (dateStr: string): string =>
   parseLocalDate(dateStr).toLocaleDateString('pl-PL');
 
-/** Liczba dni do wygaśnięcia (ujemna = już po terminie). */
 export const daysUntilExpiry = (expiryDate: string): number => {
   const expiry = parseLocalDate(expiryDate);
   const today = new Date();
@@ -23,7 +15,6 @@ export const daysUntilExpiry = (expiryDate: string): number => {
   return Math.ceil((expiry.getTime() - today.getTime()) / 86_400_000);
 };
 
-/** Czy recepta jest aktywna i wygasa za ≤ 7 dni. */
 export const isExpiringSoon = (status: string, expiryDate?: string): boolean => {
   if (!expiryDate) return false;
   if (status !== 'AKTYWNA' && status !== 'CZĘŚCIOWO_ZREALIZOWANA' && status !== 'NIEZREALIZOWANA') return false;
@@ -36,13 +27,10 @@ export const expiryWarningText = (days: number): string =>
   days === 1 ? 'Wygasa jutro' :
   `Wygasa za ${days} dni`;
 
-// ---------- Geolokalizacja ----------
-
 export type LatLng = { lat: number; lng: number };
 
 const EARTH_RADIUS_KM = 6371;
 
-/** Odległość w km między dwoma punktami (wzór Haversine'a). */
 export const haversineKm = (a: LatLng, b: LatLng): number => {
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;
   const dLng = ((b.lng - a.lng) * Math.PI) / 180;
@@ -55,15 +43,9 @@ export const haversineKm = (a: LatLng, b: LatLng): number => {
 export const distanceLabel = (km: number): string =>
   km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(km < 10 ? 2 : 1)} km`;
 
-// ---------- Styl statusów recept ----------
-// Etykiety tekstowe przychodzą z backendu (metadata); tu trzymamy tylko prezentację.
-
 export interface StatusMeta {
-  /** kolor kropki / akcentu */
   dot: string;
-  /** klasy chipa statusu */
   chip: string;
-  /** kolor lewego paska na karcie */
   rail: string;
 }
 

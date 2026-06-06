@@ -13,19 +13,12 @@ import org.springframework.stereotype.Component;
 import javax.sql.DataSource;
 import java.util.List;
 
-/**
- * Seed startowy aplikacji (clean slate): przy każdym starcie
- *  1. czyści WSZYSTKIE tabele danych,
- *  2. wgrywa wszystkie seedy SQL z resources/db/seed (apteki, leki, stany magazynowe,
- *     użytkownicy testowi + komplet recept demo).
- */
 @Slf4j
 @Component
 @Order(1)
 @RequiredArgsConstructor
 public class DataSeeder implements CommandLineRunner {
 
-    // Wszystkie seedy SQL z katalogu resources/db/seed (kolejność ma znaczenie — FK).
     private static final List<String> SEED_SCRIPTS = List.of(
             "db/seed/01_users.sql",
             "db/seed/02_pharmacies.sql",
@@ -34,7 +27,6 @@ public class DataSeeder implements CommandLineRunner {
             "db/seed/05_prescriptions.sql"
     );
 
-    // Tabele do wyczyszczenia — kolejność bez znaczenia dzięki CASCADE.
     private static final List<String> TABLES = List.of(
             "prescription_item", "pharmacy_inventory", "user_favorite_pharmacy",
             "prescription", "medication", "pharmacy", "app_user"

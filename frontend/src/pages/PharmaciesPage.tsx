@@ -29,8 +29,6 @@ const PharmaciesPage = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [searchCity, setSearchCity] = useState<string | undefined>(undefined);
-  // Osobny stan: tylko jawne wyszukiwanie miasta przesuwa mapę. Wyszukiwanie
-  // „w tym obszarze" NIE przesuwa widoku (nie skacze do centrum miasta).
   const [mapCenterCity, setMapCenterCity] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -74,7 +72,7 @@ const PharmaciesPage = () => {
     setPharmacies([]);
     setSelectedId(null);
     setLocationError(null);
-    setMapCenterCity(undefined); // zostań na bieżącym widoku mapy
+    setMapCenterCity(undefined);
 
     try {
       const inBounds = await fetchPharmaciesInBounds(bounds);
@@ -121,7 +119,7 @@ const PharmaciesPage = () => {
     setSelectedId(null);
     setLocationError(null);
     setSearchCity(city);
-    setMapCenterCity(city); // przesuń mapę tylko przy jawnym wyszukiwaniu miasta
+    setMapCenterCity(city);
   };
 
   const loadNearby = async () => {
@@ -131,7 +129,6 @@ const PharmaciesPage = () => {
       const pos = await getUserLocation();
       setUserLocation(pos);
       setSortMode('distance');
-      // Szukamy aptek dokładnie wokół pozycji użytkownika (nie wg widoku mapy).
       resetForNewSearch(undefined);
       try {
         setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 12, 500));
