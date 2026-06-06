@@ -231,17 +231,17 @@ const PrescriptionDetailPage = () => {
               </p>
             </div>
 
-            <div className="p-5 sm:p-10 space-y-6 sm:space-y-8">
-              <div className="flex flex-col gap-6 sm:gap-8 md:flex-row md:items-start md:justify-between">
-                <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
+            <div className="p-4 sm:p-10 space-y-5 sm:space-y-8">
+              <div className="flex flex-col gap-5 sm:gap-8 md:flex-row md:items-start md:justify-between">
+                <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center sm:gap-8">
                   <div className="flex flex-col items-center">
                     <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-2 sm:mb-3">Kod dostępu</p>
-                    <div className="relative px-6 py-3 sm:px-10 sm:py-4 bg-white shadow-inner rounded">
+                    <div className="relative px-7 py-3.5 sm:px-10 sm:py-4 bg-white shadow-inner rounded">
                       <div className="absolute top-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-l-2 border-brand-600" />
                       <div className="absolute top-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-t-2 border-r-2 border-brand-600" />
                       <div className="absolute bottom-0 left-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-l-2 border-brand-600" />
                       <div className="absolute bottom-0 right-0 w-3 h-3 sm:w-4 sm:h-4 border-b-2 border-r-2 border-brand-600" />
-                      <span className="text-3xl sm:text-5xl font-mono font-black text-neutral-900 tracking-widest">{prescription.number}</span>
+                      <span className="text-4xl sm:text-5xl font-mono font-black text-neutral-900 tracking-widest tabular-nums">{prescription.number}</span>
                     </div>
                   </div>
                   <div className="h-16 w-px bg-neutral-100 hidden sm:block mx-2 sm:mx-4" />
@@ -260,21 +260,11 @@ const PrescriptionDetailPage = () => {
                 </div>
               </div>
 
-              <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 pt-6 sm:pt-8 border-t border-neutral-100">
-                <div>
-                  <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Pacjent</p>
-                  <div className="inline-flex flex-col bg-brand-50 border border-brand-100 rounded-lg px-4 py-2.5 sm:px-5 sm:py-3 shadow-sm max-w-full">
-                    <span className="text-[9px] sm:text-[10px] text-brand-700/70 uppercase font-black tracking-[0.2em] mb-1">PESEL</span>
-                    <span className="text-2xl sm:text-4xl font-black text-neutral-900 font-mono tracking-wider tabular-nums break-all leading-none">{prescription.patientPesel || '—'}</span>
-                  </div>
-                  <p className="text-[10px] sm:text-xs text-neutral-400 mt-1.5 font-bold italic leading-none">Cyfrowe IKP / DoRecepty</p>
-                </div>
-                <div>
-                  <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
-                  <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">{prescription.doctorName}</p>
-                  <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">NPWZ: {prescription.doctorNpwz || '—'}</p>
-                  <p className="text-[9px] sm:text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON: {prescription.clinicRegon || '—'}</p>
-                </div>
+              <div className="pt-6 sm:pt-8 border-t border-neutral-100">
+                <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
+                <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">{prescription.doctorName}</p>
+                <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">NPWZ: {prescription.doctorNpwz || '—'}</p>
+                <p className="text-[9px] sm:text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON: {prescription.clinicRegon || '—'}</p>
               </div>
             </div>
           </section>

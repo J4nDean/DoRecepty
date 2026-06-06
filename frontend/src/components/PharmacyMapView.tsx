@@ -47,15 +47,15 @@ const PARTIAL_AVAILABILITY_PIN = { background: '#EAB308', borderColor: '#854D0E'
 
 const MapPlaceholder = ({ className = '', message }: { className?: string; message?: string }) => (
   <div
-    className={`bg-neutral-100 rounded-xl flex flex-col items-center justify-center text-neutral-400 border border-neutral-200 ${className}`}
+    className={`bg-neutral-100 rounded-xl flex flex-col items-center justify-center text-center text-neutral-400 border border-neutral-200 w-full min-h-[280px] sm:min-h-[360px] px-6 py-8 ${className}`}
     role="img"
     aria-label="Mapa aptek"
   >
-    <div className="w-14 h-14 bg-neutral-200 rounded-full flex items-center justify-center mb-3">
-      <MapIcon size={26} className="text-neutral-400" />
+    <div className="w-20 h-20 sm:w-28 sm:h-28 bg-neutral-200 rounded-full flex items-center justify-center mb-4 sm:mb-5">
+      <MapIcon size={44} className="text-neutral-400 sm:w-14 sm:h-14" />
     </div>
-    <p className="text-sm font-medium text-neutral-500">{message ?? 'Mapa aptek'}</p>
-    <p className="text-xs text-neutral-400 mt-0.5">Integracja z Google Maps</p>
+    <p className="text-base sm:text-xl font-semibold text-neutral-600">{message ?? 'Mapa aptek'}</p>
+    <p className="text-xs sm:text-sm text-neutral-400 mt-1">Integracja z Google Maps</p>
   </div>
 );
 
