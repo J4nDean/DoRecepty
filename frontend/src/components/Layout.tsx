@@ -61,24 +61,32 @@ const Sidebar = () => {
       </nav>
 
       <div className="px-3 pb-4 border-t border-neutral-100 pt-3 space-y-1">
-        <button
-          onClick={() => navigate('/profil')}
-          className="w-full px-3 py-2.5 rounded-lg hover:bg-neutral-50 transition-colors text-left"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 bg-brand-700 rounded-full flex items-center justify-center shrink-0">
-              <span className="text-[10px] font-bold text-white">
-                {user?.firstName?.[0]}{user?.lastName?.[0]}
-              </span>
+        {user?.role !== 'ADMIN' && (
+          <button
+            onClick={() => navigate('/profil')}
+            className="w-full px-3 py-2.5 rounded-lg hover:bg-neutral-50 transition-colors text-left"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 bg-brand-700 rounded-full flex items-center justify-center shrink-0">
+                <span className="text-[10px] font-bold text-white">
+                  {user?.firstName?.[0]}{user?.lastName?.[0]}
+                </span>
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-neutral-900 truncate">
+                  {user?.firstName} {user?.lastName}
+                </p>
+                <p className="text-[11px] text-neutral-400 font-mono tracking-tighter opacity-70">Profil pacjenta</p>
+              </div>
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-neutral-900 truncate">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-[11px] text-neutral-400 font-mono tracking-tighter opacity-70">Profil pacjenta</p>
-            </div>
+          </button>
+        )}
+        {user?.role === 'ADMIN' && (
+          <div className="px-3 py-2.5">
+            <p className="text-sm font-semibold text-neutral-900">{user?.firstName} {user?.lastName}</p>
+            <p className="text-[11px] text-neutral-400 font-mono tracking-tighter opacity-70">Administrator</p>
           </div>
-        </button>
+        )}
         <button
           onClick={logout}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-neutral-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
