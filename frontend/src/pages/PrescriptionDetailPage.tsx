@@ -8,10 +8,11 @@ import {
 import { AppLayout } from '../components/Layout';
 import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner } from '../components/ui';
+import { openBadgeColor } from '../theme';
 import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation } from '../api';
 import {
   formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
-  haversineKm, distanceLabel, statusMetaOf,
+  withDistance, distanceLabel, statusMetaOf,
   drugFullName, drugFormLine, packageQuantityLabel, documentOid, type LatLng,
 } from '../utils';
 import { useMetadata } from '../MetadataContext';
@@ -76,9 +77,7 @@ const PharmacyAvailabilityCard = ({
         <p className="font-bold text-neutral-900 text-base truncate">{pharmacy.name}</p>
         <p className="text-sm text-neutral-400 truncate">{pharmacy.address}, {pharmacy.city}</p>
       </div>
-      <span className={`shrink-0 text-[11px] font-black px-2.5 py-1 rounded-full ring-1 uppercase tracking-tighter ${
-        pharmacy.isOpen ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-neutral-100 text-neutral-500 ring-neutral-200'
-      }`}>
+      <span className={`shrink-0 text-[11px] font-black px-2.5 py-1 rounded-full ring-1 uppercase tracking-tighter ${openBadgeColor(pharmacy.isOpen)}`}>
         {pharmacy.isOpen ? 'Otwarte' : 'Zamknięte'}
       </span>
     </div>
@@ -105,15 +104,6 @@ const PharmacyAvailabilityCard = ({
     )}
   </div>
 );
-
-const withDistance = (pharmacies: Pharmacy[], loc: LatLng | null): Pharmacy[] => {
-  if (!loc) return pharmacies;
-  return pharmacies
-    .map(p => (p.latitude != null && p.longitude != null
-      ? { ...p, distance: haversineKm(loc, { lat: p.latitude, lng: p.longitude }) }
-      : p))
-    .sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity));
-};
 
 const buildDirectionsUrl = (pharmacy: Pharmacy, origin: LatLng | null): string => {
   const destination = pharmacy.latitude != null && pharmacy.longitude != null
@@ -183,6 +173,7 @@ const PrescriptionDetailPage = () => {
   const pharmaciesWithDistance = withDistance(
     withAvailability(pharmacies, prescription?.drugs.length ?? 0),
     userLocation,
+    true,
   );
 
   const togglePharmacy = (pid: string) => setSelectedPharmacyId(prev => (prev === pid ? null : pid));

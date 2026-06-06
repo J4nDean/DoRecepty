@@ -1,6 +1,7 @@
 import { Search, Crosshair } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
+import { fieldClass, BTN_PRIMARY } from '../theme';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -48,7 +49,7 @@ export const SearchBar = ({
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           aria-label={placeholder}
-          className={`w-full pl-10 ${onLocate ? 'pr-11' : 'pr-4'} h-11 border border-neutral-200 rounded-xl bg-white text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-600/20 transition-all`}
+          className={`${fieldClass()} w-full pl-10 ${onLocate ? 'pr-11' : 'pr-4'} h-11`}
         />
         {onLocate && (
           <button
@@ -65,7 +66,7 @@ export const SearchBar = ({
       </div>
       <button
         type="submit"
-        className="px-5 h-11 bg-brand-600 text-white rounded-xl text-sm font-semibold hover:bg-brand-700 transition-colors shrink-0"
+        className={`${BTN_PRIMARY} px-5 h-11 rounded-xl text-sm shrink-0`}
       >
         Szukaj
       </button>

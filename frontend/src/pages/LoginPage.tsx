@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '../AuthContext';
+import { Logo } from '../components/Layout';
+import { Alert, RevealToggle } from '../components/ui';
+import { fieldClass, BTN_PRIMARY } from '../theme';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -34,9 +36,7 @@ const LoginPage = () => {
       <div className="hidden md:flex md:w-5/12 lg:w-2/5 bg-gradient-to-br from-brand-600 to-brand-900 flex-col justify-between p-10 lg:p-14">
         <div className="flex items-center gap-3">
           <img src="/icon.svg" alt="DoRecepty" className="w-10 h-10 rounded-lg shadow-sm" />
-          <span className="text-white font-semibold text-xl tracking-tight">
-            <span className="text-white/70">Do</span>Recepty
-          </span>
+          <Logo tone="inverted" className="text-xl" />
         </div>
 
         <div>
@@ -73,19 +73,13 @@ const LoginPage = () => {
         <div className="w-full max-w-sm">
           <div className="flex items-center gap-2 mb-10 md:hidden">
             <img src="/icon.svg" alt="DoRecepty" className="w-8 h-8 rounded-lg shadow-sm" />
-            <span className="font-semibold text-neutral-900">
-              <span className="text-neutral-400">Do</span>Recepty
-            </span>
+            <Logo tone="neutral" />
           </div>
 
           <h1 className="text-2xl font-bold text-neutral-900 mb-1 tracking-tight">Zaloguj się</h1>
           <p className="text-sm text-neutral-500 mb-8">Wprowadź swoje dane, aby kontynuować.</p>
 
-          {error && (
-            <div role="alert" className="mb-5 p-3.5 bg-rose-50 border border-rose-200 rounded-lg text-sm text-rose-600">
-              {error}
-            </div>
-          )}
+          {error && <Alert className="mb-5">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4" noValidate>
             <div>
@@ -98,7 +92,7 @@ const LoginPage = () => {
                 onChange={e => setEmail(e.target.value)}
                 placeholder="jan.kowalski@example.com"
                 required
-                className="w-full h-11 px-4 border border-neutral-200 rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-900/20 transition-all"
+                className={`${fieldClass()} w-full h-11 px-4`}
               />
             </div>
 
@@ -113,23 +107,16 @@ const LoginPage = () => {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   required
-                  className="w-full h-11 px-4 pr-11 border border-neutral-200 rounded-xl text-sm bg-white text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-400 focus:ring-2 focus:ring-brand-900/20 transition-all"
+                  className={`${fieldClass()} w-full h-11 px-4 pr-11`}
                 />
-                <button
-                  type="button"
-                  aria-label={showPassword ? 'Ukryj hasło' : 'Pokaż hasło'}
-                  onClick={() => setShowPassword(v => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 transition-colors"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                <RevealToggle shown={showPassword} onToggle={() => setShowPassword(v => !v)} size={18} />
               </div>
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full h-11 bg-brand-600 text-white rounded-lg text-sm font-semibold hover:bg-brand-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors mt-2 shadow-sm"
+              className={`${BTN_PRIMARY} w-full h-11 rounded-lg text-sm mt-2 shadow-sm`}
             >
               {isLoading ? 'Logowanie...' : 'Zaloguj się'}
             </button>

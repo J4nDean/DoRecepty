@@ -1,39 +1,10 @@
 import { useState } from 'react';
-import { Lock, Eye, EyeOff, CheckCircle, AlertCircle } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
+import { Alert, PasswordField } from '../components/ui';
+import { BTN_PRIMARY } from '../theme';
 import { useAuth } from '../AuthContext';
 import { changePassword } from '../api';
-
-interface PasswordInputProps {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  show: boolean;
-  toggle: () => void;
-}
-
-const PasswordInput = ({ label, value, onChange, show, toggle }: PasswordInputProps) => (
-  <div>
-    <label className="block text-xs font-semibold text-neutral-600 mb-1.5">{label}</label>
-    <div className="relative">
-      <input
-        type={show ? 'text' : 'password'}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        required
-        className="w-full border border-neutral-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-brand-600/20 focus:border-brand-400 pr-10"
-      />
-      <button
-        type="button"
-        onClick={toggle}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
-        aria-label={show ? 'Ukryj hasło' : 'Pokaż hasło'}
-      >
-        {show ? <EyeOff size={15} /> : <Eye size={15} />}
-      </button>
-    </div>
-  </div>
-);
 
 export default function ProfilePage() {
   const { user } = useAuth();
@@ -41,9 +12,6 @@ export default function ProfilePage() {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [showCurrent, setShowCurrent] = useState(false);
-  const [showNew, setShowNew] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -124,31 +92,18 @@ export default function ProfilePage() {
             <h3 className="text-sm font-bold text-neutral-900">Zmiana hasła</h3>
           </div>
 
-          {success && (
-            <div className="flex items-center gap-2 text-emerald-700 bg-emerald-50 rounded-lg px-3 py-2.5 text-sm mb-4">
-              <CheckCircle size={15} />
-              Hasło zostało pomyślnie zmienione.
-            </div>
-          )}
-          {error && (
-            <div className="flex items-center gap-2 text-rose-700 bg-rose-50 rounded-lg px-3 py-2.5 text-sm mb-4">
-              <AlertCircle size={15} />
-              {error}
-            </div>
-          )}
+          {success && <Alert variant="success" className="mb-4">Hasło zostało pomyślnie zmienione.</Alert>}
+          {error && <Alert variant="error" className="mb-4">{error}</Alert>}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            <PasswordInput label="Obecne hasło" value={currentPassword} onChange={setCurrentPassword}
-              show={showCurrent} toggle={() => setShowCurrent(v => !v)} />
-            <PasswordInput label="Nowe hasło" value={newPassword} onChange={setNewPassword}
-              show={showNew} toggle={() => setShowNew(v => !v)} />
-            <PasswordInput label="Potwierdź nowe hasło" value={confirmPassword} onChange={setConfirmPassword}
-              show={showConfirm} toggle={() => setShowConfirm(v => !v)} />
+            <PasswordField label="Obecne hasło" value={currentPassword} onChange={setCurrentPassword} />
+            <PasswordField label="Nowe hasło" value={newPassword} onChange={setNewPassword} />
+            <PasswordField label="Potwierdź nowe hasło" value={confirmPassword} onChange={setConfirmPassword} />
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-brand-600 hover:bg-brand-700 disabled:opacity-50 text-white font-semibold text-sm rounded-xl px-4 py-2.5 transition-colors mt-1"
+              className={`${BTN_PRIMARY} w-full text-sm rounded-xl px-4 py-2.5 mt-1`}
             >
               {loading ? 'Zapisywanie…' : 'Zmień hasło'}
             </button>

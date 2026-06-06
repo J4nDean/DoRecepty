@@ -1,4 +1,4 @@
-import type { Drug, PrescriptionStatus } from './types';
+import type { Drug, Pharmacy, PrescriptionStatus } from './types';
 
 // "Laroaks 2,5 mg" — nazwa handlowa z mocą, jak w nagłówku pozycji recepty P1.
 export const drugFullName = (d: Drug): string =>
@@ -58,6 +58,17 @@ export const haversineKm = (a: LatLng, b: LatLng): number => {
 
 export const distanceLabel = (km: number): string =>
   km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(km < 10 ? 2 : 1)} km`;
+
+// Dokleja `distance` (km od `loc`) do aptek z geolokalizacją; opcjonalnie sortuje od najbliższej.
+export const withDistance = (pharmacies: Pharmacy[], loc: LatLng | null, sort = false): Pharmacy[] => {
+  if (!loc) return pharmacies;
+  const mapped = pharmacies.map(p =>
+    p.latitude != null && p.longitude != null
+      ? { ...p, distance: haversineKm(loc, { lat: p.latitude, lng: p.longitude }) }
+      : p,
+  );
+  return sort ? mapped.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)) : mapped;
+};
 
 export interface StatusMeta {
   dot: string;
