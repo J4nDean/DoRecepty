@@ -11,6 +11,7 @@ import PharmaciesPage from './pages/PharmaciesPage';
 import PrescriptionDetailPage from './pages/PrescriptionDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
+import AdminNearbyPage from './pages/AdminNearbyPage';
 import './styles.css';
 
 const protect = (el: React.ReactNode) => <ProtectedRoute patientOnly>{el}</ProtectedRoute>;
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/apteki"             element={protect(<PharmaciesPage />)} />
           <Route path="/profil"             element={protect(<ProfilePage />)} />
           <Route path="/admin"              element={<AdminRoute><AdminPage /></AdminRoute>} />
+          <Route path="/admin/apteki"       element={<AdminRoute><AdminNearbyPage /></AdminRoute>} />
           <Route path="*"                   element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

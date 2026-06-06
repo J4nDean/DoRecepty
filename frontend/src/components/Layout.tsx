@@ -13,6 +13,7 @@ const PATIENT_NAV = [
 
 const ADMIN_NAV = [
   { to: '/admin', icon: Shield, label: 'Panel administratora', short: 'Admin' },
+  { to: '/admin/apteki', icon: MapPin, label: 'Najbliższe apteki', short: 'Apteki' },
 ];
 
 const navFor = (user: User | null) =>
@@ -42,6 +43,7 @@ const Sidebar = () => {
           <NavLink
             key={to}
             to={to}
+            end
             className={({ isActive }) =>
               `flex items-center gap-4 px-3 py-3 rounded-md text-[15px] transition-colors ${
                 isActive
@@ -146,6 +148,7 @@ const BottomNav = () => {
         <NavLink
           key={to}
           to={to}
+          end
           className={({ isActive }) =>
             `flex-1 flex flex-col items-center justify-center py-2.5 gap-1 text-[10px] font-medium transition-colors ${
               isActive ? 'text-brand-700' : 'text-neutral-400'

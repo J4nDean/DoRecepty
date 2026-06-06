@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import {
   Plus, Pencil, Search, Building2, X, MapPin, CheckCircle2, AlertCircle,
-  ClipboardList, FileText, ChevronDown, Crosshair,
+  ClipboardList, FileText, ChevronDown, Crosshair, Users,
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { Spinner, EmptyState } from '../components/ui';
@@ -28,16 +28,28 @@ const Field = ({ label, children }: { label: string; children: React.ReactNode }
   <div><label className={labelClass}>{label}</label>{children}</div>
 );
 
-interface StatCardProps { icon: React.ReactNode; label: string; value: number | string; color: string }
-const StatCard = ({ icon, label, value, color }: StatCardProps) => (
-  <div className="bg-white border border-neutral-200 rounded-xl p-4 flex items-center gap-4">
-    <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${color}`}>{icon}</div>
-    <div>
-      <p className="text-xs text-neutral-500 font-medium">{label}</p>
-      <p className="text-2xl font-bold text-neutral-900">{value}</p>
-    </div>
-  </div>
-);
+interface StatCardProps {
+  icon: React.ReactNode; label: string; value: number | string; color: string;
+  onClick?: () => void; active?: boolean;
+}
+const StatCard = ({ icon, label, value, color, onClick, active }: StatCardProps) => {
+  const inner = (
+    <>
+      <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${color}`}>{icon}</div>
+      <div className="text-left">
+        <p className="text-xs text-neutral-500 font-medium">{label}</p>
+        <p className="text-2xl font-bold text-neutral-900">{value}</p>
+      </div>
+    </>
+  );
+  const base = `bg-white border rounded-xl p-4 flex items-center gap-4 ${active ? 'border-amber-400 ring-2 ring-amber-200' : 'border-neutral-200'}`;
+  if (!onClick) return <div className={base}>{inner}</div>;
+  return (
+    <button type="button" onClick={onClick} aria-pressed={active} className={`${base} w-full cursor-pointer hover:border-neutral-300 transition-colors`}>
+      {inner}
+    </button>
+  );
+};
 
 const STATUSES = [
   'AKTYWNA', 'NIEZREALIZOWANA', 'CZĘŚCIOWO_ZREALIZOWANA',
@@ -76,6 +88,7 @@ const PharmacyTab = () => {
   const [pharmacies, setPharmacies] = useState<ApiPharmacy[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [query, setQuery] = useState('');
+  const [showNoCoordsOnly, setShowNoCoordsOnly] = useState(false);
   const [form, setForm] = useState<PharmacyInput>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -122,9 +135,12 @@ const PharmacyTab = () => {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return pharmacies;
-    return pharmacies.filter(p => [p.name, p.city, p.address].some(v => v?.toLowerCase().includes(q)));
-  }, [pharmacies, query]);
+    return pharmacies.filter(p => {
+      if (showNoCoordsOnly && p.latitude != null && p.longitude != null) return false;
+      if (q && ![p.name, p.city, p.address].some(v => v?.toLowerCase().includes(q))) return false;
+      return true;
+    });
+  }, [pharmacies, query, showNoCoordsOnly]);
 
   return (
     <div className="space-y-6">
@@ -132,7 +148,14 @@ const PharmacyTab = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard icon={<Building2 size={20} className="text-brand-600" />} label="Łącznie aptek" value={stats.total} color="bg-brand-50" />
           <StatCard icon={<CheckCircle2 size={20} className="text-emerald-600" />} label="Aktywne" value={stats.active} color="bg-emerald-50" />
-          <StatCard icon={<MapPin size={20} className="text-amber-600" />} label="Brak współrzędnych" value={stats.noCoords} color="bg-amber-50" />
+          <StatCard
+            icon={<MapPin size={20} className="text-amber-600" />}
+            label="Brak współrzędnych"
+            value={stats.noCoords}
+            color="bg-amber-50"
+            onClick={() => setShowNoCoordsOnly(v => !v)}
+            active={showNoCoordsOnly}
+          />
         </div>
       )}
 
@@ -183,10 +206,23 @@ const PharmacyTab = () => {
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input className={inputClass + ' pl-9'} value={query} onChange={e => setQuery(e.target.value)} placeholder="Szukaj apteki..." />
           </div>
+          {showNoCoordsOnly && (
+            <button
+              type="button"
+              onClick={() => setShowNoCoordsOnly(false)}
+              className="self-start flex items-center gap-1.5 mb-3 -mt-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 text-[11px] font-semibold text-amber-700 hover:bg-amber-100 transition-colors"
+            >
+              <MapPin size={12} /> Tylko bez współrzędnych <X size={12} />
+            </button>
+          )}
           {isLoading ? (
             <div className="flex justify-center py-12"><Spinner size="lg" /></div>
           ) : filtered.length === 0 ? (
-            <EmptyState title="Brak aptek" description="Dodaj pierwszą aptekę za pomocą formularza obok." icon={<Building2 size={40} />} />
+            <EmptyState
+              title={showNoCoordsOnly ? 'Wszystkie apteki mają współrzędne' : 'Brak aptek'}
+              description={showNoCoordsOnly ? 'Żadna apteka nie wymaga uzupełnienia lokalizacji.' : 'Dodaj pierwszą aptekę za pomocą formularza obok.'}
+              icon={<Building2 size={40} />}
+            />
           ) : (
             <div className="space-y-2 overflow-y-auto max-h-[70vh] pr-1">
               {filtered.map(p => (
@@ -378,10 +414,11 @@ const PrescriptionsTab = () => {
   return (
     <div className="space-y-6">
       {!isLoading && (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={<FileText size={20} className="text-brand-600" />} label="Łącznie recept" value={stats.total} color="bg-brand-50" />
           <StatCard icon={<CheckCircle2 size={20} className="text-emerald-600" />} label="Aktywne" value={stats.active} color="bg-emerald-50" />
           <StatCard icon={<ClipboardList size={20} className="text-neutral-500" />} label="Archiwalne / zakończone" value={stats.archived} color="bg-neutral-100" />
+          <StatCard icon={<Users size={20} className="text-violet-600" />} label="Użytkownicy" value={users.length} color="bg-violet-50" />
         </div>
       )}
 
@@ -513,7 +550,7 @@ const PrescriptionsTab = () => {
 
 // ─── Nearby pharmacies tab ──────────────────────────────────────────────────
 
-const NearbyTab = () => {
+export const NearbyTab = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [userLocation, setUserLocation] = useState<LatLng | null>(null);
@@ -634,7 +671,7 @@ const NearbyTab = () => {
 
 // ─── Main page ────────────────────────────────────────────────────────────────
 
-type Tab = 'pharmacies' | 'prescriptions' | 'nearby';
+type Tab = 'pharmacies' | 'prescriptions';
 
 const AdminPage = () => {
   const [tab, setTab] = useState<Tab>('pharmacies');
@@ -655,15 +692,9 @@ const AdminPage = () => {
           >
             <FileText size={16} /> Recepty
           </button>
-          <button
-            onClick={() => setTab('nearby')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === 'nearby' ? 'bg-white shadow-sm text-neutral-900' : 'text-neutral-500 hover:text-neutral-700'}`}
-          >
-            <MapPin size={16} /> Najbliższe apteki
-          </button>
         </div>
 
-        {tab === 'pharmacies' ? <PharmacyTab /> : tab === 'prescriptions' ? <PrescriptionsTab /> : <NearbyTab />}
+        {tab === 'pharmacies' ? <PharmacyTab /> : <PrescriptionsTab />}
       </div>
     </AppLayout>
   );
