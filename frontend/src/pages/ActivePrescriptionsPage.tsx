@@ -36,7 +36,7 @@ const SortButton = ({ active, onClick, icon, label }: { active: boolean; onClick
 );
 
 const ActivePrescriptionsPage = () => {
-  const { metadata, byCategory } = useMetadata();
+  const { metadata, byCategory, loaded } = useMetadata();
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sortBy, setSortBy] = useState<SortBy>('newest');
@@ -47,12 +47,16 @@ const ActivePrescriptionsPage = () => {
   );
 
   useEffect(() => {
-    if (activeCodes.length === 0) return;
+    if (!loaded) return;
+    
+    // Fallback in case metadata fails to load
+    const validCodes = activeCodes.length > 0 ? activeCodes : ['AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA', 'NIEZREALIZOWANA'];
+    
     fetchPrescriptions()
-      .then(data => setPrescriptions(data.filter(p => activeCodes.includes(p.status))))
+      .then(data => setPrescriptions(data.filter(p => validCodes.includes(p.status))))
       .catch(() => setPrescriptions([]))
       .finally(() => setIsLoading(false));
-  }, [activeCodes]);
+  }, [loaded, activeCodes]);
 
   const sorted = useMemo(() => {
     const list = [...prescriptions];
@@ -61,7 +65,7 @@ const ActivePrescriptionsPage = () => {
       : list.sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime());
   }, [prescriptions, sortBy]);
 
-  const active = sorted.filter(p => p.status === 'AKTYWNA');
+  const active = sorted.filter(p => p.status === 'AKTYWNA' || p.status === 'NIEZREALIZOWANA');
   const partial = sorted.filter(p => p.status === 'CZĘŚCIOWO_ZREALIZOWANA');
 
   return (

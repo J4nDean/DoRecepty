@@ -9,7 +9,7 @@ import { fetchPrescriptions } from '../api';
 import type { Prescription } from '../types';
 
 const ArchivedPrescriptionsPage = () => {
-  const { metadata, byCategory } = useMetadata();
+  const { metadata, byCategory, loaded } = useMetadata();
 
   const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -20,12 +20,16 @@ const ArchivedPrescriptionsPage = () => {
   const archiveCodes = useMemo(() => archiveOptions.map(o => o.code), [archiveOptions]);
 
   useEffect(() => {
-    if (archiveCodes.length === 0) return;
+    if (!loaded) return;
+
+    // Fallback in case metadata fails to load
+    const validCodes = archiveCodes.length > 0 ? archiveCodes : ['ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA'];
+
     fetchPrescriptions()
-      .then(data => setPrescriptions(data.filter(p => archiveCodes.includes(p.status))))
+      .then(data => setPrescriptions(data.filter(p => validCodes.includes(p.status))))
       .catch(() => setPrescriptions([]))
       .finally(() => setIsLoading(false));
-  }, [archiveCodes]);
+  }, [loaded, archiveCodes]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
