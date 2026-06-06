@@ -11,9 +11,11 @@ import { Spinner } from '../components/ui';
 import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation } from '../api';
 import {
   formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
-  haversineKm, distanceLabel, statusMetaOf, type LatLng,
+  haversineKm, distanceLabel, statusMetaOf,
+  drugFullName, drugFormLine, packageQuantityLabel, documentOid, type LatLng,
 } from '../utils';
 import { useMetadata } from '../MetadataContext';
+import { useAuth } from '../AuthContext';
 import type { Prescription, DrugRealizationStatus, Pharmacy, MedicationAvailabilityStatus } from '../types';
 
 const realizationStyle: Record<DrugRealizationStatus, { cls: string; icon: React.ReactNode }> = {
@@ -151,6 +153,7 @@ const PrescriptionDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { metadata, labelOf } = useMetadata();
+  const { user } = useAuth();
 
   const [prescription, setPrescription] = useState<Prescription | null>(null);
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
@@ -226,8 +229,8 @@ const PrescriptionDetailPage = () => {
           }`}>
             <div className="p-4 sm:p-8 border-b border-dashed border-neutral-200 bg-neutral-50/20 flex flex-col items-center">
               <BarcodeMock number={prescription.number} />
-              <p className="text-center text-[9px] sm:text-[11px] text-neutral-500 font-mono font-bold mt-2 tracking-[0.2em] sm:tracking-[0.4em] uppercase opacity-70">
-                ID-DOCUMENT: {prescription.number}
+              <p className="text-center text-[8px] sm:text-[10px] text-neutral-500 font-mono font-bold mt-2 tracking-[0.15em] sm:tracking-[0.25em] uppercase opacity-70 break-all">
+                ID: {documentOid(prescription.number)}
               </p>
             </div>
 
@@ -260,11 +263,20 @@ const PrescriptionDetailPage = () => {
                 </div>
               </div>
 
-              <div className="pt-6 sm:pt-8 border-t border-neutral-100">
-                <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
-                <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">{prescription.doctorName}</p>
-                <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">NPWZ: {prescription.doctorNpwz || '—'}</p>
-                <p className="text-[9px] sm:text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON: {prescription.clinicRegon || '—'}</p>
+              <div className="pt-6 sm:pt-8 border-t border-neutral-100 grid gap-6 sm:grid-cols-2">
+                <div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Pacjent</p>
+                  <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">
+                    {user ? `${user.firstName} ${user.lastName}` : '—'}
+                  </p>
+                  <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">PESEL: {prescription.patientPesel || '—'}</p>
+                </div>
+                <div className="sm:border-l sm:border-neutral-100 sm:pl-6">
+                  <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1.5 sm:mb-2.5">Wystawca</p>
+                  <p className="text-sm sm:text-base font-black text-neutral-900 leading-tight">{prescription.doctorName}</p>
+                  <p className="text-[10px] sm:text-xs text-neutral-500 font-bold mt-1">PWZ lekarza: {prescription.doctorNpwz || '—'}</p>
+                  <p className="text-[9px] sm:text-[10px] text-neutral-400 font-medium uppercase mt-0.5">REGON podmiotu: {prescription.clinicRegon || '—'}</p>
+                </div>
               </div>
             </div>
           </section>
@@ -286,14 +298,27 @@ const PrescriptionDetailPage = () => {
                   <div className="p-5 sm:p-8 flex flex-col sm:flex-row justify-between gap-6 sm:gap-8">
                     <div className="min-w-0 space-y-4 flex-1">
                       <div>
-                        <h3 className="text-xl sm:text-2xl font-black text-neutral-900 leading-tight uppercase tracking-tight">{drug.name}</h3>
-                        <p className="text-xs sm:text-sm text-neutral-500 mt-1 sm:mt-1.5 font-bold italic">Okres realizacji: od {formatDateShort(prescription.issueDate)}</p>
+                        <h3 className="text-xl sm:text-2xl font-black text-neutral-900 leading-tight uppercase tracking-tight">{drugFullName(drug)}</h3>
+                        {drug.commonName && (
+                          <p className="text-[11px] sm:text-xs text-neutral-500 mt-1 font-bold italic">{drug.commonName}</p>
+                        )}
+                        {drugFormLine(drug) && (
+                          <p className="text-[11px] sm:text-xs text-neutral-400 font-semibold uppercase tracking-wide mt-0.5">{drugFormLine(drug)}</p>
+                        )}
+                        <p className="text-xs sm:text-sm text-neutral-500 mt-1.5 sm:mt-2 font-bold">
+                          Data realizacji: od {formatDateShort(drug.realizationDateFrom ?? prescription.issueDate)}
+                        </p>
                       </div>
                       <div className="space-y-2">
-                        <p className="text-sm sm:text-base text-neutral-700 font-black">Ilość: 1 op. po {drug.quantity} {drug.unit}</p>
+                        <div className="flex flex-wrap items-center gap-x-5 gap-y-1">
+                          <p className="text-sm sm:text-base text-neutral-700 font-black">{packageQuantityLabel(drug)}</p>
+                          <p className="text-sm sm:text-base font-black text-neutral-700">
+                            Odpłatność: <span className="text-brand-700">{drug.refundLevel}</span>
+                          </p>
+                        </div>
                         <div className="inline-block bg-brand-50 border border-brand-100 px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-sm sm:text-base text-brand-900 font-black shadow-sm max-w-full">
-                          <span className="opacity-50 text-[10px] uppercase block mb-0.5">Dawkowanie:</span>
-                          {drug.dosage}
+                          <span className="opacity-50 text-[10px] uppercase block mb-0.5">Dawkowanie (D.S.):</span>
+                          {drug.dosage || 'wg zaleceń lekarza'}
                         </div>
                       </div>
                     </div>
@@ -334,7 +359,7 @@ const PrescriptionDetailPage = () => {
                 className="mt-4 w-full inline-flex items-center justify-center gap-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-black uppercase tracking-wide text-sm sm:text-base px-5 py-3.5 rounded-lg shadow-sm transition-colors"
               >
                 <Navigation size={18} className="shrink-0" />
-                Nawiguj do: {selectedPharmacy.name}
+                Nawiguj
               </a>
             ) : (
               <p className="mt-4 w-full flex items-center justify-center gap-2 bg-neutral-50 border border-dashed border-neutral-200 text-neutral-400 font-bold text-sm px-5 py-3.5 rounded-lg text-center">

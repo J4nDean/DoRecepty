@@ -14,7 +14,7 @@ FROM (VALUES
 ) AS v(package_key, access_code, issue_off, exp_off, doctor_npwz, clinic_regon, status);
 
 INSERT INTO prescription_item (prescription_id, prescription_oid, oid_prefix, position_in_package, medication_id, quantity, dosage_instructions, realization_date_from, refund_level, status) VALUES
-  ((SELECT id FROM prescription WHERE access_code='1001'), 'OID.1001.01', 'PL.P1.2026', 1, (SELECT id FROM medication WHERE name='Metformina Aurovitas'), 2, '2 x 1 tabl. do posilku', NULL, '100%', 'ACTIVE'),
+  ((SELECT id FROM prescription WHERE access_code='1001'), 'OID.1001.01', 'PL.P1.2026', 1, (SELECT id FROM medication WHERE name='Metformina Aurovitas'), 2, '2 x 1 tabl. do posilku', CURRENT_DATE - 3, '100%', 'ACTIVE'),
   ((SELECT id FROM prescription WHERE access_code='1002'), 'OID.1002.01', 'PL.P1.2026', 1, (SELECT id FROM medication WHERE name='Concor 10'), 1, '1 x 1 tabl. rano', NULL, 'ryczalt', 'ACTIVE'),
   ((SELECT id FROM prescription WHERE access_code='1002'), 'OID.1002.02', 'PL.P1.2026', 2, (SELECT id FROM medication WHERE name='Tritace 2,5'), 1, '1 x 1 tabl. rano', NULL, '30%', 'ACTIVE'),
   ((SELECT id FROM prescription WHERE access_code='1003'), 'OID.1003.01', 'PL.P1.2026', 1, (SELECT id FROM medication WHERE name='Allertec'), 1, '1 x 1 tabl. wieczorem', NULL, NULL, 'ACTIVE'),

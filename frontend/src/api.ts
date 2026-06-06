@@ -79,13 +79,20 @@ const ITEM_STATUS_MAP: Record<string, DrugRealizationStatus> = {
   CANCELLED: 'NIEZREALIZOWANY',
 };
 
+// Normalizacja poziomu odpłatności do formy widocznej na recepcie P1.
+// Brak wartości (leki OTC / pełnopłatne) → "100%".
+const normalizeRefundLevel = (level: string | null): string => {
+  if (!level) return '100%';
+  return level.toLowerCase() === 'ryczalt' ? 'ryczałt' : level;
+};
+
 const mapPrescription = (p: ApiPrescription): Prescription => ({
   id: String(p.id),
   number: p.accessCode,
   issueDate: p.issueDate ?? '',
   expiryDate: p.expirationDate ?? '',
   status: STATUS_MAP[p.status] ?? 'ARCHIWALNA',
-  doctorName: 'Lekarz prowadzący',
+  doctorName: 'lek. (uprawniony do wystawiania recept)',
   doctorSpecialty: 'Medycyna ogólna',
   doctorNpwz: p.doctorNpwz ?? '',
   clinicRegon: p.clinicRegon ?? '',
@@ -93,9 +100,15 @@ const mapPrescription = (p: ApiPrescription): Prescription => ({
   drugs: (p.items ?? []).map(item => ({
     id: String(item.id),
     name: item.medication.name,
-    dosage: [item.medication.strength, item.dosageInstructions].filter(Boolean).join(' · '),
+    commonName: item.medication.commonName ?? undefined,
+    strength: item.medication.strength ?? undefined,
+    form: item.medication.pharmaceuticalForm ?? undefined,
+    packageSize: item.medication.packageSize ?? undefined,
+    dosage: item.dosageInstructions ?? '',
     quantity: item.quantity ?? 1,
     unit: 'op.',
+    refundLevel: normalizeRefundLevel(item.refundLevel),
+    realizationDateFrom: item.realizationDateFrom ?? undefined,
     realizationStatus: ITEM_STATUS_MAP[item.status] ?? 'NIEZREALIZOWANY',
     oid: item.prescriptionOid ?? '',
   })),

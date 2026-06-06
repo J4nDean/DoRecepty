@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import pl.j4ndean.finderbackend.controller.AccountController.ChangePasswordRequest;
+import pl.j4ndean.finderbackend.dto.ChangePasswordRequest;
 import pl.j4ndean.finderbackend.model.Pharmacy;
 import pl.j4ndean.finderbackend.model.User;
 import pl.j4ndean.finderbackend.model.UserFavoritePharmacy;
