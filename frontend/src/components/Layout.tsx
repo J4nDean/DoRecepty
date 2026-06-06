@@ -121,8 +121,8 @@ const Header = ({ title, subtitle }: { title: string; subtitle?: string }) => {
       {user && (
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <div className="flex flex-col items-end leading-none">
-            <span className="text-[8px] text-neutral-400 font-black uppercase tracking-widest mb-0.5">PESEL</span>
-            <span className={`font-mono text-sm sm:text-base font-black text-neutral-900 tracking-tight sm:tracking-wider whitespace-nowrap transition-all duration-300 leading-none ${!showPesel ? 'blur-[5px] select-none opacity-40' : 'blur-0'}`}>
+            <span className="text-[9px] sm:text-[10px] text-neutral-400 font-black uppercase tracking-widest mb-1">PESEL</span>
+            <span className={`font-mono text-lg sm:text-2xl font-black text-neutral-900 tracking-tight sm:tracking-wide whitespace-nowrap transition-all duration-300 leading-none tabular-nums ${!showPesel ? 'blur-[6px] select-none opacity-40' : 'blur-0'}`}>
               {user.pesel}
             </span>
           </div>
