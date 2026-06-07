@@ -14,7 +14,8 @@ import AdminPage from './pages/AdminPage';
 import AdminNearbyPage from './pages/AdminNearbyPage';
 import './styles.css';
 
-const protect = (el: React.ReactNode) => <ProtectedRoute patientOnly>{el}</ProtectedRoute>;
+const protect      = (el: React.ReactNode) => <ProtectedRoute patientOnly>{el}</ProtectedRoute>;
+const protectAdmin = (el: React.ReactNode) => <AdminRoute>{el}</AdminRoute>;
 
 const App = () => (
   <AuthProvider>
@@ -29,8 +30,8 @@ const App = () => (
           <Route path="/recepty/:id"        element={protect(<PrescriptionDetailPage />)} />
           <Route path="/apteki"             element={protect(<PharmaciesPage />)} />
           <Route path="/profil"             element={protect(<ProfilePage />)} />
-          <Route path="/admin"              element={<AdminRoute><AdminPage /></AdminRoute>} />
-          <Route path="/admin/apteki"       element={<AdminRoute><AdminNearbyPage /></AdminRoute>} />
+          <Route path="/admin"              element={protectAdmin(<AdminPage />)} />
+          <Route path="/admin/apteki"       element={protectAdmin(<AdminNearbyPage />)} />
           <Route path="*"                   element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>
