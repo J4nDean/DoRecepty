@@ -108,9 +108,7 @@ public class AdminController {
 
     @GetMapping("/users")
     public List<AdminUserDto> getUsers() {
-        return userRepository.findAll().stream()
-            .map(u -> new AdminUserDto(u.getId(), u.getFirstName(), u.getLastName(), u.getEmail(), u.getPesel()))
-            .toList();
+        return userRepository.findAll().stream().map(AdminUserDto::from).toList();
     }
 
     @GetMapping("/medications")
@@ -118,8 +116,6 @@ public class AdminController {
         var meds = q.isBlank()
             ? medicationRepository.findAll().stream().limit(30).toList()
             : medicationRepository.findTop30ByNameContainingIgnoreCaseOrderByNameAsc(q);
-        return meds.stream()
-            .map(m -> new AdminMedicationDto(m.getId(), m.getName(), m.getStrength(), m.getPharmaceuticalForm()))
-            .toList();
+        return meds.stream().map(AdminMedicationDto::from).toList();
     }
 }

@@ -58,26 +58,19 @@ export const changePassword = (userId: string, currentPassword: string, newPassw
 export const fetchMetadata = (): Promise<AppMetadata> =>
   api.get<AppMetadata>('/prescriptions/metadata').then(r => r.data);
 
-const STATUS_MAP: Record<string, PrescriptionStatus> = {
-  ACTIVE: 'AKTYWNA',
-  REALIZED: 'ZREALIZOWANA',
-  PARTIALLY_REALIZED: 'CZĘŚCIOWO_ZREALIZOWANA',
-  CANCELLED: 'ANULOWANA',
-  ARCHIVED: 'ARCHIWALNA',
-  AKTYWNA: 'AKTYWNA',
-  ZREALIZOWANA: 'ZREALIZOWANA',
-  CZĘŚCIOWO_ZREALIZOWANA: 'CZĘŚCIOWO_ZREALIZOWANA',
-  NIEZREALIZOWANA: 'NIEZREALIZOWANA',
-  ARCHIWALNA: 'ARCHIWALNA',
-  ANULOWANA: 'ANULOWANA',
-};
+// Backend zwraca już kanoniczne polskie kody (PrescriptionDto / DrugRealizationStatus).
+// Te zbiory służą wyłącznie jako guard na nieoczekiwane wartości.
+const PRESCRIPTION_STATUSES: readonly PrescriptionStatus[] = [
+  'AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA', 'NIEZREALIZOWANA', 'ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA',
+];
+const ITEM_STATUSES: readonly DrugRealizationStatus[] = [
+  'NIEZREALIZOWANY', 'ZREALIZOWANY', 'CZĘŚCIOWO',
+];
 
-const ITEM_STATUS_MAP: Record<string, DrugRealizationStatus> = {
-  ACTIVE: 'NIEZREALIZOWANY',
-  REALIZED: 'ZREALIZOWANY',
-  PARTIALLY_REALIZED: 'CZĘŚCIOWO',
-  CANCELLED: 'NIEZREALIZOWANY',
-};
+const asPrescriptionStatus = (s: string): PrescriptionStatus =>
+  (PRESCRIPTION_STATUSES as readonly string[]).includes(s) ? (s as PrescriptionStatus) : 'ARCHIWALNA';
+const asItemStatus = (s: string): DrugRealizationStatus =>
+  (ITEM_STATUSES as readonly string[]).includes(s) ? (s as DrugRealizationStatus) : 'NIEZREALIZOWANY';
 
 // Normalizacja poziomu odpłatności do formy widocznej na recepcie P1.
 // Brak wartości (leki OTC / pełnopłatne) → "100%".
@@ -91,7 +84,7 @@ const mapPrescription = (p: ApiPrescription): Prescription => ({
   number: p.accessCode,
   issueDate: p.issueDate ?? '',
   expiryDate: p.expirationDate ?? '',
-  status: STATUS_MAP[p.status] ?? 'ARCHIWALNA',
+  status: asPrescriptionStatus(p.status),
   doctorName: 'lek. (uprawniony do wystawiania recept)',
   doctorSpecialty: 'Medycyna ogólna',
   doctorNpwz: p.doctorNpwz ?? '',
@@ -109,7 +102,7 @@ const mapPrescription = (p: ApiPrescription): Prescription => ({
     unit: 'op.',
     refundLevel: normalizeRefundLevel(item.refundLevel),
     realizationDateFrom: item.realizationDateFrom ?? undefined,
-    realizationStatus: ITEM_STATUS_MAP[item.status] ?? 'NIEZREALIZOWANY',
+    realizationStatus: asItemStatus(item.status),
     oid: item.prescriptionOid ?? '',
   })),
 });
@@ -206,16 +199,16 @@ export const searchPharmacies = async (query: string, page = 0, size = 1000): Pr
   }
 };
 
-export const fetchNearbyByLocation = async (
-  lat: number, lng: number, radiusKm = 10, limit = 20,
-): Promise<Pharmacy[]> => {
-  const res = await api.get<ApiPharmacy[]>('/pharmacies/nearby', { params: { lat, lng, radiusKm, limit } });
-  return res.data.map(mapPharmacy);
-};
-
 export const fetchPharmaciesInBounds = async (bounds: Bounds): Promise<Pharmacy[]> => {
   const res = await api.get<ApiPharmacy[]>('/pharmacies/in-bounds', { params: bounds });
   return res.data.map(mapPharmacy);
+};
+
+// Przybliżony prostokąt ~radiusKm wokół punktu (1° lat ≈ 111 km).
+export const approxBounds = (lat: number, lng: number, radiusKm = 12): Bounds => {
+  const latD = radiusKm / 111.0;
+  const lngD = radiusKm / (111.0 * Math.cos((lat * Math.PI) / 180));
+  return { north: lat + latD, south: lat - latD, east: lng + lngD, west: lng - lngD };
 };
 
 export const updatePharmacyLocation = (

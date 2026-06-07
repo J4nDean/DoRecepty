@@ -1,5 +1,6 @@
 package pl.j4ndean.finderbackend.dto;
 
+import pl.j4ndean.finderbackend.model.DrugRealizationStatus;
 import pl.j4ndean.finderbackend.model.Prescription;
 import pl.j4ndean.finderbackend.model.PrescriptionItem;
 import pl.j4ndean.finderbackend.model.PrescriptionStatus;
@@ -21,7 +22,8 @@ public record PrescriptionDto(
             var m = i.getMedication();
             return new ItemDto(i.getId(), i.getPrescriptionOid(), i.getPositionInPackage(),
                 new MedicationDto(m.getId(), m.getName(), m.getCommonName(), m.getStrength(), m.getPharmaceuticalForm(), m.getPackageSize()),
-                i.getQuantity(), i.getDosageInstructions(), i.getRealizationDateFrom(), i.getRefundLevel(), i.getStatus());
+                i.getQuantity(), i.getDosageInstructions(), i.getRealizationDateFrom(), i.getRefundLevel(),
+                DrugRealizationStatus.from(i.getStatus()).name());
         }).toList();
         String effectiveStatus = PrescriptionStatus.from(p.getStatus()).effective(p.getExpirationDate()).name();
         return new PrescriptionDto(p.getId(), p.getAccessCode(), p.getIssueDate(), p.getExpirationDate(), p.getDoctorNpwz(), p.getClinicRegon(), effectiveStatus, patient, itemDtos);

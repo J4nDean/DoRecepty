@@ -13,9 +13,10 @@ import {
   fetchAdminPharmacies, createPharmacy, updatePharmacy, type PharmacyInput,
   fetchAdminPrescriptions, createAdminPrescription, updateAdminPrescriptionStatus,
   fetchAdminUsers, searchAdminMedications,
-  searchPharmacies, fetchNearbyByLocation, getUserLocation,
+  searchPharmacies, fetchPharmaciesInBounds, approxBounds, getUserLocation,
   type AdminPrescription, type AdminUser, type AdminMedication,
 } from '../api';
+import { useMetadata } from '../MetadataContext';
 import { withDistance, type LatLng } from '../utils';
 import type { ApiPharmacy, Pharmacy } from '../types';
 
@@ -49,11 +50,6 @@ const StatCard = ({ icon, label, value, color, onClick, active }: StatCardProps)
     </button>
   );
 };
-
-const STATUSES = [
-  'AKTYWNA', 'NIEZREALIZOWANA', 'CZĘŚCIOWO_ZREALIZOWANA',
-  'ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA',
-];
 
 const STATUS_COLORS: Record<string, string> = {
   AKTYWNA: 'bg-emerald-100 text-emerald-700',
@@ -325,6 +321,8 @@ const MedSearch = ({ onSelect }: { onSelect: (m: AdminMedication) => void }) => 
 };
 
 const PrescriptionsTab = () => {
+  const { metadata, byCategory } = useMetadata();
+  const statusOptions = metadata.prescriptionStatuses;
   const [prescriptions, setPrescriptions] = useState<AdminPrescription[]>([]);
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -357,11 +355,15 @@ const PrescriptionsTab = () => {
 
   useEffect(() => { load(); }, []);
 
-  const stats = useMemo(() => ({
-    total: prescriptions.length,
-    active: prescriptions.filter(p => ['AKTYWNA', 'NIEZREALIZOWANA', 'CZĘŚCIOWO_ZREALIZOWANA'].includes(p.status)).length,
-    archived: prescriptions.filter(p => ['ARCHIWALNA', 'ZREALIZOWANA', 'ANULOWANA'].includes(p.status)).length,
-  }), [prescriptions]);
+  const stats = useMemo(() => {
+    const codesOf = (cat: string) => new Set(byCategory(metadata.prescriptionStatuses, cat).map(o => o.code));
+    const active = codesOf('ACTIVE'), archived = codesOf('ARCHIVED');
+    return {
+      total: prescriptions.length,
+      active: prescriptions.filter(p => active.has(p.status)).length,
+      archived: prescriptions.filter(p => archived.has(p.status)).length,
+    };
+  }, [prescriptions, metadata, byCategory]);
 
   const addItem = () => setItems(prev => [...prev, { medicationId: 0, medicationName: '', quantity: 1, dosageInstructions: '' }]);
   const removeItem = (i: number) => setItems(prev => prev.filter((_, idx) => idx !== i));
@@ -446,7 +448,7 @@ const PrescriptionsTab = () => {
             </Field>
             <Field label="Status">
               <select className={inputClass} value={status} onChange={e => setStatus(e.target.value)}>
-                {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                {statusOptions.map(o => <option key={o.code} value={o.code}>{o.label}</option>)}
               </select>
             </Field>
           </div>
@@ -522,7 +524,7 @@ const PrescriptionsTab = () => {
                       {editingStatusId === p.id ? (
                         <div className="flex items-center gap-1">
                           <select className="h-8 px-2 text-xs border border-neutral-200 rounded-lg bg-white" value={editingStatus} onChange={e => setEditingStatus(e.target.value)}>
-                            {STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
+                            {statusOptions.map(o => <option key={o.code} value={o.code}>{o.label}</option>)}
                           </select>
                           <button onClick={() => saveStatus(p.id)} className="h-8 px-2 bg-brand-600 text-white text-xs rounded-lg hover:bg-brand-700 transition-colors">OK</button>
                           <button onClick={() => setEditingStatusId(null)} className="h-8 px-2 text-neutral-500 hover:text-rose-500 transition-colors"><X size={14} /></button>
@@ -565,7 +567,7 @@ export const NearbyTab = () => {
       const pos = await getUserLocation();
       setUserLocation(pos);
       setSearched(true); setSelectedId(null); setIsLoading(true);
-      try { setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 12, 500)); }
+      try { setPharmacies(await fetchPharmaciesInBounds(approxBounds(pos.lat, pos.lng))); }
       finally { setIsLoading(false); }
     } catch {
       setError('Nie udało się pobrać lokalizacji — udziel zgody w przeglądarce lub wyszukaj po mieście.');

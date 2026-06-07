@@ -1,11 +1,10 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { FileCheck, Calendar, Clock } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { Spinner, EmptyState, SectionHeading } from '../components/ui';
 import { CARD_GRID } from '../theme';
-import { useMetadata } from '../MetadataContext';
-import { fetchPrescriptions } from '../api';
+import { usePrescriptions } from '../usePrescriptions';
 import type { Prescription } from '../types';
 
 type SortBy = 'newest' | 'expiring';
@@ -32,27 +31,8 @@ const SortButton = ({ active, onClick, icon, label }: { active: boolean; onClick
 );
 
 const ActivePrescriptionsPage = () => {
-  const { metadata, byCategory, loaded } = useMetadata();
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { prescriptions, isLoading } = usePrescriptions('ACTIVE');
   const [sortBy, setSortBy] = useState<SortBy>('newest');
-
-  const activeCodes = useMemo(
-    () => byCategory(metadata.prescriptionStatuses, 'ACTIVE').map(o => o.code),
-    [metadata, byCategory],
-  );
-
-  useEffect(() => {
-    if (!loaded) return;
-    
-    // Fallback in case metadata fails to load
-    const validCodes = activeCodes.length > 0 ? activeCodes : ['AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA', 'NIEZREALIZOWANA'];
-    
-    fetchPrescriptions()
-      .then(data => setPrescriptions(data.filter(p => validCodes.includes(p.status))))
-      .catch(() => setPrescriptions([]))
-      .finally(() => setIsLoading(false));
-  }, [loaded, activeCodes]);
 
   const sorted = useMemo(() => {
     const list = [...prescriptions];

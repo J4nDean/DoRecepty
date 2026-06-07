@@ -1,36 +1,16 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Archive } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { SearchBar } from '../components/SearchBar';
 import { Spinner, EmptyState, SectionHeading } from '../components/ui';
 import { fieldClass, CARD_GRID } from '../theme';
-import { useMetadata } from '../MetadataContext';
-import { fetchPrescriptions } from '../api';
-import type { Prescription } from '../types';
+import { usePrescriptions } from '../usePrescriptions';
 
 const ArchivedPrescriptionsPage = () => {
-  const { metadata, byCategory, loaded } = useMetadata();
-
-  const [prescriptions, setPrescriptions] = useState<Prescription[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { prescriptions, isLoading, options: archiveOptions } = usePrescriptions('ARCHIVED');
   const [query, setQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-
-  const archiveOptions = useMemo(() => byCategory(metadata.prescriptionStatuses, 'ARCHIVED'), [metadata, byCategory]);
-  const archiveCodes = useMemo(() => archiveOptions.map(o => o.code), [archiveOptions]);
-
-  useEffect(() => {
-    if (!loaded) return;
-
-    // Fallback in case metadata fails to load
-    const validCodes = archiveCodes.length > 0 ? archiveCodes : ['ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA'];
-
-    fetchPrescriptions()
-      .then(data => setPrescriptions(data.filter(p => validCodes.includes(p.status))))
-      .catch(() => setPrescriptions([]))
-      .finally(() => setIsLoading(false));
-  }, [loaded, archiveCodes]);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();

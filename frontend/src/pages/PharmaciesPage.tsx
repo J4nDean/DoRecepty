@@ -6,7 +6,7 @@ import { SearchBar } from '../components/SearchBar';
 import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner, EmptyState } from '../components/ui';
 import {
-  searchPharmacies, fetchPharmaciesInBounds, fetchNearbyByLocation, getUserLocation, reverseGeocode,
+  searchPharmacies, fetchPharmaciesInBounds, approxBounds, getUserLocation, reverseGeocode,
 } from '../api';
 import { useFavoritePharmacies } from '../useFavoritePharmacies';
 import { withDistance, type LatLng } from '../utils';
@@ -39,6 +39,7 @@ const PharmaciesPage = () => {
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
+  const [visiblePharmacies, setVisiblePharmacies] = useState<Pharmacy[]>([]);
 
   const { isFavorite, toggleFavorite, favorites } = useFavoritePharmacies();
   const cardRefs = useRef<Map<string, HTMLElement>>(new Map());
@@ -131,7 +132,7 @@ const PharmaciesPage = () => {
       setSortMode('distance');
       resetForNewSearch(undefined);
       try {
-        setPharmacies(await fetchNearbyByLocation(pos.lat, pos.lng, 12, 500));
+        setPharmacies(await fetchPharmaciesInBounds(approxBounds(pos.lat, pos.lng)));
       } finally {
         setIsLoading(false);
       }
@@ -183,7 +184,7 @@ const PharmaciesPage = () => {
     return list;
   }, [pharmaciesWithDistance, nameFilter, sortMode, showFavoritesOnly, isFavorite]);
 
-  const openCount = listPharmacies.filter(p => p.isOpen).length;
+  const openCount = visiblePharmacies.filter(p => p.isOpen).length;
   const cycleSortMode = () =>
     setSortMode(prev => (prev === 'default' ? 'distance' : prev === 'distance' ? 'name' : 'default'));
 
@@ -255,11 +256,11 @@ const PharmaciesPage = () => {
 
       {locationError && <p className="mb-4 text-xs text-amber-600">{locationError}</p>}
 
-      {searched && !isLoading && listPharmacies.length > 0 && (
+      {searched && !isLoading && visiblePharmacies.length > 0 && (
         <p className="text-xs text-neutral-400 mb-4">
           {searchCity
-            ? `Znaleziono ${listPharmacies.length} aptek w "${searchCity}"`
-            : `Widocznych aptek: ${listPharmacies.length}`}
+            ? `Znaleziono ${visiblePharmacies.length} aptek w "${searchCity}"`
+            : `Widocznych aptek: ${visiblePharmacies.length}`}
           {' '}· {openCount} otwartych
           {sortMode === 'distance' && !userLocation && ' · udostępnij lokalizację dla sortowania po odległości'}
         </p>
@@ -271,6 +272,7 @@ const PharmaciesPage = () => {
           selectedId={selectedId}
           onSelect={handleSelect}
           onLoadInArea={handleLoadInArea}
+          onVisibleChange={setVisiblePharmacies}
           userLocation={userLocation}
           searchCity={mapCenterCity}
           className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
@@ -285,7 +287,7 @@ const PharmaciesPage = () => {
               description="Przesuń mapę na interesujący Cię obszar i kliknij Szukaj w tym obszarze, wpisz miasto lub użyj celownika."
               icon={<MapPin size={40} />}
             />
-          ) : listPharmacies.length === 0 ? (
+          ) : visiblePharmacies.length === 0 ? (
             <EmptyState
               title={showFavoritesOnly ? 'Brak ulubionych aptek' : 'Nie znaleziono aptek'}
               description={
@@ -296,7 +298,7 @@ const PharmaciesPage = () => {
               icon={<MapPin size={40} />}
             />
           ) : (
-            listPharmacies.map(p => (
+            visiblePharmacies.map(p => (
               <PharmacyCard
                 key={p.id}
                 ref={registerCard(p.id)}
