@@ -1,7 +1,5 @@
 package pl.j4ndean.finderbackend.model;
 
-import java.util.Arrays;
-
 public enum DrugRealizationStatus {
     NIEZREALIZOWANY("Niezrealizowany"),
     ZREALIZOWANY("Zrealizowany"),
@@ -14,9 +12,14 @@ public enum DrugRealizationStatus {
     }
 
     public static DrugRealizationStatus from(String code) {
-        return Arrays.stream(values())
-                .filter(s -> s.name().equals(code))
-                .findFirst()
-                .orElse(NIEZREALIZOWANY);
+        if (code == null) return NIEZREALIZOWANY;
+        for (DrugRealizationStatus s : values()) {
+            if (s.name().equals(code)) return s;
+        }
+        return switch (code) {
+            case "REALIZED"           -> ZREALIZOWANY;
+            case "PARTIALLY_REALIZED" -> CZĘŚCIOWO;
+            default                   -> NIEZREALIZOWANY; // ACTIVE, CANCELLED, nieznane
+        };
     }
 }

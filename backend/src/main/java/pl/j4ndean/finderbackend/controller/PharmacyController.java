@@ -24,15 +24,6 @@ public class PharmacyController {
         return pharmacyService.searchPharmacies(query);
     }
 
-    @GetMapping("/nearby")
-    public List<Pharmacy> getNearby(
-            @RequestParam double lat,
-            @RequestParam double lng,
-            @RequestParam(defaultValue = "10") double radiusKm,
-            @RequestParam(defaultValue = "20") int limit) {
-        return pharmacyService.getNearby(lat, lng, radiusKm, limit);
-    }
-
     @GetMapping("/in-bounds")
     public List<Pharmacy> getInBounds(
             @RequestParam double north,
