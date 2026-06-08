@@ -138,7 +138,7 @@ export const fetchPharmaciesForPrescription = async (prescriptionId: string): Pr
       medicationName: m.medicationName,
       isAvailable: m.stockQuantity > 0,
       quantityInStock: m.stockQuantity,
-      status: m.stockQuantity > 5 ? 'DOSTĘPNY' : m.stockQuantity > 0 ? 'CZĘŚCIOWO_DOSTĘPNY' : 'NIEDOSTĘPNY',
+      status: m.stockQuantity > 0 ? 'DOSTĘPNY' : 'NIEDOSTĘPNY',
     })),
   }));
 };

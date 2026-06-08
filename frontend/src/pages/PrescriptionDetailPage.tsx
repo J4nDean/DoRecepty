@@ -27,7 +27,6 @@ const realizationStyle: Record<DrugRealizationStatus, { cls: string; icon: React
 
 const availabilityStyle: Record<MedicationAvailabilityStatus, string> = {
   DOSTĘPNY: 'bg-emerald-50 text-emerald-700',
-  CZĘŚCIOWO_DOSTĘPNY: 'bg-brand-50 text-brand-700',
   NIEDOSTĘPNY: 'bg-rose-50 text-rose-600',
 };
 
