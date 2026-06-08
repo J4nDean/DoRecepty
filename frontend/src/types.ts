@@ -57,7 +57,7 @@ export interface Prescription {
   notes?: string;
 }
 
-export type MedicationAvailabilityStatus = 'DOSTĘPNY' | 'NIEDOSTĘPNY' | 'CZĘŚCIOWO_DOSTĘPNY';
+export type MedicationAvailabilityStatus = 'DOSTĘPNY' | 'NIEDOSTĘPNY';
 
 export interface MedicationAvailability {
   medicationId: string;
