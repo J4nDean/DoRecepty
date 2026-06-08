@@ -29,22 +29,14 @@ export type DrugRealizationStatus = 'ZREALIZOWANY' | 'NIEZREALIZOWANY' | 'CZĘŚ
 export interface Drug {
   id: string;
   name: string;
-  /** Substancja czynna (nazwa międzynarodowa / INN) */
   commonName?: string;
-  /** Moc, np. "2,5 mg" */
   strength?: string;
-  /** Postać farmaceutyczna, np. "Tabletki powlekane" */
   form?: string;
-  /** Wielkość opakowania, np. "28 tabl." */
   packageSize?: string;
-  /** Sposób dawkowania (D.S.), np. "1 x 1 tabl. wieczorem" */
   dosage: string;
-  /** Liczba opakowań */
   quantity: number;
   unit: string;
-  /** Poziom odpłatności, np. "100%", "30%", "ryczałt" */
   refundLevel?: string;
-  /** Data realizacji "od" (jeśli inna niż data wystawienia) */
   realizationDateFrom?: string;
   realizationStatus: DrugRealizationStatus;
   oid?: string;

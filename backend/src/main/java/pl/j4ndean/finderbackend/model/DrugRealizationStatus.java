@@ -19,7 +19,7 @@ public enum DrugRealizationStatus {
         return switch (code) {
             case "REALIZED"           -> ZREALIZOWANY;
             case "PARTIALLY_REALIZED" -> CZĘŚCIOWO;
-            default                   -> NIEZREALIZOWANY; // ACTIVE, CANCELLED, nieznane
+            default                   -> NIEZREALIZOWANY;
         };
     }
 }

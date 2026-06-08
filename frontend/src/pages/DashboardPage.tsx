@@ -18,7 +18,6 @@ interface StatCardProps {
   label: string;
 }
 
-// Wspólny wygląd kafelka skrótu na pulpicie.
 const TILE = 'bg-white border border-neutral-200 rounded-lg p-5 flex items-center gap-4 hover:border-neutral-300 hover:shadow-sm transition-all shadow-sm h-24';
 const TILE_ICON = 'w-12 h-12 bg-brand-600 rounded-lg flex items-center justify-center shrink-0 text-white shadow-sm';
 
@@ -55,7 +54,7 @@ const DashboardPage = () => {
   const recent = [...prescriptions]
     .sort((a, b) => new Date(b.issueDate).getTime() - new Date(a.issueDate).getTime())
     .slice(0, 5);
-    
+
   const activeCount = prescriptions.filter(p => activeCodes.includes(p.status)).length;
   const archivedCount = prescriptions.filter(p => archivedCodes.includes(p.status)).length;
 

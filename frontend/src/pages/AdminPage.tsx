@@ -20,8 +20,6 @@ import { useMetadata } from '../MetadataContext';
 import { withDistance, type LatLng } from '../utils';
 import type { ApiPharmacy, Pharmacy } from '../types';
 
-// ─── Shared helpers ───────────────────────────────────────────────────────────
-
 const inputClass = `${fieldClass()} w-full h-10 px-3`;
 const labelClass = 'block text-xs font-semibold text-neutral-600 mb-1';
 const Field = ({ label, children }: { label: string; children: React.ReactNode }) => (
@@ -61,8 +59,6 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const rand4 = () => Math.floor(1000 + Math.random() * 9000).toString();
-
-// ─── Pharmacy tab ─────────────────────────────────────────────────────────────
 
 const EMPTY_FORM: PharmacyInput = {
   name: '', address: '', city: '', postalCode: '', phone: '',
@@ -249,8 +245,6 @@ const PharmacyTab = () => {
   );
 };
 
-// ─── Prescription tab ─────────────────────────────────────────────────────────
-
 interface PrescriptionItem { medicationId: number; medicationName: string; quantity: number; dosageInstructions: string }
 
 const MedSearch = ({ onSelect }: { onSelect: (m: AdminMedication) => void }) => {
@@ -261,7 +255,6 @@ const MedSearch = ({ onSelect }: { onSelect: (m: AdminMedication) => void }) => 
   const registryLoaded = useRef(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  // Pusty `q` → backend zwraca rejestr leków (pierwsze 30). Niepusty → wyszukiwanie po nazwie.
   const run = (val: string) => {
     clearTimeout(timer.current);
     setLoading(true);
@@ -424,7 +417,6 @@ const PrescriptionsTab = () => {
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Formularz dodawania */}
         <form onSubmit={handleSubmit} className="bg-white border border-neutral-200 rounded-xl p-5 space-y-4 h-fit">
           <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2"><Plus size={18} /> Dodaj receptę</h2>
           {error && <Alert>{error}</Alert>}
@@ -495,7 +487,6 @@ const PrescriptionsTab = () => {
           </button>
         </form>
 
-        {/* Lista recept */}
         <div className="bg-white border border-neutral-200 rounded-xl p-5 flex flex-col min-h-[400px]">
           <div className="relative mb-4">
             <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400" />
@@ -548,8 +539,6 @@ const PrescriptionsTab = () => {
     </div>
   );
 };
-
-// ─── Nearby pharmacies tab ──────────────────────────────────────────────────
 
 export const NearbyTab = () => {
   const [pharmacies, setPharmacies] = useState<Pharmacy[]>([]);
@@ -661,8 +650,6 @@ export const NearbyTab = () => {
     </div>
   );
 };
-
-// ─── Main page ────────────────────────────────────────────────────────────────
 
 type Tab = 'pharmacies' | 'prescriptions';
 

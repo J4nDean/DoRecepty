@@ -47,7 +47,6 @@ export const Alert = ({
   );
 };
 
-// Nagłówek sekcji: kolorowa kropka + tytuł + opcjonalny licznik.
 export const SectionHeading = ({
   dot, label, count, className = '',
 }: { dot: string; label: string; count?: number; className?: string }) => (
@@ -60,7 +59,6 @@ export const SectionHeading = ({
   </div>
 );
 
-// Przycisk pokaż/ukryj treść pola (oko). Pozycjonowany absolutnie wewnątrz `relative` wrappera.
 export const RevealToggle = ({
   shown, onToggle, size = 16,
 }: { shown: boolean; onToggle: () => void; size?: number }) => (
@@ -74,7 +72,6 @@ export const RevealToggle = ({
   </button>
 );
 
-// Pole hasła z wbudowanym przełącznikiem widoczności.
 export const PasswordField = ({
   label, value, onChange,
 }: { label: string; value: string; onChange: (v: string) => void }) => {

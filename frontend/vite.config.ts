@@ -8,7 +8,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      // Manifest is injected automatically into index.html by the plugin
       manifest: {
         name: 'Finder E-Prescription',
         short_name: 'Apteki',
@@ -32,7 +31,6 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Cache the Google Maps API responses and app shell
         globPatterns: ['**/*.{js,css,html,ico,png,svg,webmanifest}'],
         runtimeCaching: [
           {
