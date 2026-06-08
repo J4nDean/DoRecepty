@@ -18,10 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Panel administracyjny — zarządzanie aptekami (WF-11, WF-12) i receptami.
- * Dostęp wyłącznie dla użytkowników z rolą ADMIN (patrz SecurityConfig).
- */
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
@@ -32,8 +28,6 @@ public class AdminController {
     private final PrescriptionItemRepository prescriptionItemRepository;
     private final UserRepository userRepository;
     private final MedicationRepository medicationRepository;
-
-    // ─── Apteki ───────────────────────────────────────────────────────────────
 
     @GetMapping("/pharmacies")
     public List<Pharmacy> getAllPharmacies() {
@@ -49,8 +43,6 @@ public class AdminController {
     public Pharmacy updatePharmacy(@PathVariable Long id, @RequestBody Pharmacy pharmacy) {
         return pharmacyService.updatePharmacy(id, pharmacy);
     }
-
-    // ─── Recepty ──────────────────────────────────────────────────────────────
 
     @GetMapping("/prescriptions")
     @Transactional(readOnly = true)

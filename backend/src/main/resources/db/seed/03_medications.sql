@@ -1,5 +1,3 @@
--- Leki z Rejestru Produktów Leczniczych zgodne ze schematem tabeli MEDICATION.
-
 INSERT INTO medication (gtin, name, common_name, strength, pharmaceutical_form, package_size, atc_code, prescription_category) VALUES
   ('05909990296019', 'Apap', 'Paracetamolum', '500 mg', 'Tabletki powlekane', '2 tabl.', 'N02BE01', 'OTC'),
   ('05909990265527', 'Paracetamol Farmina', 'Paracetamolum', '125 mg', 'Czopki', '10 szt.', 'N02BE01', 'OTC'),

@@ -17,8 +17,6 @@ api.interceptors.request.use(config => {
   return config;
 });
 
-// Wygasły / nieprawidłowy token → wyczyść sesję i przekieruj na logowanie.
-// Pomijamy endpointy auth, aby nie zapętlać ekranu logowania przy błędnych danych.
 api.interceptors.response.use(
   response => response,
   error => {
@@ -58,8 +56,6 @@ export const changePassword = (userId: string, currentPassword: string, newPassw
 export const fetchMetadata = (): Promise<AppMetadata> =>
   api.get<AppMetadata>('/prescriptions/metadata').then(r => r.data);
 
-// Backend zwraca już kanoniczne polskie kody (PrescriptionDto / DrugRealizationStatus).
-// Te zbiory służą wyłącznie jako guard na nieoczekiwane wartości.
 const PRESCRIPTION_STATUSES: readonly PrescriptionStatus[] = [
   'AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA', 'NIEZREALIZOWANA', 'ZREALIZOWANA', 'ARCHIWALNA', 'ANULOWANA',
 ];
@@ -72,8 +68,6 @@ const asPrescriptionStatus = (s: string): PrescriptionStatus =>
 const asItemStatus = (s: string): DrugRealizationStatus =>
   (ITEM_STATUSES as readonly string[]).includes(s) ? (s as DrugRealizationStatus) : 'NIEZREALIZOWANY';
 
-// Normalizacja poziomu odpłatności do formy widocznej na recepcie P1.
-// Brak wartości (leki OTC / pełnopłatne) → "100%".
 const normalizeRefundLevel = (level: string | null): string => {
   if (!level) return '100%';
   return level.toLowerCase() === 'ryczalt' ? 'ryczałt' : level;
@@ -204,7 +198,6 @@ export const fetchPharmaciesInBounds = async (bounds: Bounds): Promise<Pharmacy[
   return res.data.map(mapPharmacy);
 };
 
-// Przybliżony prostokąt ~radiusKm wokół punktu (1° lat ≈ 111 km).
 export const approxBounds = (lat: number, lng: number, radiusKm = 12): Bounds => {
   const latD = radiusKm / 111.0;
   const lngD = radiusKm / (111.0 * Math.cos((lat * Math.PI) / 180));
@@ -217,8 +210,6 @@ export const updatePharmacyLocation = (
   api.post('/pharmacies/update-location', { name, address, city, latitude, longitude })
     .then(() => undefined)
     .catch(() => undefined);
-
-// --- Panel administratora (WF-11, WF-12) ---
 
 export type PharmacyInput = {
   name: string;
@@ -242,8 +233,6 @@ export const createPharmacy = (data: PharmacyInput): Promise<ApiPharmacy> =>
 
 export const updatePharmacy = (id: number, data: PharmacyInput): Promise<ApiPharmacy> =>
   api.put<ApiPharmacy>(`/admin/pharmacies/${id}`, data).then(r => r.data);
-
-// --- Panel administratora — recepty ---
 
 export interface AdminPrescription {
   id: number;

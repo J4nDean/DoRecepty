@@ -1,4 +1,3 @@
--- Generated with coordinates restored from historical data
 ALTER TABLE pharmacy ALTER COLUMN phone TYPE VARCHAR(255);
 ALTER TABLE pharmacy ALTER COLUMN opening_hours_weekdays TYPE VARCHAR(512);
 ALTER TABLE pharmacy ALTER COLUMN opening_hours_saturday TYPE VARCHAR(512);

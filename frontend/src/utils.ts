@@ -1,18 +1,14 @@
 import type { Drug, Pharmacy, PrescriptionStatus } from './types';
 
-// "Laroaks 2,5 mg" — nazwa handlowa z mocą, jak w nagłówku pozycji recepty P1.
 export const drugFullName = (d: Drug): string =>
   [d.name, d.strength].filter(Boolean).join(' ');
 
-// "Tabletki powlekane · 28 tabl." — postać i wielkość opakowania.
 export const drugFormLine = (d: Drug): string =>
   [d.form, d.packageSize].filter(Boolean).join(' · ');
 
-// "1 op. po 28 tabl." — liczba opakowań i ich wielkość, jak na wydruku P1.
 export const packageQuantityLabel = (d: Drug): string =>
   `${d.quantity} op.${d.packageSize ? ` po ${d.packageSize}` : ''}`;
 
-// Identyfikator dokumentu w stylu OID systemu P1 (jak "ID: 2.19.840.1.113993...").
 export const documentOid = (accessCode: string): string =>
   `2.19.840.1.113993.3.4424.2.7.${accessCode}.1`;
 
@@ -59,7 +55,6 @@ export const haversineKm = (a: LatLng, b: LatLng): number => {
 export const distanceLabel = (km: number): string =>
   km < 1 ? `${(km * 1000).toFixed(0)} m` : `${km.toFixed(km < 10 ? 2 : 1)} km`;
 
-// Dokleja `distance` (km od `loc`) do aptek z geolokalizacją; opcjonalnie sortuje od najbliższej.
 export const withDistance = (pharmacies: Pharmacy[], loc: LatLng | null, sort = false): Pharmacy[] => {
   if (!loc) return pharmacies;
   const mapped = pharmacies.map(p =>

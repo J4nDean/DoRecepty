@@ -6,9 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.j4ndean.finderbackend.dto.PharmacyAvailabilityDto;
 import pl.j4ndean.finderbackend.dto.PrescriptionDto;
 import pl.j4ndean.finderbackend.model.PharmacyInventory;
+import pl.j4ndean.finderbackend.model.User;
 import pl.j4ndean.finderbackend.repository.PharmacyInventoryRepository;
-import pl.j4ndean.finderbackend.repository.PrescriptionItemRepository;
-import pl.j4ndean.finderbackend.repository.PrescriptionRepository;
+import pl.j4ndean.finderbackend.repository.UserRepository;
 
 import java.util.Comparator;
 import java.util.List;
@@ -18,31 +18,32 @@ import static java.util.stream.Collectors.groupingBy;
 @RequiredArgsConstructor
 public class PrescriptionService {
 
-    private final PrescriptionRepository prescriptions;
-    private final PrescriptionItemRepository items;
+    private final MockP1Service p1;
+    private final UserRepository users;
     private final PharmacyInventoryRepository inventory;
 
     @Transactional(readOnly = true)
     public List<PrescriptionDto> getUserPrescriptions(Long userId) {
-        return prescriptions.findByPatientId(userId).stream()
-                .map(p -> PrescriptionDto.from(p, items.findByPrescriptionId(p.getId())))
+        String pesel = peselOf(userId);
+        return p1.fetchPrescriptionsByPesel(pesel).stream()
+                .map(p -> PrescriptionDto.from(p, p1.fetchItems(p.getId())))
                 .toList();
     }
 
     @Transactional(readOnly = true)
     public PrescriptionDto getPrescriptionDetail(Long prescriptionId, Long userId) {
-        return prescriptions.findByIdWithPatient(prescriptionId)
-                .filter(p -> p.getPatient() != null && userId.equals(p.getPatient().getId()))
-                .map(p -> PrescriptionDto.from(p, items.findByPrescriptionId(p.getId())))
+        String pesel = peselOf(userId);
+        return p1.fetchPrescriptionByPesel(pesel, prescriptionId)
+                .map(p -> PrescriptionDto.from(p, p1.fetchItems(p.getId())))
                 .orElseThrow(() -> new RuntimeException("Prescription not found or access denied"));
     }
 
     @Transactional(readOnly = true)
     public List<PharmacyAvailabilityDto> getPharmacyAvailability(Long prescriptionId) {
-        var medicationIds = items.findByPrescriptionId(prescriptionId).stream()
+        var medicationIds = p1.fetchItems(prescriptionId).stream()
                 .map(i -> i.getMedication().getId())
                 .toList();
-        
+
         if (medicationIds.isEmpty()) return List.of();
 
         return inventory.findByMedicationIds(medicationIds).stream()
@@ -50,12 +51,18 @@ public class PrescriptionService {
                 .entrySet().stream()
                 .map(e -> PharmacyAvailabilityDto.from(e.getKey(), e.getValue().stream()
                     .map(i -> new PharmacyAvailabilityDto.AvailableMedicationDto(
-                        i.getMedication().getId(), 
-                        i.getMedication().getName(), 
+                        i.getMedication().getId(),
+                        i.getMedication().getName(),
                         i.getStockQuantity()))
                     .toList()))
                 .sorted(Comparator.comparingInt((PharmacyAvailabilityDto d) -> d.availableMedications().size()).reversed())
                 .limit(2000)
                 .toList();
+    }
+
+    private String peselOf(Long userId) {
+        return users.findById(userId)
+                .map(User::getPesel)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 }
