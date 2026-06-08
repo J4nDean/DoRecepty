@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { MapPin, ArrowDownAZ, ArrowUpDown, Star, History as HistoryIcon, X } from 'lucide-react';
+import { MapPin, ArrowDownAZ, ArrowUpDown, Star, History as HistoryIcon, X, Navigation } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PharmacyCard } from '../components/PharmacyCard';
 import { SearchBar } from '../components/SearchBar';
@@ -9,7 +9,7 @@ import {
   searchPharmacies, fetchPharmaciesInBounds, approxBounds, getUserLocation, reverseGeocode,
 } from '../api';
 import { useFavoritePharmacies } from '../useFavoritePharmacies';
-import { withDistance, type LatLng } from '../utils';
+import { withDistance, buildDirectionsUrl, type LatLng } from '../utils';
 import type { Pharmacy } from '../types';
 
 type MapBounds = { north: number; south: number; east: number; west: number };
@@ -184,6 +184,11 @@ const PharmaciesPage = () => {
     return list;
   }, [pharmaciesWithDistance, nameFilter, sortMode, showFavoritesOnly, isFavorite]);
 
+  const selectedPharmacy = useMemo(
+    () => pharmaciesWithDistance.find(p => p.id === selectedId) ?? null,
+    [pharmaciesWithDistance, selectedId],
+  );
+
   const openCount = visiblePharmacies.filter(p => p.isOpen).length;
   const cycleSortMode = () =>
     setSortMode(prev => (prev === 'default' ? 'distance' : prev === 'distance' ? 'name' : 'default'));
@@ -267,16 +272,35 @@ const PharmaciesPage = () => {
       )}
 
       <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-300px)] lg:min-h-[400px]">
-        <PharmacyMapView
-          pharmacies={listPharmacies}
-          selectedId={selectedId}
-          onSelect={handleSelect}
-          onLoadInArea={handleLoadInArea}
-          onVisibleChange={setVisiblePharmacies}
-          userLocation={userLocation}
-          searchCity={mapCenterCity}
-          className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
-        />
+        <div className="flex flex-col gap-3 lg:flex-1 lg:min-h-0">
+          <PharmacyMapView
+            pharmacies={listPharmacies}
+            selectedId={selectedId}
+            onSelect={handleSelect}
+            onLoadInArea={handleLoadInArea}
+            onVisibleChange={setVisiblePharmacies}
+            userLocation={userLocation}
+            searchCity={mapCenterCity}
+            className="h-[48dvh] min-h-[260px] -mx-4 sm:-mx-5 md:-mx-6 lg:mx-0 lg:h-auto lg:min-h-0 lg:flex-1 rounded-none lg:rounded-xl"
+          />
+
+          {selectedPharmacy ? (
+            <a
+              href={buildDirectionsUrl(selectedPharmacy, userLocation)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full inline-flex items-center justify-center gap-2.5 bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white font-black uppercase tracking-wide text-sm sm:text-base px-5 py-3.5 rounded-lg shadow-sm transition-colors"
+            >
+              <Navigation size={18} className="shrink-0" />
+              Nawiguj do: {selectedPharmacy.name}
+            </a>
+          ) : (
+            <p className="w-full flex items-center justify-center gap-2 bg-neutral-50 border border-dashed border-neutral-200 text-neutral-400 font-bold text-sm px-5 py-3.5 rounded-lg text-center">
+              <MapPin size={16} className="shrink-0" />
+              Zaznacz aptekę, aby wyznaczyć trasę
+            </p>
+          )}
+        </div>
 
         <div className="h-[32dvh] min-h-[180px] overflow-y-auto overscroll-contain space-y-3 pb-2 lg:h-auto lg:w-80 lg:overflow-y-auto lg:pr-1 scroll-smooth">
           {isLoading ? (
