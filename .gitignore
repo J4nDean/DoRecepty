@@ -75,3 +75,7 @@ yarn-error.log*
 # ==========================================
 **/doc/
 **/temp/
+
+# Rozpakowane dokumenty Word (.docx) / praca inżynierska
+**/_thesis_unpacked/
+**/*_unpacked/
