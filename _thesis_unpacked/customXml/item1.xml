@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<b:Sources xmlns:b="http://schemas.openxmlformats.org/officeDocument/2006/bibliography" xmlns="http://schemas.openxmlformats.org/officeDocument/2006/bibliography" SelectedStyle="\APASixthEditionOfficeOnline.xsl" StyleName="APA" Version="6">
+  <b:Source>
+    <b:Tag>Cen261</b:Tag>
+    <b:SourceType>InternetSite</b:SourceType>
+    <b:Guid>{E7FC2EDF-436D-4E84-A7E3-4AC5D1E7A514}</b:Guid>
+    <b:Title>Od 8 stycznia czas e-recepty</b:Title>
+    <b:InternetSiteTitle>www.cez.gov.pl</b:InternetSiteTitle>
+    <b:Year>2020</b:Year>
+    <b:Month>1</b:Month>
+    <b:Day>8</b:Day>
+    <b:URL>https://www.cez.gov.pl/pl/page/o-nas/aktualnosci/od-8-stycznia-czas-e-recepty</b:URL>
+    <b:Author>
+      <b:Author>
+        <b:Corporate>Centrum e-Zdrowia</b:Corporate>
+      </b:Author>
+    </b:Author>
+    <b:RefOrder>2</b:RefOrder>
+  </b:Source>
+  <b:Source>
+    <b:Tag>Sta</b:Tag>
+    <b:SourceType>InternetSite</b:SourceType>
+    <b:Guid>{E28F0FC0-116F-460C-8290-0ED26279C11E}</b:Guid>
+    <b:Title>Aktualności</b:Title>
+    <b:InternetSiteTitle>www.ezdrowie.gov.pl</b:InternetSiteTitle>
+    <b:URL>https://ezdrowie.gov.pl/portal/home?modSingleId=185658&amp;isExtend=true</b:URL>
+    <b:Year>2026</b:Year>
+    <b:Author>
+      <b:Author>
+        <b:Corporate>Platforma e-Zdrowie</b:Corporate>
+      </b:Author>
+    </b:Author>
+    <b:RefOrder>3</b:RefOrder>
+  </b:Source>
+  <b:Source>
+    <b:Tag>Kla23</b:Tag>
+    <b:SourceType>InternetSite</b:SourceType>
+    <b:Guid>{1C8517BE-798D-4CF1-9539-29981198C680}</b:Guid>
+    <b:Author>
+      <b:Author>
+        <b:NameList>
+          <b:Person>
+            <b:Last>Torchała</b:Last>
+            <b:First>Klaudia</b:First>
+          </b:Person>
+        </b:NameList>
+      </b:Author>
+    </b:Author>
+    <b:Title>E-recepta na tak, e-porada – raczej na nie</b:Title>
+    <b:InternetSiteTitle>Serwis Zdrowie (PAP)</b:InternetSiteTitle>
+    <b:Year>2023</b:Year>
+    <b:Month>2</b:Month>
+    <b:Day>15</b:Day>
+    <b:URL>https://zdrowie.pap.pl/raport/e-recepta-na-tak-e-porada-raczej-na-nie</b:URL>
+    <b:RefOrder>4</b:RefOrder>
+  </b:Source>
+  <b:Source>
+    <b:Tag>Cen26</b:Tag>
+    <b:SourceType>InternetSite</b:SourceType>
+    <b:Guid>{0B331AF4-5B66-4135-9057-A943A4369F61}</b:Guid>
+    <b:Title>System e-zdrowie (P1)</b:Title>
+    <b:Year>2025</b:Year>
+    <b:InternetSiteTitle>www.cez.gov.pl</b:InternetSiteTitle>
+    <b:URL>https://www.cez.gov.pl/pl/nasze-produkty/e-zdrowie-p1</b:URL>
+    <b:Author>
+      <b:Author>
+        <b:Corporate>Centrum e-Zdrowia</b:Corporate>
+      </b:Author>
+    </b:Author>
+    <b:RefOrder>5</b:RefOrder>
+  </b:Source>
+  <b:Source>
+    <b:Tag>Cen</b:Tag>
+    <b:SourceType>InternetSite</b:SourceType>
+    <b:Guid>{B83BDFF4-5881-403F-8967-DB3380E60B95}</b:Guid>
+    <b:Author>
+      <b:Author>
+        <b:Corporate>Centrum e-Zdrowia</b:Corporate>
+      </b:Author>
+    </b:Author>
+    <b:Title>Rejestr Produktów Leczniczych</b:Title>
+    <b:URL>https://rejestry.ezdrowie.gov.pl/registry/rpl</b:URL>
+    <b:RefOrder>6</b:RefOrder>
+  </b:Source>
+  <b:Source>
+    <b:Tag>Cen1</b:Tag>
+    <b:SourceType>InternetSite</b:SourceType>
+    <b:Guid>{4D9769BE-BF9A-406E-B886-279F9E265ECD}</b:Guid>
+    <b:Author>
+      <b:Author>
+        <b:Corporate>Centrum e-Zdrowia</b:Corporate>
+      </b:Author>
+    </b:Author>
+    <b:Title>Rejestr Aptek</b:Title>
+    <b:URL>https://rejestry.ezdrowie.gov.pl/registry/ra</b:URL>
+    <b:RefOrder>7</b:RefOrder>
+  </b:Source>
+  <b:Source>
+    <b:Tag>Boo02</b:Tag>
+    <b:SourceType>BookSection</b:SourceType>
+    <b:Guid>{965AA985-28D2-4F3F-937A-E211291366B3}</b:Guid>
+    <b:Author>
+      <b:Author>
+        <b:NameList>
+          <b:Person>
+            <b:Last>Booch</b:Last>
+            <b:First>G.</b:First>
+          </b:Person>
+          <b:Person>
+            <b:Last>Rumbaugh</b:Last>
+            <b:First>J.</b:First>
+          </b:Person>
+          <b:Person>
+            <b:Last>Jacobson</b:Last>
+            <b:First>I.</b:First>
+          </b:Person>
+        </b:NameList>
+      </b:Author>
+      <b:BookAuthor>
+        <b:NameList>
+          <b:Person>
+            <b:Last>Booch</b:Last>
+            <b:First>G.</b:First>
+          </b:Person>
+          <b:Person>
+            <b:Last>Rumbaugh</b:Last>
+            <b:First>J.</b:First>
+          </b:Person>
+          <b:Person>
+            <b:Last>Jacobson</b:Last>
+            <b:First>I.</b:First>
+          </b:Person>
+        </b:NameList>
+      </b:BookAuthor>
+    </b:Author>
+    <b:Title>Rozdział 1. Czym jest UML?</b:Title>
+    <b:Year>2002</b:Year>
+    <b:BookTitle>UML. Przewodnik użytkownika</b:BookTitle>
+    <b:Publisher>Wydawnictwa Naukowo-Techniczne</b:Publisher>
+    <b:RefOrder>1</b:RefOrder>
+  </b:Source>
+</b:Sources>

@@ -12,7 +12,7 @@ import { openBadgeColor } from '../theme';
 import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation } from '../api';
 import {
   formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
-  withDistance, distanceLabel, statusMetaOf,
+  withDistance, distanceLabel, statusMetaOf, buildDirectionsUrl,
   drugFullName, drugFormLine, packageQuantityLabel, documentOid, type LatLng,
 } from '../utils';
 import { useMetadata } from '../MetadataContext';
@@ -103,15 +103,6 @@ const PharmacyAvailabilityCard = ({
     )}
   </div>
 );
-
-const buildDirectionsUrl = (pharmacy: Pharmacy, origin: LatLng | null): string => {
-  const destination = pharmacy.latitude != null && pharmacy.longitude != null
-    ? `${pharmacy.latitude},${pharmacy.longitude}`
-    : [pharmacy.address, pharmacy.postalCode, pharmacy.city].filter(Boolean).join(', ');
-  const params = new URLSearchParams({ api: '1', destination, travelmode: 'driving' });
-  if (origin) params.set('origin', `${origin.lat},${origin.lng}`);
-  return `https://www.google.com/maps/dir/?${params.toString()}`;
-};
 
 const withAvailability = (pharmacies: Pharmacy[], drugCount: number): Pharmacy[] =>
   pharmacies.map(p => {

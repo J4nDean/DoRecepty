@@ -65,6 +65,15 @@ export const withDistance = (pharmacies: Pharmacy[], loc: LatLng | null, sort = 
   return sort ? mapped.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity)) : mapped;
 };
 
+export const buildDirectionsUrl = (pharmacy: Pharmacy, origin: LatLng | null): string => {
+  const destination = pharmacy.latitude != null && pharmacy.longitude != null
+    ? `${pharmacy.latitude},${pharmacy.longitude}`
+    : [pharmacy.address, pharmacy.postalCode, pharmacy.city].filter(Boolean).join(', ');
+  const params = new URLSearchParams({ api: '1', destination, travelmode: 'driving' });
+  if (origin) params.set('origin', `${origin.lat},${origin.lng}`);
+  return `https://www.google.com/maps/dir/?${params.toString()}`;
+};
+
 export interface StatusMeta {
   dot: string;
   chip: string;
