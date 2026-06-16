@@ -33,7 +33,7 @@ public class SecurityConfig {
             "https://*.vercel.app",
             "https://finder-e-prescription.vercel.app"
     );
-    private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "DELETE", "OPTIONS");
+    private static final List<String> ALLOWED_METHODS = List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
 
     private final JwtAuthFilter jwtAuthFilter;
 

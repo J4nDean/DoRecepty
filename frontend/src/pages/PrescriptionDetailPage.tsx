@@ -227,9 +227,9 @@ const PrescriptionDetailPage = () => {
               <button
                 onClick={handleArchive}
                 disabled={archiving}
-                className="absolute top-3 right-4 z-10 flex items-center gap-1 text-[11px] font-semibold text-neutral-400 hover:text-rose-600 transition-colors disabled:opacity-50"
+                className="absolute top-4 right-5 z-10 flex items-center gap-1.5 text-sm font-semibold text-neutral-400 hover:text-rose-600 transition-colors disabled:opacity-50"
               >
-                <Archive size={12} />
+                <Archive size={15} />
                 {archiving ? 'Archiwizowanie...' : 'Przenieś do archiwalnych'}
               </button>
             )}
