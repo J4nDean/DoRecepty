@@ -220,9 +220,19 @@ const PrescriptionDetailPage = () => {
 
       <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
         <div className="lg:col-span-3 space-y-4">
-          <section className={`bg-white rounded-lg border shadow-sm overflow-hidden w-full transition-all ${
+          <section className={`relative bg-white rounded-lg border shadow-sm overflow-hidden w-full transition-all ${
             expiringSoon ? 'border-amber-400 ring-2 ring-amber-400' : 'border-neutral-200'
           }`}>
+            {canArchive && (
+              <button
+                onClick={handleArchive}
+                disabled={archiving}
+                className="absolute top-3 right-4 z-10 flex items-center gap-1 text-[11px] font-semibold text-neutral-400 hover:text-rose-600 transition-colors disabled:opacity-50"
+              >
+                <Archive size={12} />
+                {archiving ? 'Archiwizowanie...' : 'Przenieś do archiwalnych'}
+              </button>
+            )}
             <div className="p-4 sm:p-8 border-b border-dashed border-neutral-200 bg-neutral-50/20 flex flex-col items-center">
               <BarcodeMock number={prescription.number} />
               <p className="text-center text-[8px] sm:text-[10px] text-neutral-500 font-mono font-bold mt-2 tracking-[0.15em] sm:tracking-[0.25em] uppercase opacity-70 break-all">
@@ -256,16 +266,6 @@ const PrescriptionDetailPage = () => {
                     <span className={`w-2 h-2 rounded-full shrink-0 ${statusMeta.dot}`} />
                     <span className="truncate">{labelOf(metadata.prescriptionStatuses, prescription.status)}</span>
                   </span>
-                  {canArchive && (
-                    <button
-                      onClick={handleArchive}
-                      disabled={archiving}
-                      className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-neutral-400 hover:text-rose-600 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50"
-                    >
-                      <Archive size={13} />
-                      {archiving ? 'Archiwizowanie...' : 'Przenieś do archiwalnych'}
-                    </button>
-                  )}
                 </div>
               </div>
 
