@@ -211,19 +211,9 @@ const PrescriptionDetailPage = () => {
 
       <div className="grid lg:grid-cols-5 gap-6 lg:gap-8">
         <div className="lg:col-span-3 space-y-4">
-          <section className={`relative bg-white rounded-lg border shadow-sm overflow-hidden w-full transition-all ${
+          <section className={`bg-white rounded-lg border shadow-sm overflow-hidden w-full transition-all ${
             expiringSoon ? 'border-amber-400 ring-2 ring-amber-400' : 'border-neutral-200'
           }`}>
-            {canArchive && (
-              <button
-                onClick={handleArchive}
-                disabled={archiving}
-                className="absolute top-4 right-5 z-10 flex items-center gap-1.5 text-sm font-semibold text-neutral-400 hover:text-rose-600 transition-colors disabled:opacity-50"
-              >
-                <Archive size={15} />
-                {archiving ? 'Archiwizowanie...' : 'Przenieś do archiwalnych'}
-              </button>
-            )}
             <div className="p-4 sm:p-8 border-b border-dashed border-neutral-200 bg-neutral-50/20 flex flex-col items-center">
               <BarcodeMock number={prescription.number} />
               <p className="text-center text-[8px] sm:text-[10px] text-neutral-500 font-mono font-bold mt-2 tracking-[0.15em] sm:tracking-[0.25em] uppercase opacity-70 break-all">
@@ -283,6 +273,17 @@ const PrescriptionDetailPage = () => {
               </div>
             </div>
           </section>
+
+          {canArchive && (
+            <button
+              onClick={handleArchive}
+              disabled={archiving}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-rose-200 bg-rose-50 text-rose-600 font-bold text-sm hover:bg-rose-100 active:bg-rose-200 transition-colors disabled:opacity-50"
+            >
+              <Archive size={16} />
+              {archiving ? 'Archiwizowanie...' : 'Przenieś do archiwalnych'}
+            </button>
+          )}
 
           <section className="space-y-3 w-full">
             <div className="flex items-center justify-between px-2 mb-2">
