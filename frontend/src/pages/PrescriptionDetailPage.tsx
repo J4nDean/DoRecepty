@@ -11,7 +11,7 @@ import { Spinner } from '../components/ui';
 import { openBadgeColor } from '../theme';
 import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation, archivePrescription } from '../api';
 import {
-  formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
+  formatDateShort, daysUntilExpiry, isExpiringSoon,
   withDistance, distanceLabel, statusMetaOf, buildDirectionsUrl,
   drugFullName, drugFormLine, packageQuantityLabel, documentOid, type LatLng,
 } from '../utils';
@@ -40,21 +40,11 @@ const RealizationBadge = ({ status, label }: { status: DrugRealizationStatus; la
   );
 };
 
-const ExpiryInfo = ({ status, expiryDate }: { status: string; expiryDate: string }) => {
-  if (!isExpiringSoon(status, expiryDate)) {
-    return <p className="text-sm text-neutral-400 font-medium">Ważna do: {formatDateShort(expiryDate)}</p>;
-  }
-  const days = daysUntilExpiry(expiryDate);
-  return (
-    <div className="mt-1">
-      <p className="text-sm text-amber-700 font-bold">Ważna do: {formatDateShort(expiryDate)}</p>
-      <p className="flex items-center gap-1.5 text-[12px] font-black text-amber-700 mt-1 uppercase">
-        <AlertTriangle size={12} />
-        {expiryWarningText(days)}
-      </p>
-    </div>
-  );
-};
+const ExpiryInfo = ({ expiryDate, soon }: { expiryDate: string; soon: boolean }) => (
+  <p className={`text-sm font-medium mt-0.5 ${soon ? 'text-amber-700 font-bold' : 'text-neutral-400'}`}>
+    Ważna do: {formatDateShort(expiryDate)}
+  </p>
+);
 
 const PharmacyAvailabilityCard = ({
   pharmacy, prescription, selected, onClick, availabilityLabel,
@@ -207,6 +197,7 @@ const PrescriptionDetailPage = () => {
 
   const statusMeta = statusMetaOf(prescription.status);
   const expiringSoon = isExpiringSoon(prescription.status, prescription.expiryDate);
+  const expiryDays = expiringSoon ? daysUntilExpiry(prescription.expiryDate) : 0;
 
   return (
     <AppLayout title="E-recepta" subtitle={`Dokument nr ${prescription.number}`}>
@@ -257,7 +248,7 @@ const PrescriptionDetailPage = () => {
                   <div className="text-center sm:text-left">
                     <p className="text-[10px] sm:text-[11px] text-neutral-400 uppercase font-black tracking-widest mb-1">Wystawiono</p>
                     <p className="text-xl sm:text-2xl font-black text-neutral-900">{formatDateShort(prescription.issueDate)}</p>
-                    <ExpiryInfo status={prescription.status} expiryDate={prescription.expiryDate} />
+                    <ExpiryInfo expiryDate={prescription.expiryDate} soon={expiringSoon} />
                   </div>
                 </div>
 
@@ -266,6 +257,12 @@ const PrescriptionDetailPage = () => {
                     <span className={`w-2 h-2 rounded-full shrink-0 ${statusMeta.dot}`} />
                     <span className="truncate">{labelOf(metadata.prescriptionStatuses, prescription.status)}</span>
                   </span>
+                  {expiringSoon && (
+                    <span className="inline-flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-amber-600 bg-amber-50 px-3 py-1 rounded-full ring-1 ring-amber-300 uppercase tracking-tight">
+                      <AlertTriangle size={12} />
+                      {expiryDays === 0 ? 'DZIŚ' : expiryDays === 1 ? 'JUTRO' : `${expiryDays} DNI`}
+                    </span>
+                  )}
                 </div>
               </div>
 
