@@ -115,6 +115,10 @@ export const fetchPrescriptionById = async (id: string): Promise<Prescription | 
   }
 };
 
+export const archivePrescription = async (prescriptionId: string): Promise<void> => {
+  await api.patch(`/prescriptions/${prescriptionId}/archive`);
+};
+
 export const fetchPharmaciesForPrescription = async (prescriptionId: string): Promise<Pharmacy[]> => {
   const res = await api.get<ApiPharmacyAvailability[]>(`/prescriptions/${prescriptionId}/pharmacies`, noCache());
   return res.data.map(p => ({
@@ -156,7 +160,7 @@ const todaysHours = (p: ApiPharmacy): string | null | undefined => {
 };
 
 const isOpenNow = (p: ApiPharmacy): boolean => {
-  if (p.status && p.status !== 'AKTYWNA') return false;
+  if (p.status && p.status.toUpperCase() !== 'AKTYWNA') return false;
   const allHours = [p.openingHoursWeekdays, p.openingHoursSaturday, p.openingHoursSunday];
   if (allHours.some(h => h && ALWAYS_OPEN_RE.test(h))) return true;
   const match = todaysHours(p)?.match(HOURS_RE);

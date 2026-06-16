@@ -39,4 +39,9 @@ public class PrescriptionController {
     public List<PharmacyAvailabilityDto> getPharmacies(@PathVariable Long prescriptionId) {
         return prescriptionService.getPharmacyAvailability(prescriptionId);
     }
+
+    @PatchMapping("/{id}/archive")
+    public ResponseEntity<PrescriptionDto> archive(@PathVariable Long id, Authentication auth) {
+        return ResponseEntity.ok(prescriptionService.archivePrescription(id, Long.valueOf(auth.getName())));
+    }
 }

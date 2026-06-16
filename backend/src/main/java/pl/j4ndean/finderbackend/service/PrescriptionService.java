@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.j4ndean.finderbackend.dto.PharmacyAvailabilityDto;
 import pl.j4ndean.finderbackend.dto.PrescriptionDto;
 import pl.j4ndean.finderbackend.model.PharmacyInventory;
+import pl.j4ndean.finderbackend.model.PrescriptionStatus;
 import pl.j4ndean.finderbackend.model.User;
 import pl.j4ndean.finderbackend.repository.PharmacyInventoryRepository;
 import pl.j4ndean.finderbackend.repository.UserRepository;
@@ -58,6 +59,25 @@ public class PrescriptionService {
                 .sorted(Comparator.comparingInt((PharmacyAvailabilityDto d) -> d.availableMedications().size()).reversed())
                 .limit(2000)
                 .toList();
+    }
+
+    @Transactional
+    public PrescriptionDto archivePrescription(Long prescriptionId, Long userId) {
+        String pesel = peselOf(userId);
+        var prescription = p1.fetchPrescriptionByPesel(pesel, prescriptionId)
+                .orElseThrow(() -> new RuntimeException("Prescription not found or access denied"));
+
+        PrescriptionStatus effectiveStatus = PrescriptionStatus.from(prescription.getStatus())
+                .effective(prescription.getExpirationDate());
+        if (effectiveStatus == PrescriptionStatus.ZREALIZOWANA
+                || effectiveStatus == PrescriptionStatus.ARCHIWALNA
+                || effectiveStatus == PrescriptionStatus.ANULOWANA) {
+            throw new RuntimeException("Cannot archive prescription with status: " + effectiveStatus.label);
+        }
+
+        prescription.setStatus("ARCHIWALNA");
+        p1.save(prescription);
+        return PrescriptionDto.from(prescription, p1.fetchItems(prescriptionId));
     }
 
     private String peselOf(Long userId) {

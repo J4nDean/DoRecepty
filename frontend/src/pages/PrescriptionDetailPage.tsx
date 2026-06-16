@@ -3,13 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Pill,
   CheckCircle2, Clock, XCircle,
-  MapPin, FileX, AlertTriangle, Navigation,
+  MapPin, FileX, AlertTriangle, Navigation, Archive,
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner } from '../components/ui';
 import { openBadgeColor } from '../theme';
-import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation } from '../api';
+import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation, archivePrescription } from '../api';
 import {
   formatDateShort, daysUntilExpiry, expiryWarningText, isExpiringSoon,
   withDistance, distanceLabel, statusMetaOf, buildDirectionsUrl,
@@ -141,6 +141,7 @@ const PrescriptionDetailPage = () => {
   const [selectedPharmacyId, setSelectedPharmacyId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [archiving, setArchiving] = useState(false);
 
   const availabilityLabel = (status: MedicationAvailabilityStatus) =>
     labelOf(metadata.medicationAvailabilityStatuses, status);
@@ -190,6 +191,21 @@ const PrescriptionDetailPage = () => {
     );
   }
 
+  const ARCHIVABLE_STATUSES = ['AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA', 'NIEZREALIZOWANA'];
+  const canArchive = ARCHIVABLE_STATUSES.includes(prescription.status);
+
+  const handleArchive = async () => {
+    if (!window.confirm('Czy na pewno chcesz przenieść tę receptę do archiwalnych?')) return;
+    setArchiving(true);
+    try {
+      await archivePrescription(prescription.id);
+      navigate('/recepty/archiwalne');
+    } catch {
+      alert('Nie udało się zarchiwizować recepty.');
+      setArchiving(false);
+    }
+  };
+
   const statusMeta = statusMetaOf(prescription.status);
   const expiringSoon = isExpiringSoon(prescription.status, prescription.expiryDate);
 
@@ -236,11 +252,21 @@ const PrescriptionDetailPage = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-center md:block shrink-0">
+                <div className="flex flex-col items-center md:items-end gap-2 shrink-0">
                   <span className={`inline-flex items-center gap-1.5 text-[9px] sm:text-[10px] font-black px-3 sm:px-4 py-1.5 rounded-full ring-2 ${statusMeta.chip} uppercase tracking-tight shadow-sm max-w-full`}>
                     <span className={`w-2 h-2 rounded-full shrink-0 ${statusMeta.dot}`} />
                     <span className="truncate">{labelOf(metadata.prescriptionStatuses, prescription.status)}</span>
                   </span>
+                  {canArchive && (
+                    <button
+                      onClick={handleArchive}
+                      disabled={archiving}
+                      className="flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold text-neutral-400 hover:text-rose-600 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <Archive size={13} />
+                      {archiving ? 'Archiwizowanie...' : 'Przenieś do archiwalnych'}
+                    </button>
+                  )}
                 </div>
               </div>
 

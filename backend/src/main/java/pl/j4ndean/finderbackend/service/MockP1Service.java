@@ -39,4 +39,9 @@ public class MockP1Service {
     public List<PrescriptionItem> fetchItems(Long prescriptionId) {
         return items.findByPrescriptionId(prescriptionId);
     }
+
+    @Transactional
+    public Prescription save(Prescription prescription) {
+        return prescriptions.save(prescription);
+    }
 }
