@@ -133,7 +133,7 @@ export const fetchPharmaciesForPrescription = async (prescriptionId: string): Pr
       saturday: p.openingHoursSaturday ?? null,
       sunday: p.openingHoursSunday ?? null,
     },
-    isOpen: p.status ? p.status === 'AKTYWNA' : true,
+    isOpen: isOpenNow(p),
     latitude: p.latitude ?? undefined,
     longitude: p.longitude ?? undefined,
     hasPrescriptionMedications: true,

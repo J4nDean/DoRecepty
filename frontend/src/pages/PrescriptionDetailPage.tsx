@@ -191,8 +191,7 @@ const PrescriptionDetailPage = () => {
     );
   }
 
-  const ARCHIVABLE_STATUSES = ['AKTYWNA', 'CZĘŚCIOWO_ZREALIZOWANA', 'NIEZREALIZOWANA'];
-  const canArchive = ARCHIVABLE_STATUSES.includes(prescription.status);
+  const canArchive = prescription.status === 'NIEZREALIZOWANA';
 
   const handleArchive = async () => {
     if (!window.confirm('Czy na pewno chcesz przenieść tę receptę do archiwalnych?')) return;

@@ -69,10 +69,8 @@ public class PrescriptionService {
 
         PrescriptionStatus effectiveStatus = PrescriptionStatus.from(prescription.getStatus())
                 .effective(prescription.getExpirationDate());
-        if (effectiveStatus == PrescriptionStatus.ZREALIZOWANA
-                || effectiveStatus == PrescriptionStatus.ARCHIWALNA
-                || effectiveStatus == PrescriptionStatus.ANULOWANA) {
-            throw new RuntimeException("Cannot archive prescription with status: " + effectiveStatus.label);
+        if (effectiveStatus != PrescriptionStatus.NIEZREALIZOWANA) {
+            throw new RuntimeException("Tylko niezrealizowane recepty można przenieść do archiwalnych");
         }
 
         prescription.setStatus("ARCHIWALNA");
