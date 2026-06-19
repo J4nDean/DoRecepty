@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { APIProvider, AdvancedMarker, Map, Pin, useMap, useApiIsLoaded } from '@vis.gl/react-google-maps';
 import { Search, Map as MapIcon } from 'lucide-react';
-import { updatePharmacyLocation } from '../api';
+import { updatePharmacyLocation } from '../lib/api';
 import type { Pharmacy } from '../types';
 
 type LatLng = { lat: number; lng: number };

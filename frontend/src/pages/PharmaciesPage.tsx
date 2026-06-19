@@ -7,9 +7,9 @@ import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner, EmptyState } from '../components/ui';
 import {
   searchPharmacies, fetchPharmaciesInBounds, approxBounds, getUserLocation, reverseGeocode,
-} from '../api';
-import { useFavoritePharmacies } from '../useFavoritePharmacies';
-import { withDistance, buildDirectionsUrl, type LatLng } from '../utils';
+} from '../lib/api';
+import { useFavoritePharmacies } from '../hooks/useFavoritePharmacies';
+import { withDistance, buildDirectionsUrl, type LatLng } from '../lib/utils';
 import type { Pharmacy } from '../types';
 
 type MapBounds = { north: number; south: number; east: number; west: number };

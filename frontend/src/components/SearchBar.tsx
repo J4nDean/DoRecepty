@@ -1,7 +1,7 @@
 import { Search, Crosshair } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent, KeyboardEvent } from 'react';
-import { fieldClass, BTN_PRIMARY } from '../theme';
+import { fieldClass, BTN_PRIMARY } from '../lib/theme';
 
 interface SearchBarProps {
   placeholder?: string;

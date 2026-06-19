@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { NavLink, Navigate, useNavigate } from 'react-router-dom';
 import { Home, FileCheck, Archive, MapPin, LogOut, Eye, EyeOff, Shield } from 'lucide-react';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../context/AuthContext';
 import type { User } from '../types';
 
 const PATIENT_NAV = [

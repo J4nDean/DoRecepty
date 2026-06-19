@@ -9,7 +9,7 @@
         <relativePath/>
     </parent>
     <groupId>pl.j4ndean</groupId>
-    <artifactId>finder-backend</artifactId>
+    <artifactId>dorecepty-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>backend</name>
     <description>backend</description>

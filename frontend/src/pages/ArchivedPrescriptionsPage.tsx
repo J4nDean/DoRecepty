@@ -4,8 +4,8 @@ import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { SearchBar } from '../components/SearchBar';
 import { Spinner, EmptyState, SectionHeading } from '../components/ui';
-import { fieldClass, CARD_GRID } from '../theme';
-import { usePrescriptions } from '../usePrescriptions';
+import { fieldClass, CARD_GRID } from '../lib/theme';
+import { usePrescriptions } from '../hooks/usePrescriptions';
 
 const ArchivedPrescriptionsPage = () => {
   const { prescriptions, isLoading, options: archiveOptions } = usePrescriptions('ARCHIVED');

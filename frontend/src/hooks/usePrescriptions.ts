@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { fetchPrescriptions } from './api';
-import { useMetadata } from './MetadataContext';
-import type { Prescription } from './types';
+import { fetchPrescriptions } from '../lib/api';
+import { useMetadata } from '../context/MetadataContext';
+import type { Prescription } from '../types';
 
 export const usePrescriptions = (category: 'ACTIVE' | 'ARCHIVED') => {
   const { metadata, byCategory, loaded } = useMetadata();

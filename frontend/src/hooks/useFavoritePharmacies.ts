@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from './AuthContext';
-import { fetchFavorites, addFavorite, removeFavorite } from './api';
+import { useAuth } from '../context/AuthContext';
+import { fetchFavorites, addFavorite, removeFavorite } from '../lib/api';
 
 const STORAGE_PREFIX = 'rx_favorite_pharmacies';
 

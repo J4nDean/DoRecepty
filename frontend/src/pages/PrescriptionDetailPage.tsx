@@ -8,15 +8,15 @@ import {
 import { AppLayout } from '../components/Layout';
 import PharmacyMapView from '../components/PharmacyMapView';
 import { Spinner } from '../components/ui';
-import { openBadgeColor } from '../theme';
-import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation, archivePrescription } from '../api';
+import { openBadgeColor } from '../lib/theme';
+import { fetchPrescriptionById, fetchPharmaciesForPrescription, getUserLocation, archivePrescription } from '../lib/api';
 import {
   formatDateShort, daysUntilExpiry, isExpiringSoon,
   withDistance, distanceLabel, statusMetaOf, buildDirectionsUrl,
   drugFullName, drugFormLine, packageQuantityLabel, documentOid, type LatLng,
-} from '../utils';
-import { useMetadata } from '../MetadataContext';
-import { useAuth } from '../AuthContext';
+} from '../lib/utils';
+import { useMetadata } from '../context/MetadataContext';
+import { useAuth } from '../context/AuthContext';
 import type { Prescription, DrugRealizationStatus, Pharmacy, MedicationAvailabilityStatus } from '../types';
 
 const realizationStyle: Record<DrugRealizationStatus, { cls: string; icon: React.ReactNode }> = {

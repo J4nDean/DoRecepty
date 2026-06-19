@@ -1,8 +1,8 @@
 import { forwardRef } from 'react';
 import { MapPin, Phone, Clock, CheckCircle2, XCircle, Star } from 'lucide-react';
 import type { Pharmacy } from '../types';
-import { distanceLabel } from '../utils';
-import { openBadgeColor } from '../theme';
+import { distanceLabel } from '../lib/utils';
+import { openBadgeColor } from '../lib/theme';
 
 interface PharmacyCardProps {
   pharmacy: Pharmacy;

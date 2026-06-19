@@ -1,4 +1,4 @@
-import type { Drug, Pharmacy, PrescriptionStatus } from './types';
+import type { Drug, Pharmacy, PrescriptionStatus } from '../types';
 
 export const drugFullName = (d: Drug): string =>
   [d.name, d.strength].filter(Boolean).join(' ');
@@ -33,11 +33,6 @@ export const isExpiringSoon = (status: string, expiryDate?: string): boolean => 
   const d = daysUntilExpiry(expiryDate);
   return d >= 0 && d <= 7;
 };
-
-export const expiryWarningText = (days: number): string =>
-  days === 0 ? 'Wygasa dzisiaj' :
-  days === 1 ? 'Wygasa jutro' :
-  `Wygasa za ${days} dni`;
 
 export type LatLng = { lat: number; lng: number };
 

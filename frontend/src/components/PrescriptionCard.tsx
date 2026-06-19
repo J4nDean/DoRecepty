@@ -1,8 +1,8 @@
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, AlertTriangle } from 'lucide-react';
 import type { Prescription } from '../types';
-import { statusMetaOf, daysUntilExpiry, isExpiringSoon, drugFullName } from '../utils';
-import { useMetadata } from '../MetadataContext';
+import { statusMetaOf, daysUntilExpiry, isExpiringSoon, drugFullName } from '../lib/utils';
+import { useMetadata } from '../context/MetadataContext';
 
 const BarcodeMock = ({ number }: { number: string }) => {
   const fullBarcodeNumber = `100101${number}316993141033672942435380593264361040`.slice(0, 44);

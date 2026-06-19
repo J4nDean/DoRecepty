@@ -2,10 +2,10 @@ import { useState } from 'react';
 import type { FormEvent, ChangeEvent, ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Layout';
 import { RevealToggle } from '../components/ui';
-import { fieldClass, BTN_PRIMARY } from '../theme';
+import { fieldClass, BTN_PRIMARY } from '../lib/theme';
 
 interface FormState {
   firstName: string;

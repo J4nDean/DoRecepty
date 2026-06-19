@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { fetchMetadata } from './api';
-import type { AppMetadata, EnumOption } from './types';
+import { fetchMetadata } from '../lib/api';
+import type { AppMetadata, EnumOption } from '../types';
 
 const EMPTY: AppMetadata = {
   prescriptionStatuses: [],

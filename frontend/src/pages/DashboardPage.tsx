@@ -4,11 +4,11 @@ import { FileCheck, Archive, MapPin, ChevronRight, FileText, AlertTriangle } fro
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { Spinner, EmptyState } from '../components/ui';
-import { CARD_GRID } from '../theme';
-import { useAuth } from '../AuthContext';
-import { useMetadata } from '../MetadataContext';
-import { fetchPrescriptions } from '../api';
-import { isExpiringSoon, daysUntilExpiry } from '../utils';
+import { CARD_GRID } from '../lib/theme';
+import { useAuth } from '../context/AuthContext';
+import { useMetadata } from '../context/MetadataContext';
+import { fetchPrescriptions } from '../lib/api';
+import { isExpiringSoon, daysUntilExpiry } from '../lib/utils';
 import type { Prescription } from '../types';
 
 interface StatCardProps {

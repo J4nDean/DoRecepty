@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { Spinner, EmptyState, Alert } from '../components/ui';
-import { fieldClass, BTN_PRIMARY } from '../theme';
+import { fieldClass, BTN_PRIMARY } from '../lib/theme';
 import { PharmacyCard } from '../components/PharmacyCard';
 import PharmacyMapView from '../components/PharmacyMapView';
 import {
@@ -15,9 +15,9 @@ import {
   fetchAdminUsers, searchAdminMedications,
   searchPharmacies, fetchPharmaciesInBounds, approxBounds, getUserLocation,
   type AdminPrescription, type AdminUser, type AdminMedication,
-} from '../api';
-import { useMetadata } from '../MetadataContext';
-import { withDistance, type LatLng } from '../utils';
+} from '../lib/api';
+import { useMetadata } from '../context/MetadataContext';
+import { withDistance, type LatLng } from '../lib/utils';
 import type { ApiPharmacy, Pharmacy } from '../types';
 
 const inputClass = `${fieldClass()} w-full h-10 px-3`;

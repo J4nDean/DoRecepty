@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { Logo } from '../components/Layout';
 import { Alert, RevealToggle } from '../components/ui';
-import { fieldClass, BTN_PRIMARY } from '../theme';
+import { fieldClass, BTN_PRIMARY } from '../lib/theme';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');

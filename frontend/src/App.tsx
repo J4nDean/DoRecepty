@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './AuthContext';
-import { MetadataProvider } from './MetadataContext';
+import { AuthProvider } from './context/AuthContext';
+import { MetadataProvider } from './context/MetadataContext';
 import { ProtectedRoute, AdminRoute } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
@@ -12,7 +12,6 @@ import PrescriptionDetailPage from './pages/PrescriptionDetailPage';
 import ProfilePage from './pages/ProfilePage';
 import AdminPage from './pages/AdminPage';
 import AdminNearbyPage from './pages/AdminNearbyPage';
-import './styles.css';
 
 const protect      = (el: React.ReactNode) => <ProtectedRoute patientOnly>{el}</ProtectedRoute>;
 const protectAdmin = (el: React.ReactNode) => <AdminRoute>{el}</AdminRoute>;

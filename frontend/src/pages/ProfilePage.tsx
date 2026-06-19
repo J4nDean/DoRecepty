@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Lock } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { Alert, PasswordField } from '../components/ui';
-import { BTN_PRIMARY } from '../theme';
-import { useAuth } from '../AuthContext';
-import { changePassword } from '../api';
+import { BTN_PRIMARY } from '../lib/theme';
+import { useAuth } from '../context/AuthContext';
+import { changePassword } from '../lib/api';
 
 export default function ProfilePage() {
   const { user } = useAuth();

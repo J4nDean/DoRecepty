@@ -3,8 +3,8 @@ import { FileCheck, Calendar, Clock } from 'lucide-react';
 import { AppLayout } from '../components/Layout';
 import { PrescriptionCard } from '../components/PrescriptionCard';
 import { Spinner, EmptyState, SectionHeading } from '../components/ui';
-import { CARD_GRID } from '../theme';
-import { usePrescriptions } from '../usePrescriptions';
+import { CARD_GRID } from '../lib/theme';
+import { usePrescriptions } from '../hooks/usePrescriptions';
 import type { Prescription } from '../types';
 
 type SortBy = 'newest' | 'expiring';

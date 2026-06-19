@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { FileX, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
-import { fieldClass } from '../theme';
+import { fieldClass } from '../lib/theme';
 
 export const Spinner = ({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) => {
   const cls = { sm: 'w-4 h-4 border-2', md: 'w-6 h-6 border-2', lg: 'w-9 h-9 border-[3px]' }[size];
